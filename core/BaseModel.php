@@ -1,23 +1,26 @@
 <?php
 
 class BaseModel {
-    protected $conn;
+    protected $db;
+    protected $table;
 
     public function __construct() {
-        $this->conn = Database::connPDO();
-        var_dump($this->conn);
-        die();
-    }
-    public function getALL($sql){
-        $stm = $this->conn->prepare($sql);
-        $stm->execute();
-        return $stm->fetchAll(PDO::FETCH_ASSOC);
-    }
-    //đếm số dòng
-     public function getRow($sql){
-        $stm = $this->conn->prepare($sql);
-        $stm->execute();
-        return $stm->fetch(PDO::FETCH_ASSOC);
+        $this->db = Database::getInstance();
     }
 
+    public function getAll(){
+        $this->db->query("SELECT * FROM " . $this->table);
+        return $this->db->resultSet();
+    }
+    //đếm số dòng
+     public function findById($id){
+        $this->db->query("SELECT * FROM " . $this->table . " WHERE id = :id");
+        $this->db->bind(':id', $id);
+        return $this->db->single();
+    }
+    public function deleteById($id){
+        $this->db->query("DELETE FROM " . $this->table . " WHERE id = :id");
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
 }
