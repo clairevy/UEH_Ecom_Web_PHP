@@ -1,4 +1,5 @@
 <?php
+
 class User extends BaseModel {
     protected $table = 'users';
     protected $primaryKey = 'user_id';

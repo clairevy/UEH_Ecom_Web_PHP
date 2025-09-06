@@ -1,4 +1,5 @@
 <?php
+
 class Order extends BaseModel {
     protected $table = 'orders';
     protected $primaryKey = 'order_id';

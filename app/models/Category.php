@@ -1,0 +1,97 @@
+<?php
+class Category extends BaseModel {
+    protected $table = 'categories';
+    protected $primaryKey = 'category_id';
+
+    public function createCategory($data) {
+        $this->db->query("INSERT INTO " . $this->table . " (name, parent_id, slug, is_active, created_at) VALUES (:name, :parent_id, :slug, 1, NOW())");
+        $this->db->bind(':name', $data['name']);
+        $this->db->bind(':parent_id', $data['parent_id'] ?? null);
+        $this->db->bind(':slug', $this->generateSlug($data['name']));
+        return $this->db->execute();
+    }
+
+    public function updateCategory($id, $data) {
+        $this->db->query("UPDATE " . $this->table . " SET name = :name, parent_id = :parent_id, slug = :slug, is_active = :is_active WHERE category_id = :id");
+        $this->db->bind(':name', $data['name']);
+        $this->db->bind(':parent_id', $data['parent_id'] ?? null);
+        $this->db->bind(':slug', $data['slug'] ?? $this->generateSlug($data['name']));
+        $this->db->bind(':is_active', $data['is_active'] ?? 1);
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
+
+    public function findById($id) {
+        $this->db->query("SELECT * FROM " . $this->table . " WHERE category_id = :id");
+        $this->db->bind(':id', $id);
+        return $this->db->single();
+    }
+
+    public function findBySlug($slug) {
+        $this->db->query("SELECT * FROM " . $this->table . " WHERE slug = :slug AND is_active = 1");
+        $this->db->bind(':slug', $slug);
+        return $this->db->single();
+    }
+
+    public function deleteById($id) {
+        // Soft delete by deactivating
+        $this->db->query("UPDATE " . $this->table . " SET is_active = 0 WHERE category_id = :id");
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
+
+    public function getAllCategories($onlyActive = true) {
+        $sql = "SELECT * FROM " . $this->table;
+        if ($onlyActive) {
+            $sql .= " WHERE is_active = 1";
+        }
+        $sql .= " ORDER BY name ASC";
+        $this->db->query($sql);
+        return $this->db->resultSet();
+    }
+
+    // Get parent categories
+    public function getParentCategories() {
+        $this->db->query("SELECT * FROM " . $this->table . " WHERE parent_id IS NULL AND is_active = 1 ORDER BY name ASC");
+        return $this->db->resultSet();
+    }
+
+    // Get child categories of a specific parent
+    public function getChildCategories($parentId) {
+        $this->db->query("SELECT * FROM " . $this->table . " WHERE parent_id = :parent_id AND is_active = 1 ORDER BY name ASC");
+        $this->db->bind(':parent_id', $parentId);
+        return $this->db->resultSet();
+    }
+
+    // Assign a product to a category
+    public function assignProductToCategory($productId, $categoryId) {
+        $this->db->query("INSERT INTO product_categories (product_id, category_id) VALUES (:product_id, :category_id)");
+        $this->db->bind(':product_id', $productId);
+        $this->db->bind(':category_id', $categoryId);
+        return $this->db->execute();
+    }
+
+    // Remove a product from a category
+    public function removeProductFromCategory($productId, $categoryId) {
+        $this->db->query("DELETE FROM product_categories WHERE product_id = :product_id AND category_id = :category_id");
+        $this->db->bind(':product_id', $productId);
+        $this->db->bind(':category_id', $categoryId);
+        return $this->db->execute();
+    }
+
+    // Get all categories for a product
+    public function getCategoriesForProduct($productId) {
+        $this->db->query("SELECT c.* FROM " . $this->table . " c 
+                         JOIN product_categories pc ON c.category_id = pc.category_id 
+                         WHERE pc.product_id = :product_id AND c.is_active = 1");
+        $this->db->bind(':product_id', $productId);
+        return $this->db->resultSet();
+    }
+
+    private function generateSlug($name) {
+        $slug = strtolower(trim($name));
+        $slug = preg_replace('/[^a-z0-9-]/', '-', $slug);
+        $slug = preg_replace('/-+/', '-', $slug);
+        return trim($slug, '-');
+    }
+}

@@ -1,5 +1,6 @@
 <?php
-class ProductModel extends BaseModel {
+
+class Product extends BaseModel {
     protected $table = 'products';
     protected $primaryKey = 'product_id';
 
@@ -19,22 +20,16 @@ class ProductModel extends BaseModel {
     }
 
     public function createNewProduct($data) {
-        $this->db->query("INSERT INTO " . $this->table . " (name, description, base_price, slug, is_active, created_at, updated_at) VALUES (:name, :description, :base_price, :slug, 1, NOW(), NOW())");
+        $this->db->query("INSERT INTO " . $this->table . " (name, description, base_price, slug, collection_id, is_active, created_at, updated_at) VALUES (:name, :description, :base_price, :slug, :collection_id, 1, NOW(), NOW())");
         $this->db->bind(':name', $data['name']);
         $this->db->bind(':description', $data['description']);
         $this->db->bind(':base_price', $data['price']); // Mapping old 'price' to 'base_price'
         $this->db->bind(':slug', $this->generateSlug($data['name']));
+        $this->db->bind(':collection_id', $data['collection_id'] ?? null);
         return $this->db->execute();
     }
 
-    public function updateProductInfo($id, $data) {
-        $this->db->query("UPDATE " . $this->table . " SET name = :name, description = :description, base_price = :base_price, updated_at = NOW() WHERE product_id = :id");
-        $this->db->bind(':name', $data['name']);
-        $this->db->bind(':description', $data['description']);
-        $this->db->bind(':base_price', $data['price'] ?? $data['base_price']);
-        $this->db->bind(':id', $id);
-        return $this->db->execute();
-    }
+
 
     // Update product with full info
     public function updateProductWithDetails($id, $data) {
@@ -65,12 +60,11 @@ class ProductModel extends BaseModel {
     }
 
     public function findBySlug($slug) {
-        $this->db->query("SELECT p.*, c.name as collection_name 
+      $this->db->query("SELECT p.*
                          FROM " . $this->table . " p 
-                         LEFT JOIN collection c ON p.collection_id = c.collection_id 
-                         WHERE p.slug = :slug AND p.is_active = 1");
-        $this->db->bind(':slug', $slug);
-        return $this->db->single();
+                        WHERE p.slug = :slug AND p.is_active = 1");
+      $this->db->bind(':slug', $slug);
+      return $this->db->single();
     }
 
     public function deleteById($id) {
@@ -121,6 +115,18 @@ class ProductModel extends BaseModel {
                          ORDER BY p.base_price ASC");
         $this->db->bind(':min_price', $minPrice);
         $this->db->bind(':max_price', $maxPrice);
+        return $this->db->resultSet();
+    }
+
+    //get product by category
+    public function getProductsByCategory($categoryId) {
+        $this->db->query("SELECT p.*, c.name as category_name 
+                         FROM " . $this->table . " p 
+                         JOIN product_categories pc ON p.product_id = pc.product_id
+                         JOIN categories c ON pc.category_id = c.category_id
+                         WHERE pc.category_id = :category_id AND p.is_active = 1 
+                         ORDER BY p.name ASC");
+        $this->db->bind(':category_id', $categoryId);
         return $this->db->resultSet();
     }
 
