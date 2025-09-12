@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KICKS Admin - Order Details</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="logo">
+                <strong>KICKS</strong>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="sidebar-nav-item">
+                    <a href="../index.html" class="sidebar-nav-link">
+                        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828765.png" alt="Dashboard" class="sidebar-nav-icon">
+                        Dashboard
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="products.html" class="sidebar-nav-link">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="Products" class="sidebar-nav-icon">
+                        All Products
+                    </a>
+                </li>
+                <li class="sidebar-nav-item">
+                    <a href="orders.html" class="sidebar-nav-link active">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3063/3063822.png" alt="Orders" class="sidebar-nav-icon">
+                        Order List
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-content">
+                    <div>
+                        <h1 class="header-title">Orders Details</h1>
+                        <small class="text-muted">Home > Order List > Order Details</small>
+                    </div>
+                    <div class="header-actions">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                Change Status
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">Delivered</a></li>
+                                <li><a class="dropdown-item" href="#">Cancelled</a></li>
+                                <li><a class="dropdown-item" href="#">Pending</a></li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-primary-custom btn-custom">
+                            <img src="https://cdn-icons-png.flaticon.com/512/3580/3580085.png" alt="Save" width="16" height="16" class="me-1">
+                             Save
+                        </button>
+                        <div class="dropdown user-dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
+                                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User" width="20" height="20" class="rounded-circle">
+                                ADMIN
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">Profile</a></li>
+                                <li><a class="dropdown-item" href="#">Settings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#">Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <main class="content">
+                <!-- Order Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h3 class="mb-1">Orders ID: <span class="badge bg-warning text-dark px-3 py-2">#6743</span></h3>
+                        <div class="d-flex align-items-center text-muted">
+                            <img src="https://cdn-icons-png.flaticon.com/512/2693/2693507.png" alt="Calendar" width="16" height="16" class="me-2">
+                            <span>Feb 16 2022 - Feb 20 2022</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Information Cards -->
+                <div class="row mb-4">
+                    <!-- Customer Info -->
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <div class="bg-warning rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Customer" width="24" height="24">
+                                    </div>
+                                </div>
+                                <h6 class="fw-bold mb-1">Customer</h6>
+                                <div class="fw-bold mb-2">Full Name: Jane Cooper</div>
+                                <div class="text-muted small mb-2">Email: janecooper@gmail.com</div>
+                                <div class="text-muted small">Phone: +90 231 1212</div>
+                                <button class="btn btn-dark btn-sm mt-3 px-4">View profile</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Info -->
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <div class="bg-warning rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/3063/3063822.png" alt="Order" width="24" height="24">
+                                    </div>
+                                </div>
+                                <h6 class="fw-bold mb-1">Order Info</h6>
+                                <div class="fw-bold mb-2">Shipping: Next express</div>
+                                <div class="text-muted small mb-2">Payment Method: Paypal</div>
+                                <div class="text-muted small">Status: Pending</div>
+                                <button class="btn btn-dark btn-sm mt-3 px-4">Download info</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Deliver to -->
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <div class="bg-warning rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/2072/2072130.png" alt="Delivery" width="24" height="24">
+                                    </div>
+                                </div>
+                                <h6 class="fw-bold mb-1">Deliver to</h6>
+                                <div class="fw-bold mb-2">Address: Santa Ana, Illinois</div>
+                                <div class="text-muted small mb-2">8542 2345 Westheimer Rd.</div>
+                                <div class="text-muted small">Block 3A</div>
+                                <button class="btn btn-dark btn-sm mt-3 px-4">View profile</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Info Row -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <!-- Payment Info -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">Payment Info</h6>
+                                <div class="d-flex align-items-center mb-2">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/349/349221.png" alt="Card" width="20" height="20" class="me-2">
+                                    <span>Master Card **** **** 6557</span>
+                                </div>
+                                <div class="text-muted small mb-1">Business name: Jane Cooper</div>
+                                <div class="text-muted small">Phone: +90 231 1212</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- Notes -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">Note</h6>
+                                <textarea class="form-control" rows="4" placeholder="Type some notes..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Table -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <h5 class="table-title">Products</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-link" type="button" data-bs-toggle="dropdown">
+                                <img src="https://cdn-icons-png.flaticon.com/512/2311/2311524.png" alt="More" width="20" height="20">
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">Edit Products</a></li>
+                                <li><a class="dropdown-item" href="#">Remove Products</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <input type="checkbox" class="form-check-input">
+                                    </th>
+                                    <th>Product Name</th>
+                                    <th>Order ID</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="checkbox" class="form-check-input"></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/2589/2589903.png" alt="Product" class="product-img me-3">
+                                            <span class="fw-bold">Adidas ultra boost</span>
+                                        </div>
+                                    </td>
+                                    <td>#25421</td>
+                                    <td>2</td>
+                                    <td class="fw-bold">$800.40</td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" class="form-check-input"></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/2589/2589903.png" alt="Product" class="product-img me-3">
+                                            <span class="fw-bold">Adidas ultra boost</span>
+                                        </div>
+                                    </td>
+                                    <td>#25421</td>
+                                    <td>2</td>
+                                    <td class="fw-bold">$800.40</td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" class="form-check-input"></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/2589/2589903.png" alt="Product" class="product-img me-3">
+                                            <span class="fw-bold">Adidas ultra boost</span>
+                                        </div>
+                                    </td>
+                                    <td>#25421</td>
+                                    <td>2</td>
+                                    <td class="fw-bold">$800.40</td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" class="form-check-input"></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/2589/2589903.png" alt="Product" class="product-img me-3">
+                                            <span class="fw-bold">Adidas ultra boost</span>
+                                        </div>
+                                    </td>
+                                    <td>#25421</td>
+                                    <td>2</td>
+                                    <td class="fw-bold">$800.40</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="card-footer bg-light">
+                        <div class="row justify-content-end">
+                            <div class="col-md-4">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Subtotal</span>
+                                    <span class="fw-bold">$1,201.6</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Tax (20%)</span>
+                                    <span class="fw-bold">$240.32</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Discount</span>
+                                    <span class="fw-bold">$0</span>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <span class="fw-bold">Total</span>
+                                    <span class="fw-bold fs-5 text-success">$3841.92</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>
