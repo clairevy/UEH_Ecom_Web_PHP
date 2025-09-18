@@ -178,63 +178,15 @@
 <section class="container shrink my-4">
   <h2 class="section-title text-center">NEW ARRIVALS</h2>
   <div class="title-underline"></div>
-  <div class="row justify-content-center">
-    <!-- Item 1 -->
-    <div class="col-md-4 mb-4">
-      <div class="card product-card stagger-1">
-        <img src="/app/assets/Images/17499d23c783d06afbc740850e2624ae.jpg" class="card-img-top" alt="Ring 1">
-        <div class="card-body text-center">
-          <h5 class="card-title">DIAMOND SOLITAIRE RING</h5>
-          <p class="card-text">Crafted in 18K white gold, this solitaire ring features a brilliant-cut diamond...</p>
-          <p class="price">$50.0</p>
-          <div class="product-actions">
-            <i class="bi bi-heart"></i>
-            <i class="bi bi-cart"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Item 2 -->
-    <div class="col-md-4 mb-4">
-      <div class="card product-card stagger-2">
-        <img src="/app/assets/Images/17499d23c783d06afbc740850e2624ae.jpg" class="card-img-top" alt="Ring 2">
-        <div class="card-body text-center">
-          <h5 class="card-title">DIAMOND SOLITAIRE RING</h5>
-          <p class="card-text">Crafted in 18K white gold, this solitaire ring features a brilliant-cut diamond...</p>
-          <p class="price">$150.0</p>
-          <div class="product-actions">
-            <i class="bi bi-heart"></i>
-            <i class="bi bi-cart"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Item 3 -->
-    <div class="col-md-4 mb-4">
-      <div class="card product-card stagger-1">
-        <img src="/app/assets/Images/c3c56e86eb1a6f530e336f978587c93e.jpg" class="card-img-top" alt="Ring 3">
-        <div class="card-body text-center">
-          <h5 class="card-title">DIAMOND SOLITAIRE RING</h5>
-          <p class="card-text">Crafted in 18K white gold, this solitaire ring features a brilliant-cut diamond...</p>
-          <p class="price">$100.0</p>
-          <div class="product-actions">
-            <i class="bi bi-heart"></i>
-            <i class="bi bi-cart"></i>
-          </div>
-        </div>
-      </div>
-    </div>    
+  <div class="row justify-content-center" id="newArrivalsContainer">
+    <!-- JS sẽ render sản phẩm ở đây -->
   </div>
-
-    <button class="carousel-btn prev-btn" onclick="scrollProducts('newArrivals', 'left')">
-        <i class="fas fa-chevron-left"></i>
-    </button>
-    <button class="carousel-btn next-btn" onclick="scrollProducts('newArrivals', 'right')">
-        <i class="fas fa-chevron-right"></i>
-    </button>
-  <!-- View More button -->
+  <button class="carousel-btn prev-btn" onclick="moveCarousel('newArrivals', -1)">
+      <i class="fas fa-chevron-left"></i>
+  </button>
+  <button class="carousel-btn next-btn" onclick="moveCarousel('newArrivals', 1)">
+      <i class="fas fa-chevron-right"></i>
+  </button>
   <div class="text-center mt-4">
     <button class="btn btn-outline-dark">View more</button>
   </div>
@@ -244,66 +196,17 @@
 <section class="container shrink my-4">
   <h2 class="section-title text-center">THE MOST POPULAR</h2>
   <div class="title-underline"></div>
-  <div class="row justify-content-center">
-        <!-- Item 1 -->
-    <div class="col-md-4 mb-4">
-      <div class="card product-card stagger-2">
-        <img src="/app/assets/Images/3ac935a5708c4d0a3e0c01ee74b71775.jpg" class="card-img-top" alt="Ring 1">
-        <div class="card-body text-center">
-          <h5 class="card-title">DIAMOND SOLITAIRE RING</h5>
-          <p class="card-text">Crafted in 18K white gold, this solitaire ring features a brilliant-cut diamond...</p>
-          <p class="price">$50.0</p>
-          <div class="product-actions">
-            <i class="bi bi-heart"></i>
-            <i class="bi bi-cart"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Item 2 -->
-    <div class="col-md-4 mb-4">
-      <div class="card product-card stagger-1">
-        <img src="/app/assets/Images/17499d23c783d06afbc740850e2624ae.jpg" class="card-img-top" alt="Ring 2">
-        <div class="card-body text-center">
-          <h5 class="card-title">DIAMOND SOLITAIRE RING</h5>
-          <p class="card-text">Crafted in 18K white gold, this solitaire ring features a brilliant-cut diamond...</p>
-          <p class="price">$150.0</p>
-          <div class="product-actions">
-            <i class="bi bi-heart"></i>
-            <i class="bi bi-cart"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Item 3 -->
-    <div class="col-md-4 mb-4">
-      <div class="card product-card stagger-2">
-        <img src="/app/assets/Images/c3c56e86eb1a6f530e336f978587c93e.jpg" class="card-img-top" alt="Ring 3">
-        <div class="card-body text-center">
-          <h5 class="card-title">DIAMOND SOLITAIRE RING</h5>
-          <p class="card-text">Crafted in 18K white gold, this solitaire ring features a brilliant-cut diamond...</p>
-          <p class="price">$100.0</p>
-          <div class="product-actions">
-            <i class="bi bi-heart"></i>
-            <i class="bi bi-cart"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-    </div>
-    <button class="carousel-btn prev-btn" onclick="scrollProducts('mostPopular', 'left')">
-        <i class="fas fa-chevron-left"></i>
-    </button>
-    <button class="carousel-btn next-btn" onclick="scrollProducts('mostPopular', 'right')">
-        <i class="fas fa-chevron-right"></i> 
-    </button>
-    <!-- View More button -->
-    <div class="text-center mt-4">
-        <button class="btn btn-outline-dark">View more</button>
-    </div>
+  <div class="row justify-content-center" id="popularContainer">
+    <!-- JS sẽ render sản phẩm ở đây -->
   </div>
+  <button class="carousel-btn prev-btn" onclick="moveCarousel('popular', -1)">
+      <i class="fas fa-chevron-left"></i>
+  </button>
+  <button class="carousel-btn next-btn" onclick="moveCarousel('popular', 1)">
+      <i class="fas fa-chevron-right"></i>
+  </button>
+  <div class="text-center mt-4">
+    <button class="btn btn-outline-dark">View more</button>
   </div>
 </section>
 
@@ -545,6 +448,130 @@
                 decoration.style.transform = `rotate(${scrolled * 0.1}deg)`;
             }
         });
+
+        /* Giả lập dữ liệu sản phẩm */
+const products = [
+  {
+    id: 1,
+    name: "DIAMOND SOLITAIRE RING",
+    desc: "Crafted in 18K white gold, this solitaire ring features a brilliant-cut diamond...",
+    price: 50,
+    img: "/app/assets/Images/17499d23c783d06afbc740850e2624ae.jpg",
+    createdAt: "2025-09-18",
+    sold: 10
+  },
+  {
+    id: 2,
+    name: "GOLDEN EARRINGS",
+    desc: "18K gold earrings with elegant design.",
+    price: 120,
+    img: "/app/assets/Images/c3c56e86eb1a6f530e336f978587c93e.jpg",
+    createdAt: "2025-09-17",
+    sold: 25
+  },
+  {
+    id: 3,
+    name: "SILVER BRACELET",
+    desc: "Sterling silver bracelet with diamond accents.",
+    price: 80,
+    img: "/app/assets/Images/3ac935a5708c4d0a3e0c01ee74b71775.jpg",
+    createdAt: "2025-09-16",
+    sold: 18
+  },
+  {
+    id: 4,
+    name: "PEARL NECKLACE",
+    desc: "Classic pearl necklace for every occasion.",
+    price: 200,
+    img: "/app/assets/Images/17499d23c783d06afbc740850e2624ae.jpg",
+    createdAt: "2025-09-15",
+    sold: 30
+  },
+  {
+    id: 5,
+    name: "EMERALD RING",
+    desc: "Emerald ring with 18K gold band.",
+    price: 150,
+    img: "/app/assets/Images/c3c56e86eb1a6f530e336f978587c93e.jpg",
+    createdAt: "2025-09-14",
+    sold: 12
+  },
+  {
+    id: 6,
+    name: "SAPPHIRE EARRINGS",
+    desc: "Blue sapphire earrings in white gold.",
+    price: 110,
+    img: "/app/assets/Images/3ac935a5708c4d0a3e0c01ee74b71775.jpg",
+    createdAt: "2025-09-13",
+    sold: 22
+  },
+  {
+    id: 7,
+    name: "DIAMOND BRACELET",
+    desc: "Diamond bracelet with intricate design.",
+    price: 300,
+    img: "/app/assets/Images/17499d23c783d06afbc740850e2624ae.jpg",
+    createdAt: "2025-09-12",
+    sold: 35
+  }
+];
+
+/* Cấu hình số card hiển thị mỗi lần */
+const CARDS_PER_VIEW = 3;
+
+/* State cho carousel */
+let carouselState = {
+  newArrivals: 0,
+  popular: 0
+};
+
+/* Hàm render sản phẩm */
+function renderProducts(type) {
+  let sorted;
+  if (type === 'newArrivals') {
+    sorted = [...products].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } else {
+    sorted = [...products].sort((a, b) => b.sold - a.sold);
+  }
+  // Lấy 7 sản phẩm đầu tiên
+  sorted = sorted.slice(0, 7);
+
+  // Lấy chỉ số bắt đầu
+  let start = carouselState[type];
+  let items = [];
+  for (let i = 0; i < CARDS_PER_VIEW; i++) {
+    let idx = (start + i) % sorted.length;
+    let p = sorted[idx];
+    items.push(`
+      <div class="col-md-4 mb-4">
+        <div class="card product-card">
+          <img src="${p.img}" class="card-img-top" alt="${p.name}">
+          <div class="card-body text-center">
+            <h5 class="card-title">${p.name}</h5>
+            <p class="card-text">${p.desc}</p>
+            <p class="price">$${p.price}</p>
+            <div class="product-actions">
+              <i class="bi bi-heart"></i>
+              <i class="bi bi-cart"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    `);
+  }
+  document.getElementById(type === 'newArrivals' ? 'newArrivalsContainer' : 'popularContainer').innerHTML = items.join('');
+}
+
+/* Hàm chuyển carousel */
+function moveCarousel(type, dir) {
+  let sortedLength = 7; // luôn lấy 7 sản phẩm đầu
+  carouselState[type] = (carouselState[type] + dir + sortedLength) % sortedLength;
+  renderProducts(type);
+}
+
+/* Khởi tạo */
+renderProducts('newArrivals');
+renderProducts('popular');
     </script>
 </body>
 </html>
