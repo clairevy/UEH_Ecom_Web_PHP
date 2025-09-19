@@ -526,17 +526,15 @@ let carouselState = {
 };
 
 /* Hàm render sản phẩm */
-function renderProducts(type) {
+function renderProducts(type, direction = null) {
   let sorted;
   if (type === 'newArrivals') {
     sorted = [...products].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   } else {
     sorted = [...products].sort((a, b) => b.sold - a.sold);
   }
-  // Lấy 7 sản phẩm đầu tiên
   sorted = sorted.slice(0, 7);
 
-  // Lấy chỉ số bắt đầu
   let start = carouselState[type];
   let items = [];
   for (let i = 0; i < CARDS_PER_VIEW; i++) {
@@ -559,17 +557,27 @@ function renderProducts(type) {
       </div>
     `);
   }
-  document.getElementById(type === 'newArrivals' ? 'newArrivalsContainer' : 'popularContainer').innerHTML = items.join('');
+  const container = document.getElementById(type === 'newArrivals' ? 'newArrivalsContainer' : 'popularContainer');
+  container.innerHTML = items.join('');
+  // Xóa cả hai class trước khi thêm mới
+  container.classList.remove('product-carousel-slide-left', 'product-carousel-slide-right');
+  if (direction) {
+    void container.offsetWidth; // Force reflow
+    if (direction === 'left') {
+      container.classList.add('product-carousel-slide-left');
+    } else if (direction === 'right') {
+      container.classList.add('product-carousel-slide-right');
+    }
+  }
 }
 
-/* Hàm chuyển carousel */
 function moveCarousel(type, dir) {
-  let sortedLength = 7; // luôn lấy 7 sản phẩm đầu
+  let sortedLength = 7;
   carouselState[type] = (carouselState[type] + dir + sortedLength) % sortedLength;
-  renderProducts(type);
+  renderProducts(type, dir === 1 ? 'right' : 'left');
 }
 
-/* Khởi tạo */
+// Khởi tạo
 renderProducts('newArrivals');
 renderProducts('popular');
     </script>
