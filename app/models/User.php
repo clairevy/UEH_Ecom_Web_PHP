@@ -51,7 +51,7 @@ class User extends BaseModel {
     }
 
     //Customer login
-    public function signin($email, $password) {
+    public function login($email, $password) {
         // Validate input
         if(empty($email)) {
             return ['success' => false, 'message' => 'Vui lòng nhập email'];
@@ -90,12 +90,50 @@ class User extends BaseModel {
 
     // Create a new user
     public function createNewUser($data) {
-        $this->db->query("INSERT INTO " . $this->table . " (email, password_hash, name, phone, is_active, role_id, created_at, updated_at) VALUES (:email, :password_hash, :name, :phone, 1, 2, NOW(), NOW())");
-        $this->db->bind(':email', $data['email']);
-        $this->db->bind(':password_hash', password_hash($data['password'], PASSWORD_BCRYPT));
-        $this->db->bind(':name', $data['name']);
-        $this->db->bind(':phone', $data['phone'] ?? null);
-        return $this->db->execute();
+        try {
+            // Debug: Kiểm tra dữ liệu đầu vào
+            error_log("Creating user with data: " . print_r($data, true));
+            
+            // Kiểm tra xem có role customer (ID = 2) không
+            $this->db->query("SELECT role_id FROM roles WHERE role_id = 2");
+            $this->db->execute();
+            $customerRole = $this->db->single();
+            
+            if (!$customerRole) {
+                // Nếu chưa có roles, tạo cả admin và customer theo đúng ID
+                error_log("No customer role found, creating default roles...");
+                
+                // Tạo role admin (ID = 1)
+                $this->db->query("INSERT INTO roles (role_id, role_name, description) VALUES (1, 'admin', 'Quản trị viên')");
+                $this->db->execute();
+                
+                // Tạo role customer (ID = 2) 
+                $this->db->query("INSERT INTO roles (role_id, role_name, description) VALUES (2, 'customer', 'Khách hàng')");
+                $this->db->execute();
+                
+                error_log("Created default roles: admin (ID=1) and customer (ID=2)");
+            }
+            
+            // Tạo user với role_id = 2 (customer)
+            $this->db->query("INSERT INTO " . $this->table . " (email, password_hash, name, phone, is_active, role_id, created_at, updated_at) VALUES (:email, :password_hash, :name, :phone, 1, 2, NOW(), NOW())");
+            $this->db->bind(':email', $data['email']);
+            $this->db->bind(':password_hash', password_hash($data['password'], PASSWORD_BCRYPT));
+            $this->db->bind(':name', $data['name']);
+            $this->db->bind(':phone', $data['phone'] ?? null);
+            
+            $result = $this->db->execute();
+            
+            // Debug: Kiểm tra kết quả
+            error_log("Database execute result: " . ($result ? 'SUCCESS' : 'FAILED'));
+            if ($result) {
+                error_log("User created with role_id = 2 (customer)");
+            }
+            
+            return $result;
+        } catch (Exception $e) {
+            error_log("Error creating user: " . $e->getMessage());
+            return false;
+        }
     }
 
     public function findByEmail($email) {

@@ -6,11 +6,15 @@ class BaseController{
     }
     protected function renderView($view, $data = []) {
         extract($data);
-        if (file_exists("../app/views/{$view}.php")) {
-            require_once "../app/views/{$view}.php";
+        
+        // Sử dụng đường dẫn tuyệt đối
+        $viewPath = __DIR__ . "/../app/views/{$view}.php";
+        
+        if (file_exists($viewPath)) {
+            require_once $viewPath;
         } else {
-            // View không tồn tại
-            die('View does not exist');
+            // View không tồn tại - hiển thị thông báo debug
+            die("View không tồn tại: {$viewPath}");
         }
     }
 }

@@ -63,4 +63,141 @@ class Collection extends BaseModel {
         $slug = preg_replace('/-+/', '-', $slug);
         return trim($slug, '-');
     }
+
+    // =================== COLLECTION IMAGE METHODS ===================
+    
+    /**
+     * Get all images for a collection
+     */
+    public function getCollectionImages($collectionId) {
+        $sql = "SELECT i.*, iu.usage_id, iu.ref_type, iu.ref_id, iu.is_primary
+                FROM images i 
+                JOIN image_usages iu ON i.image_id = iu.image_id 
+                WHERE iu.ref_type = 'collection' 
+                AND iu.ref_id = :collection_id 
+                ORDER BY iu.is_primary DESC, iu.created_at ASC";
+        
+        $this->db->query($sql);
+        $this->db->bind(':collection_id', $collectionId);
+        
+        return $this->db->resultSet();
+    }
+    
+    /**
+     * Get collection cover (primary image)
+     */
+    public function getCollectionCover($collectionId) {
+        $images = $this->getCollectionImages($collectionId);
+        return $images ? $images[0] : null;
+    }
+    
+    /**
+     * Add cover to collection (replaces existing)
+     */
+    public function addCollectionCover($collectionId, $imagePath) {
+        // Delete existing cover first
+        $this->deleteAllCollectionImages($collectionId);
+        
+        // Insert into images table first
+        $this->db->query("INSERT INTO images (file_path, file_name, alt_text, created_at) VALUES (:path, :name, :alt, NOW())");
+        $this->db->bind(':path', $imagePath);
+        $this->db->bind(':name', basename($imagePath));
+        $this->db->bind(':alt', basename($imagePath));
+        
+        if (!$this->db->execute()) {
+            return false;
+        }
+        
+        $imageId = $this->db->lastInsertId();
+        
+        // Insert into image_usages table
+        $this->db->query("INSERT INTO image_usages (image_id, ref_type, ref_id, is_primary, created_at) 
+                         VALUES (:image_id, 'collection', :ref_id, 1, NOW())");
+        $this->db->bind(':image_id', $imageId);
+        $this->db->bind(':ref_id', $collectionId);
+        
+        return $this->db->execute() ? $imageId : false;
+    }
+    
+    /**
+     * Delete a specific collection image by usage_id
+     */
+    public function deleteCollectionImage($usageId) {
+        // Get image_id first
+        $this->db->query("SELECT image_id FROM image_usages WHERE usage_id = :usage_id");
+        $this->db->bind(':usage_id', $usageId);
+        $imageRecord = $this->db->single();
+        
+        if (!$imageRecord) return false;
+        
+        // Delete from image_usages
+        $this->db->query("DELETE FROM image_usages WHERE usage_id = :usage_id");
+        $this->db->bind(':usage_id', $usageId);
+        $result1 = $this->db->execute();
+        
+        // Check if image is used elsewhere
+        $this->db->query("SELECT COUNT(*) as count FROM image_usages WHERE image_id = :image_id");
+        $this->db->bind(':image_id', $imageRecord->image_id);
+        $usage_count = $this->db->single();
+        
+        // If not used elsewhere, delete from images table
+        if ($usage_count->count == 0) {
+            $this->db->query("DELETE FROM images WHERE image_id = :image_id");
+            $this->db->bind(':image_id', $imageRecord->image_id);
+            $this->db->execute();
+        }
+        
+        return $result1;
+    }
+    
+    /**
+     * Delete all images for a collection
+     */
+    public function deleteAllCollectionImages($collectionId) {
+        $this->db->query("SELECT usage_id FROM image_usages 
+                         WHERE ref_type = 'collection' AND ref_id = :collection_id");
+        $this->db->bind(':collection_id', $collectionId);
+        $usages = $this->db->resultSet();
+        
+        foreach ($usages as $usage) {
+            $this->deleteCollectionImage($usage->usage_id);
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Get collections with their covers (for display purposes)
+     */
+    public function getAllCollectionsWithCovers($onlyActive = true) {
+        $collections = $this->getAllCollections($onlyActive);
+        
+        foreach ($collections as $collection) {
+            $collection->cover_image = $this->getCollectionCover($collection->collection_id);
+        }
+        
+        return $collections;
+    }
+    
+    /**
+     * Get single collection with cover
+     */
+    public function getCollectionWithCover($collectionId) {
+        $collection = $this->findById($collectionId);
+        if ($collection) {
+            $collection->cover_image = $this->getCollectionCover($collectionId);
+        }
+        return $collection;
+    }
+    
+    /**
+     * Get collection by slug with cover
+     */
+    public function getCollectionBySlugWithCover($slug) {
+        $collection = $this->findBySlug($slug);
+        if ($collection) {
+            $collection->cover_image = $this->getCollectionCover($collection->collection_id);
+        }
+        return $collection;
+    }
 }
