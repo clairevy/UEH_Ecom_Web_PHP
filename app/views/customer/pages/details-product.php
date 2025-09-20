@@ -7,6 +7,19 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/app/assets/css.css">
+    
+    <style>
+        .related-product-card a:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s ease;
+        }
+        .related-product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .related-product-card:hover {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+    </style>
 </head>
 <body>
 
@@ -63,9 +76,12 @@
     <div class="container mt-5 pt-4">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">Trang chủ</a></li>
-                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">Trang sức</a></li>
-                <li class="breadcrumb-item active">Nhẫn kim cương</li>
+                <li class="breadcrumb-item"><a href="/Ecom_website/customer" class="text-decoration-none">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a href="/Ecom_website/customer/products" class="text-decoration-none">Trang sức</a></li>
+                <?php if (isset($productCategories) && !empty($productCategories)): ?>
+                    <li class="breadcrumb-item"><a href="/Ecom_website/customer/products?category=<?= $productCategories[0]->category_id ?>" class="text-decoration-none"><?= htmlspecialchars($productCategories[0]->name) ?></a></li>
+                <?php endif; ?>
+                <li class="breadcrumb-item active"><?= isset($product) ? htmlspecialchars($product->name) : 'Chi tiết sản phẩm' ?></li>
             </ol>
         </nav>
     </div>
@@ -79,29 +95,31 @@
                     <div class="row">
                         <div class="col-2">
                             <div class="thumbnail-container">
-                                <div class="thumbnail-item active" onclick="changeImage(this, 'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=500')">
-                                    <img src="https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=100" alt="Thumbnail 1">
-                                </div>
-                                <div class="thumbnail-item" onclick="changeImage(this, 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500')">
-                                    <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=100" alt="Thumbnail 2">
-                                </div>
-                                <div class="thumbnail-item" onclick="changeImage(this, 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500')">
-                                    <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=100" alt="Thumbnail 3">
-                                </div>
-                                <div class="thumbnail-item" onclick="changeImage(this, 'https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=500')">
-                                    <img src="https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=100" alt="Thumbnail 4">
-                                </div>
-                                <div class="thumbnail-item" onclick="changeImage(this, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500')">
-                                    <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=100" alt="Thumbnail 5">
-                                </div>
-                                <div class="thumbnail-item" onclick="changeImage(this, 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=500')">
-                                    <img src="https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=100" alt="Thumbnail 6">
-                                </div>
+                                <?php if (isset($product->images) && !empty($product->images)): ?>
+                                    <?php foreach ($product->images as $index => $image): ?>
+                                        <div class="thumbnail-item <?= $index === 0 ? 'active' : '' ?>" onclick="changeImage(this, '<?= $image->file_path ?>')">
+                                            <img src="<?= $image->file_path ?>" alt="<?= htmlspecialchars($image->alt_text ?: $product->name) ?>">
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <!-- Fallback images if no images in database -->
+                                    <div class="thumbnail-item active" onclick="changeImage(this, 'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=500')">
+                                        <img src="https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=100" alt="Thumbnail 1">
+                                    </div>
+                                    <div class="thumbnail-item" onclick="changeImage(this, 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500')">
+                                        <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=100" alt="Thumbnail 2">
+                                    </div>
+                                    <div class="thumbnail-item" onclick="changeImage(this, 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500')">
+                                        <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=100" alt="Thumbnail 3">
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="col-10" style="padding-left: 30px;">
                             <div class="main-image">
-                                <img id="mainImage" src="https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=500" alt="Nhẫn Kim Cương Vàng Trắng 18K">
+                                <img id="mainImage" 
+                                     src="<?= isset($product->primary_image) ? $product->primary_image->file_path : (isset($product->images[0]) ? $product->images[0]->file_path : 'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=500') ?>" 
+                                     alt="<?= isset($product) ? htmlspecialchars($product->name) : 'Product Image' ?>">
                             </div>
                         </div>
                     </div>
@@ -110,24 +128,24 @@
 
             <!-- Product Info -->
             <div class="col-lg-6" style="padding-left: 30px;">
-                <h1 class="product-title">Nhẫn Kim Cương Vàng Trắng 18K</h1>
+                <h1 class="product-title"><?= isset($product) ? htmlspecialchars($product->name) : 'Tên sản phẩm' ?></h1>
                 
                 <div class="rating-reviews d-flex align-items-center mb-3">
                     <div class="rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
+                        <?php 
+                        $avgRating = isset($reviewStats->average_rating) ? round($reviewStats->average_rating) : 5;
+                        for ($i = 1; $i <= 5; $i++): ?>
+                            <i class="<?= $i <= $avgRating ? 'fas' : 'far' ?> fa-star"></i>
+                        <?php endfor; ?>
                     </div>
-                    <span class="text-muted">(150 đánh giá)</span>
+                    <span class="text-muted">(<?= isset($reviewStats->total_reviews) ? $reviewStats->total_reviews : 0 ?> đánh giá)</span>
                     <span class="badge bg-success ms-3">Còn hàng</span>
                 </div>
 
-                <div class="price">45.000.000 ₫</div>
+                <div class="price"><?= isset($product) ? number_format($product->base_price, 0, ',', '.') : '0' ?> ₫</div>
 
                 <p class="product-description text-muted">
-                    Nhẫn kim cương vàng trắng 18K cao cấp với thiết kế tinh tế và sang trọng. Kim cương chất lượng cao được chế tác thủ công tỉ mỉ, tạo nên món trang sức hoàn hảo cho những dịp đặc biệt.
+                    <?= isset($product) ? htmlspecialchars($product->description) : 'Mô tả sản phẩm sẽ được hiển thị ở đây.' ?>
                 </p>
 
                 <div class="product-options">
@@ -322,85 +340,40 @@
     </div>
 
     <!-- Related Products -->
+    <?php if (isset($relatedProducts) && !empty($relatedProducts)): ?>
     <div class="container">
-    <div class="related-products">
-        <h3 class="mb-4">Sản phẩm liên quan</h3>
-        <div class="row">
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="related-product-card">
-                    <div class="product-image">
-                        <span class="sale-badge">Sale</span>
-                        <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=300" alt="Dây chuyền kim cương">
-                        <button class="wishlist-btn"><i class="far fa-heart"></i></button>
-                        <button class="compare-btn"><i class="fas fa-eye"></i></button>
-                        <button class="add-to-cart-overlay">Thêm vào giỏ</button>
-                    </div>
-                    <h6 class="mt-3">Dây chuyền kim cương vàng 18K</h6>
-                    <div class="rating mb-2">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <small class="text-muted ms-1">(89)</small>
-                    </div>
-                    <div class="product-price">
-                        <span class="original-price">25.000.000 ₫</span>
-                        <span class="text-danger">18.500.000 ₫</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="related-product-card">
-                    <div class="product-image">
-                        <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300" alt="Bông tai kim cương">
-                        <button class="wishlist-btn"><i class="far fa-heart"></i></button>
-                        <button class="compare-btn"><i class="fas fa-eye"></i></button>
-                        <button class="add-to-cart-overlay">Thêm vào giỏ</button>
-                    </div>
-                    <h6 class="mt-3">Bông tai kim cương cao cấp</h6>
-                    <div class="rating mb-2">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <small class="text-muted ms-1">(75)</small>
-                    </div>
-                    <div class="product-price">
-                        <span>32.000.000 ₫</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 mb-4">
-                <div class="related-product-card">
-                    <div class="product-image">
-                        <span class="sale-badge">Sale</span>
-                        <img src="https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=300" alt="Vòng tay kim cương">
-                        <button class="wishlist-btn"><i class="far fa-heart"></i></button>
-                        <button class="compare-btn"><i class="fas fa-eye"></i></button>
-                        <button class="add-to-cart-overlay">Thêm vào giỏ</button>
-                    </div>
-                    <h6 class="mt-3">Vòng tay kim cương nữ</h6>
-                    <div class="rating mb-2">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="far fa-star"></i>
-                        <small class="text-muted ms-1">(60)</small>
-                    </div>
-                    <div class="product-price">
-                        <span class="original-price">20.000.000 ₫</span>
-                        <span class="text-danger">15.000.000 ₫</span>
-                    </div>
-                </div>
+        <div class="related-products">
+            <h3 class="mb-4">Sản phẩm liên quan</h3>
+            <div class="row">
+                        <?php foreach ($relatedProducts as $relatedProduct): ?>
+                            <div class="col-lg-3 col-md-6 mb-4">
+                                <div class="related-product-card">
+                                    <a href="/Ecom_website/customer/product-detail/<?= $relatedProduct->product_id ?>" style="text-decoration: none; color: inherit; display: block;">
+                                        <div class="product-image">
+                                            <img src="<?= $relatedProduct->primary_image ? $relatedProduct->primary_image->file_path : 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=300' ?>" 
+                                                 alt="<?= htmlspecialchars($relatedProduct->name) ?>">
+                                            <button class="wishlist-btn" onclick="event.preventDefault(); event.stopPropagation();"><i class="far fa-heart"></i></button>
+                                            <button class="compare-btn" onclick="event.preventDefault(); event.stopPropagation();"><i class="fas fa-eye"></i></button>
+                                            <button class="add-to-cart-overlay" onclick="event.preventDefault(); event.stopPropagation();">Thêm vào giỏ</button>
+                                        </div>
+                                        <h6 class="mt-3"><?= htmlspecialchars($relatedProduct->name) ?></h6>
+                                        <div class="rating mb-2">
+                                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                                <i class="fas fa-star"></i>
+                                            <?php endfor; ?>
+                                            <small class="text-muted ms-1">(<?= rand(50, 200) ?>)</small>
+                                        </div>
+                                        <div class="product-price">
+                                            <span><?= number_format($relatedProduct->base_price, 0, ',', '.') ?> ₫</span>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
             </div>
         </div>
     </div>
-</div>
+    <?php endif; ?>
 
 
 <!-- Footer -->
@@ -486,5 +459,20 @@
         });
         document.getElementById(tabId).classList.add("active");
     }
+
+    // Search functionality
+    document.querySelector('.search-btn').addEventListener('click', function() {
+        const searchTerm = document.querySelector('.search-input').value;
+        if (searchTerm.trim()) {
+            window.location.href = `/Ecom_website/customer/products?search=${encodeURIComponent(searchTerm.trim())}`;
+        }
+    });
+
+    // Handle Enter key in search
+    document.querySelector('.search-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.querySelector('.search-btn').click();
+        }
+    });
 </script>
 

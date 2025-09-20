@@ -11,6 +11,26 @@
     <html xmlns:th="http://www.thymeleaf.org">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     
+    <style>
+        .product-card a:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s ease;
+        }
+        .list-card-product a:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s ease;
+        }
+        .related-product-card a:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s ease;
+        }
+        .product-card, .list-card-product, .related-product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .product-card:hover, .list-card-product:hover, .related-product-card:hover {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+    </style>
     
 </head>
 <body>
@@ -219,36 +239,49 @@
             </div>
             <div class="position-relative">
                 <div class="d-flex justify-content-center" id="categoryCarousel">
-                    <div class="category-item text-center mx-3">
-                        <div class="category-circle">
-                            <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=100&h=100&fit=crop" alt="Necklaces">
+                    <?php if (isset($categories) && !empty($categories)): ?>
+                        <?php foreach ($categories as $category): ?>
+                            <div class="category-item text-center mx-3">
+                                <div class="category-circle">
+                                    <img src="<?= $category->banner_image ? $category->banner_image->file_path : 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=100&h=100&fit=crop' ?>" 
+                                         alt="<?= htmlspecialchars($category->name) ?>">
+                                </div>
+                                <p class="mt-2"><?= htmlspecialchars($category->name) ?></p>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <!-- Fallback static categories if no data from DB -->
+                        <div class="category-item text-center mx-3">
+                            <div class="category-circle">
+                                <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=100&h=100&fit=crop" alt="Necklaces">
+                            </div>
+                            <p class="mt-2">Necklaces</p>
                         </div>
-                        <p class="mt-2">Necklaces</p>
-                    </div>
-                    <div class="category-item text-center mx-3">
-                        <div class="category-circle">
-                            <img src="https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=100&h=100&fit=crop" alt="Earrings">
+                        <div class="category-item text-center mx-3">
+                            <div class="category-circle">
+                                <img src="https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=100&h=100&fit=crop" alt="Earrings">
+                            </div>
+                            <p class="mt-2">Earrings</p>
                         </div>
-                        <p class="mt-2">Earrings</p>
-                    </div>
-                    <div class="category-item text-center mx-3">
-                        <div class="category-circle">
-                            <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=100&h=100&fit=crop" alt="Rings">
+                        <div class="category-item text-center mx-3">
+                            <div class="category-circle">
+                                <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=100&h=100&fit=crop" alt="Rings">
+                            </div>
+                            <p class="mt-2">Rings</p>
                         </div>
-                        <p class="mt-2">Rings</p>
-                    </div>
-                    <div class="category-item text-center mx-3">
-                        <div class="category-circle">
-                            <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=100&h=100&fit=crop" alt="Bracelets">
+                        <div class="category-item text-center mx-3">
+                            <div class="category-circle">
+                                <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=100&h=100&fit=crop" alt="Bracelets">
+                            </div>
+                            <p class="mt-2">Bracelets</p>
                         </div>
-                        <p class="mt-2">Bracelets</p>
-                    </div>
-                    <div class="category-item text-center mx-3">
-                        <div class="category-circle">
-                            <img src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=100&h=100&fit=crop" alt="Anklets">
+                        <div class="category-item text-center mx-3">
+                            <div class="category-circle">
+                                <img src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=100&h=100&fit=crop" alt="Anklets">
+                            </div>
+                            <p class="mt-2">Anklets</p>
                         </div>
-                        <p class="mt-2">Anklets</p>
-                    </div>
+                    <?php endif; ?>
                 </div>
                 
             </div>
@@ -428,8 +461,8 @@
         document.querySelector('.search-btn').addEventListener('click', function() {
             const searchTerm = document.querySelector('.search-input').value;
             if (searchTerm.trim()) {
-                console.log('Searching for:', searchTerm);
-                // Add your search logic here
+                // Redirect to products page with search parameter
+                window.location.href = `/Ecom_website/customer/products?search=${encodeURIComponent(searchTerm.trim())}`;
             }
         });
 
@@ -449,72 +482,88 @@
             }
         });
 
-        /* Giả lập dữ liệu sản phẩm */
-const products = [
-  {
-    id: 1,
-    name: "DIAMOND SOLITAIRE RING",
-    desc: "Crafted in 18K white gold, this solitaire ring features a brilliant-cut diamond...",
-    price: 50,
-    img: "/app/assets/Images/17499d23c783d06afbc740850e2624ae.jpg",
-    createdAt: "2025-09-18",
-    sold: 10
-  },
-  {
-    id: 2,
-    name: "GOLDEN EARRINGS",
-    desc: "18K gold earrings with elegant design.",
-    price: 120,
-    img: "/app/assets/Images/c3c56e86eb1a6f530e336f978587c93e.jpg",
-    createdAt: "2025-09-17",
-    sold: 25
-  },
-  {
-    id: 3,
-    name: "SILVER BRACELET",
-    desc: "Sterling silver bracelet with diamond accents.",
-    price: 80,
-    img: "/app/assets/Images/3ac935a5708c4d0a3e0c01ee74b71775.jpg",
-    createdAt: "2025-09-16",
-    sold: 18
-  },
-  {
-    id: 4,
-    name: "PEARL NECKLACE",
-    desc: "Classic pearl necklace for every occasion.",
-    price: 200,
-    img: "/app/assets/Images/17499d23c783d06afbc740850e2624ae.jpg",
-    createdAt: "2025-09-15",
-    sold: 30
-  },
-  {
-    id: 5,
-    name: "EMERALD RING",
-    desc: "Emerald ring with 18K gold band.",
-    price: 150,
-    img: "/app/assets/Images/c3c56e86eb1a6f530e336f978587c93e.jpg",
-    createdAt: "2025-09-14",
-    sold: 12
-  },
-  {
-    id: 6,
-    name: "SAPPHIRE EARRINGS",
-    desc: "Blue sapphire earrings in white gold.",
-    price: 110,
-    img: "/app/assets/Images/3ac935a5708c4d0a3e0c01ee74b71775.jpg",
-    createdAt: "2025-09-13",
-    sold: 22
-  },
-  {
-    id: 7,
-    name: "DIAMOND BRACELET",
-    desc: "Diamond bracelet with intricate design.",
-    price: 300,
-    img: "/app/assets/Images/17499d23c783d06afbc740850e2624ae.jpg",
-    createdAt: "2025-09-12",
-    sold: 35
-  }
-];
+        /* Dữ liệu sản phẩm từ server */
+        let newArrivalsData = [];
+        let popularProductsData = [];
+
+        // Fetch dữ liệu từ server
+        async function fetchProductData() {
+            try {
+                // Fetch new arrivals
+                const newArrivalsResponse = await fetch('/Ecom_website/customer/api/new-arrivals?limit=7');
+                const newArrivalsResult = await newArrivalsResponse.json();
+                if (newArrivalsResult.success) {
+                    newArrivalsData = newArrivalsResult.data.map(product => ({
+                        id: product.product_id,
+                        name: product.name.toUpperCase(),
+                        desc: product.description.substring(0, 80) + '...',
+                        price: parseFloat(product.base_price),
+                        img: product.primary_image ? product.primary_image.file_path : "/app/assets/Images/17499d23c783d06afbc740850e2624ae.jpg",
+                        createdAt: product.created_at,
+                        sold: Math.floor(Math.random() * 50) // Mock sold data
+                    }));
+                }
+
+                // Fetch popular products
+                const popularResponse = await fetch('/Ecom_website/customer/api/popular?limit=7');
+                const popularResult = await popularResponse.json();
+                if (popularResult.success) {
+                    popularProductsData = popularResult.data.map(product => ({
+                        id: product.product_id,
+                        name: product.name.toUpperCase(),
+                        desc: product.description.substring(0, 80) + '...',
+                        price: parseFloat(product.base_price),
+                        img: product.primary_image ? product.primary_image.file_path : "/app/assets/Images/17499d23c783d06afbc740850e2624ae.jpg",
+                        createdAt: product.created_at,
+                        sold: Math.floor(Math.random() * 50) // Mock sold data
+                    }));
+                }
+
+                // Render products after data is loaded
+                renderProducts('newArrivals');
+                renderProducts('popular');
+            } catch (error) {
+                console.error('Error fetching product data:', error);
+                // Fallback to mock data if API fails
+                newArrivalsData = getMockProducts();
+                popularProductsData = getMockProducts();
+                renderProducts('newArrivals');
+                renderProducts('popular');
+            }
+        }
+
+        // Fallback mock data
+        function getMockProducts() {
+            return [
+                {
+                    id: 1,
+                    name: "DIAMOND SOLITAIRE RING",
+                    desc: "Crafted in 18K white gold, this solitaire ring features a brilliant-cut diamond...",
+                    price: 50,
+                    img: "/app/assets/Images/17499d23c783d06afbc740850e2624ae.jpg",
+                    createdAt: "2025-09-18",
+                    sold: 10
+                },
+                {
+                    id: 2,
+                    name: "GOLDEN EARRINGS",
+                    desc: "18K gold earrings with elegant design.",
+                    price: 120,
+                    img: "/app/assets/Images/c3c56e86eb1a6f530e336f978587c93e.jpg",
+                    createdAt: "2025-09-17",
+                    sold: 25
+                },
+                {
+                    id: 3,
+                    name: "SILVER BRACELET",
+                    desc: "Sterling silver bracelet with diamond accents.",
+                    price: 80,
+                    img: "/app/assets/Images/3ac935a5708c4d0a3e0c01ee74b71775.jpg",
+                    createdAt: "2025-09-16",
+                    sold: 18
+                }
+            ];
+        }
 
 /* Cấu hình số card hiển thị mỗi lần */
 const CARDS_PER_VIEW = 3;
@@ -527,32 +576,37 @@ let carouselState = {
 
 /* Hàm render sản phẩm */
 function renderProducts(type, direction = null) {
-  let sorted;
+  let dataSource;
   if (type === 'newArrivals') {
-    sorted = [...products].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    dataSource = newArrivalsData;
   } else {
-    sorted = [...products].sort((a, b) => b.sold - a.sold);
+    dataSource = popularProductsData;
   }
-  sorted = sorted.slice(0, 7);
+
+  if (!dataSource || dataSource.length === 0) {
+    return; // Don't render if no data
+  }
 
   let start = carouselState[type];
   let items = [];
   for (let i = 0; i < CARDS_PER_VIEW; i++) {
-    let idx = (start + i) % sorted.length;
-    let p = sorted[idx];
-    items.push(`
+    let idx = (start + i) % dataSource.length;
+    let p = dataSource[idx];
+            items.push(`
       <div class="col-md-4 mb-4">
         <div class="card product-card">
-          <img src="${p.img}" class="card-img-top" alt="${p.name}">
-          <div class="card-body text-center">
-            <h5 class="card-title">${p.name}</h5>
-            <p class="card-text">${p.desc}</p>
-            <p class="price">$${p.price}</p>
-            <div class="product-actions">
-              <i class="bi bi-heart"></i>
-              <i class="bi bi-cart"></i>
+          <a href="/Ecom_website/customer/product-detail/${p.id}" style="text-decoration: none; color: inherit;">
+            <img src="${p.img}" class="card-img-top" alt="${p.name}">
+            <div class="card-body text-center">
+              <h5 class="card-title">${p.name}</h5>
+              <p class="card-text">${p.desc}</p>
+              <p class="price">${p.price.toLocaleString('vi-VN')}₫</p>
+              <div class="product-actions">
+                <i class="bi bi-heart"></i>
+                <i class="bi bi-cart"></i>
+              </div>
             </div>
-          </div>
+          </a>
         </div>
       </div>
     `);
@@ -572,14 +626,18 @@ function renderProducts(type, direction = null) {
 }
 
 function moveCarousel(type, dir) {
-  let sortedLength = 7;
+  let dataSource = type === 'newArrivals' ? newArrivalsData : popularProductsData;
+  if (!dataSource || dataSource.length === 0) return;
+  
+  let sortedLength = dataSource.length;
   carouselState[type] = (carouselState[type] + dir + sortedLength) % sortedLength;
   renderProducts(type, dir === 1 ? 'right' : 'left');
 }
 
-// Khởi tạo
-renderProducts('newArrivals');
-renderProducts('popular');
+// Khởi tạo - fetch data và render
+document.addEventListener('DOMContentLoaded', function() {
+  fetchProductData();
+});
     </script>
 </body>
 </html>

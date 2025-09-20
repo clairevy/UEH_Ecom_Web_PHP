@@ -4,7 +4,7 @@ class BaseController{
         require_once "app/models/{$model}.php";
         return new $model;
     }
-    protected function renderView($view, $data = []) {
+    protected function view($view, $data = []) {
         extract($data);
         
         // Sử dụng đường dẫn tuyệt đối

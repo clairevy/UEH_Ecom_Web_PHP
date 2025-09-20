@@ -17,10 +17,19 @@ class ProductsController extends BaseController {
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
         $limit = 12; // 12 sản phẩm mỗi trang
         $offset = ($page - 1) * $limit;
+        $search = $_GET['search'] ?? '';
 
         // Lấy sản phẩm với ảnh
-        $products = $this->productModel->getAllProductsWithImages($limit, $offset);
-        $totalProducts = $this->productModel->getTotalProductCount();
+        if (!empty($search)) {
+            $products = $this->productModel->searchProducts($search);
+            $totalProducts = count($products);
+            // Apply pagination to search results
+            $products = array_slice($products, $offset, $limit);
+        } else {
+            $products = $this->productModel->getAllProductsWithImages($limit, $offset);
+            $totalProducts = $this->productModel->getTotalProductCount();
+        }
+        
         $totalPages = ceil($totalProducts / $limit);
 
         // Lấy categories với banners cho sidebar
@@ -31,25 +40,27 @@ class ProductsController extends BaseController {
             'categories' => $categories,
             'currentPage' => $page,
             'totalPages' => $totalPages,
-            'totalProducts' => $totalProducts
+            'totalProducts' => $totalProducts,
+            'searchQuery' => $search,
+            'pageTitle' => !empty($search) ? "Search Results for '{$search}'" : 'All Products - JEWELRY'
         ];
 
-        $this->renderView('testview/products/index', $data);
+        $this->view('products', $data);
     }
 
     /**
      * Hiển thị chi tiết sản phẩm
      */
-    public function show($slug) {
-        if (empty($slug)) {
-            $this->redirectTo('/products');
+    public function show($id) {
+        if (empty($id)) {
+            header('Location: /Ecom_website/products');
             return;
         }
 
-        $product = $this->productModel->getProductBySlugWithImages($slug);
+        $product = $this->productModel->getProductWithImages($id);
         
         if (!$product) {
-            $this->renderView('errors/404', ['message' => 'Sản phẩm không tồn tại']);
+            $this->view('404', ['message' => 'Sản phẩm không tồn tại']);
             return;
         }
 
@@ -72,7 +83,7 @@ class ProductsController extends BaseController {
             'images' => $images
         ];
 
-        $this->renderView('testview/products/show', $data);
+        $this->view('product_detail', $data);
     }
 
     /**
@@ -87,7 +98,7 @@ class ProductsController extends BaseController {
         // Lấy thông tin category với banner
         $category = $this->categoryModel->getCategoryBySlugWithBanner($categorySlug);
         if (!$category) {
-            $this->renderView('errors/404', ['message' => 'Danh mục không tồn tại']);
+            $this->view('404', ['message' => 'Danh mục không tồn tại']);
             return;
         }
 
@@ -140,7 +151,7 @@ class ProductsController extends BaseController {
             ]
         ];
 
-        $this->renderView('testview/products/category', $data);
+        $this->view('products_category', $data);
     }
 
     /**
@@ -182,7 +193,7 @@ class ProductsController extends BaseController {
             'totalProducts' => $totalProducts
         ];
 
-        $this->renderView('testview/products/search', $data);
+        $this->view('products_search', $data);
     }
 
     /**

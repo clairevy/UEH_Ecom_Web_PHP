@@ -303,8 +303,8 @@ class Review extends BaseModel
             $result = $this->db->single();
             
             if ($result) {
-                $result['average_rating'] = $result['average_rating'] ? round((float)$result['average_rating'], 1) : 0;
-                $result['total_reviews'] = (int)$result['total_reviews'];
+                $result->average_rating = $result->average_rating ? round((float)$result->average_rating, 1) : 0;
+                $result->total_reviews = (int)$result->total_reviews;
             }
             
             return $result;

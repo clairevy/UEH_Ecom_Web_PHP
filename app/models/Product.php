@@ -40,12 +40,16 @@ class Product extends BaseModel {
     }
 
     public function findById($id) {
-        $this->db->query("SELECT p.*, c.name as collection_name 
+        $this->db->query("SELECT p.*, c.collection_name 
                          FROM " . $this->table . " p 
                          LEFT JOIN collection c ON p.collection_id = c.collection_id 
                          WHERE p.product_id = :id");
         $this->db->bind(':id', $id);
         return $this->db->single();
+    }
+
+    public function getById($productId) {
+        return $this->findById($productId);
     }
 
     public function findBySlug($slug) {
@@ -63,7 +67,7 @@ class Product extends BaseModel {
     }
 
     public function getAllProducts() {
-        $this->db->query("SELECT p.*, c.name as collection_name 
+        $this->db->query("SELECT p.*, c.collection_name 
                          FROM " . $this->table . " p 
                          LEFT JOIN collection c ON p.collection_id = c.collection_id 
                          WHERE p.is_active = 1 
@@ -73,7 +77,7 @@ class Product extends BaseModel {
 
     // Search products by name or description
     public function searchProducts($keyword) {
-        $this->db->query("SELECT p.*, c.name as collection_name 
+        $this->db->query("SELECT p.*, c.collection_name 
                          FROM " . $this->table . " p 
                          LEFT JOIN collection c ON p.collection_id = c.collection_id 
                          WHERE (p.name LIKE :keyword OR p.description LIKE :keyword) 
@@ -230,87 +234,94 @@ class Product extends BaseModel {
     }
 
     // Get price range by category
-    // public function getPriceRangeByCategory($categoryId) {
-    //     $this->db->query("SELECT MIN(p.base_price) as min_price, MAX(p.base_price) as max_price
-    //                      FROM " . $this->table . " p 
-    //                      JOIN product_categories pc ON p.product_id = pc.product_id
-    //                      WHERE pc.category_id = :category_id AND p.is_active = 1");
-    //     $this->db->bind(':category_id', $categoryId);
-    //     return $this->db->single();
-    // }
+    public function getPriceRangeByCategory($categoryId) {
+        $this->db->query("SELECT MIN(p.base_price) as min_price, MAX(p.base_price) as max_price
+                         FROM " . $this->table . " p 
+                         JOIN product_categories pc ON p.product_id = pc.product_id
+                         WHERE pc.category_id = :category_id AND p.is_active = 1");
+        $this->db->bind(':category_id', $categoryId);
+        return $this->db->single();
+    }
+
+    // Get overall price range
+    public function getPriceRange() {
+        $this->db->query("SELECT MIN(base_price) as min_price, MAX(base_price) as max_price 
+                         FROM " . $this->table . " WHERE is_active = 1");
+        return $this->db->single();
+    }
 
     // Search products with pagination
-    // public function searchProductsPaginated($keyword, $limit = 12, $offset = 0) {
-    //     $this->db->query("SELECT p.*, c.collection_name
-    //                      FROM " . $this->table . " p 
-    //                      LEFT JOIN collection c ON p.collection_id = c.collection_id 
-    //                      WHERE (p.name LIKE :keyword OR p.description LIKE :keyword) 
-    //                      AND p.is_active = 1 
-    //                      ORDER BY p.name ASC
-    //                      LIMIT :limit OFFSET :offset");
-    //     $this->db->bind(':keyword', '%' . $keyword . '%');
-    //     $this->db->bind(':limit', $limit);
-    //     $this->db->bind(':offset', $offset);
-    //     return $this->db->resultSet();
-    // }
+    public function searchProductsPaginated($keyword, $limit = 12, $offset = 0) {
+        $this->db->query("SELECT p.*, c.collection_name
+                         FROM " . $this->table . " p 
+                         LEFT JOIN collection c ON p.collection_id = c.collection_id 
+                         WHERE (p.name LIKE :keyword OR p.description LIKE :keyword) 
+                         AND p.is_active = 1 
+                         ORDER BY p.name ASC
+                         LIMIT :limit OFFSET :offset");
+        $this->db->bind(':keyword', '%' . $keyword . '%');
+        $this->db->bind(':limit', $limit);
+        $this->db->bind(':offset', $offset);
+        return $this->db->resultSet();
+    }
 
     // Get total search results
-    // public function getTotalSearchResults($keyword) {
-    //     $this->db->query("SELECT COUNT(*) as count FROM " . $this->table . " 
-    //                      WHERE (name LIKE :keyword OR description LIKE :keyword) 
-    //                      AND is_active = 1");
-    //     $this->db->bind(':keyword', '%' . $keyword . '%');
-    //     $result = $this->db->single();
-    //     return $result ? (int)$result->count : 0;
-    // }
+    public function getTotalSearchResults($keyword) {
+        $this->db->query("SELECT COUNT(*) as count FROM " . $this->table . " 
+                         WHERE (name LIKE :keyword OR description LIKE :keyword) 
+                         AND is_active = 1");
+        $this->db->bind(':keyword', '%' . $keyword . '%');
+        $result = $this->db->single();
+        return $result ? (int)$result->count : 0;
+    }
 
     // Get filtered products (without category)
-    // public function getFilteredProducts($limit = 12, $offset = 0, $minPrice = null, $maxPrice = null, $sortBy = 'newest') {
-    //     $sql = "SELECT p.*, c.collection_name
-    //             FROM " . $this->table . " p 
-    //             LEFT JOIN collection c ON p.collection_id = c.collection_id 
-    //             WHERE p.is_active = 1";
+    public function getFilteredProducts($limit = 12, $offset = 0, $minPrice = null, $maxPrice = null, $sortBy = 'newest') {
+        $sql = "SELECT p.*, c.collection_name
+                FROM " . $this->table . " p 
+                LEFT JOIN collection c ON p.collection_id = c.collection_id 
+                WHERE p.is_active = 1";
 
-    //     if ($minPrice !== null) {
-    //         $sql .= " AND p.base_price >= :min_price";
-    //     }
-    //     if ($maxPrice !== null) {
-    //         $sql .= " AND p.base_price <= :max_price";
-    //     }
+        if ($minPrice !== null) {
+            $sql .= " AND p.base_price >= :min_price";
+        }
+        if ($maxPrice !== null) {
+            $sql .= " AND p.base_price <= :max_price";
+        }
 
-    //     // Add sorting
-    //     switch ($sortBy) {
-    //         case 'price_low':
-    //             $sql .= " ORDER BY p.base_price ASC";
-    //             break;
-    //         case 'price_high':
-    //             $sql .= " ORDER BY p.base_price DESC";
-    //             break;
-    //         case 'name':
-    //             $sql .= " ORDER BY p.name ASC";
-    //             break;
-    //         case 'oldest':
-    //             $sql .= " ORDER BY p.created_at ASC";
-    //             break;
-    //         default:
-    //             $sql .= " ORDER BY p.created_at DESC";
-    //     }
+        // Add sorting
+        switch ($sortBy) {
+            case 'price_low':
+                $sql .= " ORDER BY p.base_price ASC";
+                break;
+            case 'price_high':
+                $sql .= " ORDER BY p.base_price DESC";
+                break;
+            case 'name':
+                $sql .= " ORDER BY p.name ASC";
+                break;
+            case 'oldest':
+                $sql .= " ORDER BY p.created_at ASC";
+                break;
+            default:
+                $sql .= " ORDER BY p.created_at DESC";
+        }
 
-    //     $sql .= " LIMIT :limit OFFSET :offset";
+        $sql .= " LIMIT :limit OFFSET :offset";
 
-    //     $this->db->query($sql);
-    //     $this->db->bind(':limit', $limit);
-    //     $this->db->bind(':offset', $offset);
+        $this->db->query($sql);
+        $this->db->bind(':limit', $limit);
+        $this->db->bind(':offset', $offset);
         
-    //     if ($minPrice !== null) {
-    //         $this->db->bind(':min_price', $minPrice);
-    //     }
-    //     if ($maxPrice !== null) {
-    //         $this->db->bind(':max_price', $maxPrice);
-    //     }
+        if ($minPrice !== null) {
+            $this->db->bind(':min_price', $minPrice);
+        }
+        if ($maxPrice !== null) {
+            $this->db->bind(':max_price', $maxPrice);
+        }
 
-    //     return $this->db->resultSet();
-    // }
+        return $this->db->resultSet();
+    }
 
     // Get total filtered products
     public function getTotalFilteredProducts($minPrice = null, $maxPrice = null) {
@@ -487,5 +498,62 @@ class Product extends BaseModel {
             $product->primary_image = $this->getProductPrimaryImage($product->product_id);
         }
         return $product;
+    }
+
+    // =================== NEW ARRIVALS & POPULAR PRODUCTS ===================
+
+    /**
+     * Get new arrivals (most recently created products)
+     */
+    public function getNewArrivals($limit = 8) {
+        $this->db->query("SELECT p.*, c.collection_name
+                         FROM " . $this->table . " p 
+                         LEFT JOIN collection c ON p.collection_id = c.collection_id 
+                         WHERE p.is_active = 1 
+                         ORDER BY p.created_at DESC
+                         LIMIT :limit");
+        $this->db->bind(':limit', $limit);
+        $products = $this->db->resultSet();
+        
+        // Add images for each product
+        foreach ($products as $product) {
+            $product->images = $this->getProductImages($product->product_id);
+            $product->primary_image = $this->getProductPrimaryImage($product->product_id);
+        }
+        
+        return $products;
+    }
+
+    /**
+     * Get popular products (based on a combination of factors)
+     * For now, we'll use most recently updated products as a proxy for popularity
+     * In a real system, this could be based on sales, views, ratings, etc.
+     */
+    public function getPopularProducts($limit = 8) {
+        $this->db->query("SELECT p.*, c.collection_name
+                         FROM " . $this->table . " p 
+                         LEFT JOIN collection c ON p.collection_id = c.collection_id 
+                         WHERE p.is_active = 1 
+                         ORDER BY p.updated_at DESC, p.created_at DESC
+                         LIMIT :limit");
+        $this->db->bind(':limit', $limit);
+        $products = $this->db->resultSet();
+        
+        // Add images for each product
+        foreach ($products as $product) {
+            $product->images = $this->getProductImages($product->product_id);
+            $product->primary_image = $this->getProductPrimaryImage($product->product_id);
+        }
+        
+        return $products;
+    }
+
+    /**
+     * Get featured products (products marked as featured or top-rated)
+     */
+    public function getFeaturedProducts($limit = 8) {
+        // For now, we'll get the newest products as featured
+        // In a real system, there might be a 'featured' flag in the database
+        return $this->getNewArrivals($limit);
     }
 }

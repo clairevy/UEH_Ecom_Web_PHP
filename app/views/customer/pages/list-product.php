@@ -10,6 +10,19 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS --> 
     <link href="/app/assets/css.css" rel="stylesheet">   
+    
+    <style>
+        .list-card-product a:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s ease;
+        }
+        .list-card-product {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .list-card-product:hover {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
@@ -41,7 +54,8 @@
             <div class="d-flex align-items-center">
                 <!-- Search -->
                 <div class="search-container me-3">
-                    <input type="text" class="search-input" placeholder="What are you looking for?">
+                    <input type="text" class="search-input" placeholder="What are you looking for?" 
+                           value="<?= isset($filters['search']) ? htmlspecialchars($filters['search']) : '' ?>">
                     <button class="search-btn">
                         <i class="fas fa-search"></i>
                     </button>
@@ -82,6 +96,20 @@
                         <i class="fas fa-list me-2"></i>Category
                     </div>
                     <div class="filter-body">
+                        <?php if (isset($categories) && !empty($categories)): ?>
+                            <?php foreach ($categories as $category): ?>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" 
+                                           value="<?= $category->category_id ?>" 
+                                           id="category_<?= $category->category_id ?>"
+                                           <?= (isset($filters['category']) && $filters['category'] == $category->category_id) ? 'checked' : '' ?>>
+                                    <label class="form-check-label" for="category_<?= $category->category_id ?>">
+                                        <?= htmlspecialchars($category->name) ?>
+                                    </label>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <!-- Fallback static categories -->
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="checkbox" value="rings" id="rings">
                             <label class="form-check-label" for="rings">Nhẫn</label>
@@ -102,6 +130,7 @@
                             <input class="form-check-input" type="checkbox" value="watches" id="watches">
                             <label class="form-check-label" for="watches">Đồng hồ</label>
                         </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -198,7 +227,7 @@
                             <h3 class="mb-0">Sản phẩm trang sức</h3>
                         </div> -->
                         <div class="results-info col-md-6">
-                            <strong id="resultsCount">0</strong> sản phẩm được tìm thấy
+                            <strong id="resultsCount"><?= isset($totalProducts) ? $totalProducts : 0 ?></strong> sản phẩm được tìm thấy
                         </div>
                         <div class="col-md-6">
                             <select class="form-select" id="sortSelect">
@@ -217,23 +246,68 @@
 
                 <!-- Product Grid -->
                 <div class="row" id="productGrid">
-                    <!-- Products will be loaded here -->
+                    <?php if (isset($products) && !empty($products)): ?>
+                        <?php foreach ($products as $product): ?>
+                            <div class="col-lg-4 col-md-6 mb-4 d-flex justify-content-center">
+                                <div class="list-card-product">
+                                    <a href="/Ecom_website/customer/product-detail/<?= $product->product_id ?>" style="text-decoration: none; color: inherit; display: block;">
+                                        <div class="position-relative">
+                                            <img src="<?= $product->primary_image ? $product->primary_image->file_path : '/app/assets/Images/17499d23c783d06afbc740850e2624ae.jpg' ?>" 
+                                                 class="card-img-top" alt="<?= htmlspecialchars($product->name) ?>">
+                                            <span class="badge bg-danger position-absolute top-0 end-0 m-2">NEW</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <h5 class="card-title mb-2"><?= htmlspecialchars($product->name) ?></h5>
+                                            <div class="mb-2">
+                                                <span class="price fw-bold"><?= number_format($product->base_price, 0, ',', '.') ?>₫</span>
+                                            </div>
+                                            <div class="mb-2">
+                                                <span class="rating text-warning">
+                                                    ★★★★★
+                                                </span>
+                                                <span class="text-muted ms-1">(<?= rand(10, 200) ?>)</span>
+                                            </div>
+                                            <div class="product-actions">
+                                                <button class="btn btn-icon btn-sm me-2" title="Yêu thích" onclick="event.preventDefault(); event.stopPropagation();"><i class="fa-regular fa-heart"></i></button>
+                                                <button class="btn btn-icon btn-sm" title="Thêm vào giỏ" onclick="event.preventDefault(); event.stopPropagation();"><i class="fa-solid fa-cart-plus"></i></button>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="col-12 text-center py-5 text-muted">
+                            Không tìm thấy sản phẩm phù hợp.
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Pagination -->
+                <?php if (isset($totalPages) && $totalPages > 1): ?>
                 <nav aria-label="Product pagination" class="mt-4">
                     <ul class="pagination justify-content-center">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" tabindex="-1">Previous</a>
+                        <li class="page-item <?= ($currentPage <= 1) ? 'disabled' : '' ?>">
+                            <a class="page-link" href="?page=<?= max(1, $currentPage - 1) ?><?= isset($filters['search']) && !empty($filters['search']) ? '&search=' . urlencode($filters['search']) : '' ?>" tabindex="-1">Previous</a>
                         </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#">Next</a>
+                        
+                        <?php
+                        $startPage = max(1, $currentPage - 2);
+                        $endPage = min($totalPages, $currentPage + 2);
+                        
+                        for ($i = $startPage; $i <= $endPage; $i++):
+                        ?>
+                            <li class="page-item <?= ($i == $currentPage) ? 'active' : '' ?>">
+                                <a class="page-link" href="?page=<?= $i ?><?= isset($filters['search']) && !empty($filters['search']) ? '&search=' . urlencode($filters['search']) : '' ?>"><?= $i ?></a>
+                            </li>
+                        <?php endfor; ?>
+                        
+                        <li class="page-item <?= ($currentPage >= $totalPages) ? 'disabled' : '' ?>">
+                            <a class="page-link" href="?page=<?= min($totalPages, $currentPage + 1) ?><?= isset($filters['search']) && !empty($filters['search']) ? '&search=' . urlencode($filters['search']) : '' ?>">Next</a>
                         </li>
                     </ul>
                 </nav>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -286,309 +360,53 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Mock database for jewelry products
-        const jewelryProducts = [
-            {
-                id: 1,
-                name: "Nhẫn Kim Cương Luxury 18K",
-                price: 15000000,
-                originalPrice: 18000000,
-                image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=300&h=300&fit=crop",
-                rating: 4.8,
-                reviews: 156,
-                badge: "hot",
-                category: "rings",
-                material: "diamond",
-                brand: "luxury-gold"
-            },
-            {
-                id: 2,
-                name: "Dây Chuyền Ngọc Trai Akoya",
-                price: 8500000,
-                originalPrice: 10000000,
-                image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300&h=300&fit=crop",
-                rating: 4.9,
-                reviews: 203,
-                badge: "sale",
-                category: "necklaces",
-                material: "pearl",
-                brand: "pearl-beauty"
-            },
-            {
-                id: 3,
-                name: "Bông Tai Vàng 24K Hoa Hồng",
-                price: 6200000,
-                originalPrice: null,
-                image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=300&h=300&fit=crop",
-                rating: 4.7,
-                reviews: 89,
-                badge: null,
-                category: "earrings",
-                material: "gold",
-                brand: "luxury-gold"
-            },
-            {
-                id: 4,
-                name: "Vòng Tay Bạc 925 Charm",
-                price: 2800000,
-                originalPrice: 3500000,
-                image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=300&h=300&fit=crop",
-                rating: 4.6,
-                reviews: 124,
-                badge: "best-deal",
-                category: "bracelets",
-                material: "silver",
-                brand: "elegant"
-            },
-            {
-                id: 5,
-                name: "Đồng Hồ Diamond Luxury Swiss",
-                price: 45000000,
-                originalPrice: null,
-                image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop",
-                rating: 5.0,
-                reviews: 67,
-                badge: "hot",
-                category: "watches",
-                material: "diamond",
-                brand: "diamond-star"
-            },
-            {
-                id: 6,
-                name: "Nhẫn Cưới Vàng Trắng 18K",
-                price: 12000000,
-                originalPrice: 14500000,
-                image: "https://images.unsplash.com/photo-1606800052052-a08af7148866?w=300&h=300&fit=crop",
-                rating: 4.8,
-                reviews: 245,
-                badge: "sale",
-                category: "rings",
-                material: "gold",
-                brand: "luxury-gold"
-            },
-            {
-                id: 7,
-                name: "Dây Chuyền Bạc 925 Infinity",
-                price: 1950000,
-                originalPrice: null,
-                image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=300&h=300&fit=crop",
-                rating: 4.5,
-                reviews: 78,
-                badge: null,
-                category: "necklaces",
-                material: "silver",
-                brand: "elegant"
-            },
-            {
-                id: 8,
-                name: "Bông Tai Kim Cương Thiên Nhiên",
-                price: 25000000,
-                originalPrice: 30000000,
-                image: "https://images.unsplash.com/photo-1617038220319-276d3cfab638?w=300&h=300&fit=crop",
-                rating: 4.9,
-                reviews: 134,
-                badge: "hot",
-                category: "earrings",
-                material: "diamond",
-                brand: "diamond-star"
-            },
-            {
-                id: 9,
-                name: "Vòng Tay Ngọc Trai Freshwater",
-                price: 4200000,
-                originalPrice: 5000000,
-                image: "https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?w=300&h=300&fit=crop",
-                rating: 4.7,
-                reviews: 92,
-                badge: "sale",
-                category: "bracelets",
-                material: "pearl",
-                brand: "pearl-beauty"
-            },
-            {
-                id: 10,
-                name: "Nhẫn Bạc 925 Đá Zircon",
-                price: 890000,
-                originalPrice: 1200000,
-                image: "https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?w=300&h=300&fit=crop",
-                rating: 4.4,
-                reviews: 167,
-                badge: "best-deal",
-                category: "rings",
-                material: "silver",
-                brand: "elegant"
-            },
-            {
-                id: 11,
-                name: "Dây Chuyền Vàng 18K Trái Tim",
-                price: 7800000,
-                originalPrice: null,
-                image: "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=300&h=300&fit=crop",
-                rating: 4.6,
-                reviews: 111,
-                badge: null,
-                category: "necklaces",
-                material: "gold",
-                brand: "luxury-gold"
-            },
-            {
-                id: 12,
-                name: "Bông Tai Ngọc Trai Nam Dương",
-                price: 18500000,
-                originalPrice: 22000000,
-                image: "https://images.unsplash.com/photo-1622434641406-a158123450f9?w=300&h=300&fit=crop",
-                rating: 4.8,
-                reviews: 76,
-                badge: "hot",
-                category: "earrings",
-                material: "pearl",
-                brand: "pearl-beauty"
-            }
-        ];
-
-        // Function to get products from database with filters
-        function getProductsFromDatabase(filters = {}) {
-            let filteredProducts = [...jewelryProducts];
-
-            // Apply category filter
-            if (filters.categories && filters.categories.length > 0) {
-                filteredProducts = filteredProducts.filter(product => 
-                    filters.categories.includes(product.category)
-                );
-            }
-
-            // Apply material filter
-            if (filters.materials && filters.materials.length > 0) {
-                filteredProducts = filteredProducts.filter(product => 
-                    filters.materials.includes(product.material)
-                );
-            }
-
-            // Apply brand filter
-            if (filters.brands && filters.brands.length > 0) {
-                filteredProducts = filteredProducts.filter(product => 
-                    filters.brands.includes(product.brand)
-                );
-            }
-
-            // Apply price filter
-            if (filters.priceRange && filters.priceRange !== 'all') {
-                const [minPrice, maxPrice] = filters.priceRange.split('-').map(Number);
-                filteredProducts = filteredProducts.filter(product => {
-                    return product.price >= minPrice && product.price <= maxPrice;
-                });
-            }
-
-            // Apply custom price range
-            if (filters.customMinPrice || filters.customMaxPrice) {
-                const minPrice = filters.customMinPrice || 0;
-                const maxPrice = filters.customMaxPrice || Infinity;
-                filteredProducts = filteredProducts.filter(product => {
-                    return product.price >= minPrice && product.price <= maxPrice;
-                });
-            }
-
-            // Apply sorting
-            if (filters.sort) {
-                switch (filters.sort) {
-                    case 'price_asc':
-                        filteredProducts.sort((a, b) => a.price - b.price);
-                        break;
-                    case 'price_desc':
-                        filteredProducts.sort((a, b) => b.price - a.price);
-                        break;
-                    case 'rating':
-                        filteredProducts.sort((a, b) => b.rating - a.rating);
-                        break;
-                    case 'newest':
-                        filteredProducts.sort((a, b) => b.id - a.id);
-                        break;
-                    default:
-                        // Most popular (by reviews)
-                        filteredProducts.sort((a, b) => b.reviews - a.reviews);
-                }
-            }
-
-            return filteredProducts;
-        }
-
-        // Function to render product cards (đã đổi sang list-card-product)
-        function renderProducts(products) {
-            const productGrid = document.getElementById('productGrid');
+        // Hàm áp dụng filter và reload trang với parameters mới
+        function applyFilters() {
+            const url = new URL(window.location);
             
-            if (products.length === 0) {
-                productGrid.innerHTML = `<div class="col-12 text-center py-5 text-muted">Không tìm thấy sản phẩm phù hợp.</div>`;
-                document.getElementById('resultsCount').textContent = 0;
-                return;
+            // Get category filters
+            const categories = Array.from(document.querySelectorAll('input[type=checkbox][id^="category_"]'))
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+            
+            if (categories.length > 0) {
+                url.searchParams.set('category', categories[0]); // For now, support single category
+            } else {
+                url.searchParams.delete('category');
             }
 
-            let html = products.map(product => `
-                <div class="col-lg-4 col-md-6 mb-4 d-flex justify-content-center">
-                    <div class="list-card-product">
-                        <div class="position-relative">
-                            <img src="${product.image}" class="card-img-top" alt="${product.name}">
-                            ${product.badge ? `<span class="badge bg-danger position-absolute top-0 end-0 m-2">${product.badge.toUpperCase()}</span>` : ''}
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title mb-2">${product.name}</h5>
-                            <div class="mb-2">
-                                <span class="price fw-bold">${product.price.toLocaleString('vi-VN')}₫</span>
-                                ${product.originalPrice ? `<span class="text-muted text-decoration-line-through ms-2">${product.originalPrice.toLocaleString('vi-VN')}₫</span>` : ''}
-                            </div>
-                            <div class="mb-2">
-                                <span class="rating text-warning">
-                                    ${'★'.repeat(Math.round(product.rating))}${'☆'.repeat(5 - Math.round(product.rating))}
-                                </span>
-                                <span class="text-muted ms-1">(${product.reviews})</span>
-                            </div>
-                            <div class="product-actions">
-                                <button class="btn btn-icon btn-sm me-2" title="Yêu thích"><i class="fa-regular fa-heart"></i></button>
-                                <button class="btn btn-icon btn-sm" title="Thêm vào giỏ"><i class="fa-solid fa-cart-plus"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-            productGrid.innerHTML = html;
-            document.getElementById('resultsCount').textContent = products.length;
-        }
+            // Get price range
+            const priceRange = document.querySelector('input[name="priceRange"]:checked')?.value;
+            if (priceRange && priceRange !== 'all') {
+                const [minPrice, maxPrice] = priceRange.split('-');
+                url.searchParams.set('min_price', minPrice);
+                url.searchParams.set('max_price', maxPrice);
+            } else {
+                url.searchParams.delete('min_price');
+                url.searchParams.delete('max_price');
+            }
 
-        // Lấy filter từ UI
-        function getFiltersFromUI() {
-            // Category
-            const categories = Array.from(document.querySelectorAll('input[type=checkbox][id^="rings"],input[type=checkbox][id^="necklaces"],input[type=checkbox][id^="earrings"],input[type=checkbox][id^="bracelets"],input[type=checkbox][id^="watches"]'))
-                .filter(cb => cb.checked)
-                .map(cb => cb.value);
+            // Get custom price
+            const customMinPrice = document.getElementById('minPrice')?.value;
+            const customMaxPrice = document.getElementById('maxPrice')?.value;
+            if (customMinPrice) {
+                url.searchParams.set('min_price', customMinPrice);
+            }
+            if (customMaxPrice) {
+                url.searchParams.set('max_price', customMaxPrice);
+            }
 
-            // Material
-            const materials = Array.from(document.querySelectorAll('input[type=checkbox][id^="gold"],input[type=checkbox][id^="silver"],input[type=checkbox][id^="diamond"],input[type=checkbox][id^="pearl"]'))
-                .filter(cb => cb.checked)
-                .map(cb => cb.value);
+            // Get sort
+            const sort = document.getElementById('sortSelect')?.value;
+            if (sort) {
+                url.searchParams.set('sort', sort);
+            }
 
-            // Brand
-            const brands = Array.from(document.querySelectorAll('input[type=checkbox][id^="luxury-gold"],input[type=checkbox][id^="diamond-star"],input[type=checkbox][id^="pearl-beauty"],input[type=checkbox][id^="elegant"]'))
-                .filter(cb => cb.checked)
-                .map(cb => cb.value);
+            // Reset to page 1 when filtering
+            url.searchParams.set('page', '1');
 
-            // Price range
-            const priceRange = document.querySelector('input[name="priceRange"]:checked')?.value || 'all';
-
-            // Custom price
-            const customMinPrice = parseInt(document.getElementById('minPrice').value) || null;
-            const customMaxPrice = parseInt(document.getElementById('maxPrice').value) || null;
-
-            // Sort
-            const sort = document.getElementById('sortSelect').value;
-
-            return {
-                categories,
-                materials,
-                brands,
-                priceRange,
-                customMinPrice,
-                customMaxPrice,
-                sort
-            };
+            // Redirect to new URL
+            window.location.href = url.toString();
         }
 
         // Gắn sự kiện cho filter và sort
@@ -597,21 +415,39 @@
             document.querySelectorAll('.filter-card input, #sortSelect').forEach(el => {
                 el.addEventListener('change', applyFilters);
             });
-            // Custom price inputs
-            document.getElementById('minPrice').addEventListener('input', applyFilters);
-            document.getElementById('maxPrice').addEventListener('input', applyFilters);
+            
+            // Custom price inputs with debounce
+            let priceTimeout;
+            document.getElementById('minPrice')?.addEventListener('input', function() {
+                clearTimeout(priceTimeout);
+                priceTimeout = setTimeout(applyFilters, 1000); // Wait 1 second after user stops typing
+            });
+            document.getElementById('maxPrice')?.addEventListener('input', function() {
+                clearTimeout(priceTimeout);
+                priceTimeout = setTimeout(applyFilters, 1000);
+            });
         }
 
-        // Hàm áp dụng filter và render lại sản phẩm
-        function applyFilters() {
-            const filters = getFiltersFromUI();
-            const filteredProducts = getProductsFromDatabase(filters);
-            renderProducts(filteredProducts);
-        }
+        // Search functionality
+        document.querySelector('.search-btn').addEventListener('click', function() {
+            const searchTerm = document.querySelector('.search-input').value;
+            if (searchTerm.trim()) {
+                const url = new URL(window.location);
+                url.searchParams.set('search', searchTerm.trim());
+                url.searchParams.set('page', '1'); // Reset to page 1
+                window.location.href = url.toString();
+            }
+        });
+
+        // Handle Enter key in search
+        document.querySelector('.search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.querySelector('.search-btn').click();
+            }
+        });
 
         // Khởi tạo trang
         document.addEventListener('DOMContentLoaded', function() {
-            renderProducts(jewelryProducts);
             attachFilterEvents();
         });
     </script>

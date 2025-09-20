@@ -9,15 +9,61 @@ class Route {
        
         // Xử lý Controller
         if (isset($url[0])) {
-            // Chuyển đổi tên từ URL (vd: 'users') thành tên Class (vd: 'UsersController')
-            $controllerName = ucfirst($url[0]) . 'Controller';
-            // Tạo đường dẫn tuyệt đối đến file controller
-            $controllerFile = __DIR__ . '/../app/controllers/' . $controllerName . '.php';
-
-            if (file_exists($controllerFile)) {
-                $this->controller = $controllerName;
+            // Special handling for customer routes
+            if ($url[0] === 'customer') {
+                $this->controller = 'CustomerController';
                 unset($url[0]);
+                
+                // Check for specific customer actions
+                if (isset($url[1])) {
+                    switch ($url[1]) {
+                        case 'products':
+                            $this->method = 'products';
+                            unset($url[1]);
+                            break;
+                        case 'product-detail':
+                        case 'product':
+                            $this->method = 'productDetail';
+                            unset($url[1]);
+                            break;
+                        case 'search':
+                            $this->method = 'searchApi';
+                            unset($url[1]);
+                            break;
+                        case 'api':
+                            unset($url[1]);
+                            if (isset($url[2])) {
+                                switch ($url[2]) {
+                                    case 'new-arrivals':
+                                        $this->method = 'getNewArrivals';
+                                        break;
+                                    case 'popular':
+                                        $this->method = 'getPopularProducts';
+                                        break;
+                                    case 'category':
+                                        $this->method = 'getProductsByCategory';
+                                        break;
+                                }
+                                unset($url[2]);
+                            }
+                            break;
+                    }
+                }
+            } else {
+                // Chuyển đổi tên từ URL (vd: 'users') thành tên Class (vd: 'UsersController')
+                $controllerName = ucfirst($url[0]) . 'Controller';
+                // Tạo đường dẫn tuyệt đối đến file controller
+                $controllerFile = __DIR__ . '/../app/controllers/' . $controllerName . '.php';
+
+                if (file_exists($controllerFile)) {
+                    $this->controller = $controllerName;
+                    unset($url[0]);
+                }
             }
+        } else {
+            // Default to customer home page instead of HomeController
+            $this->controller = 'CustomerController';
+            $this->method = 'index';
         }
 
         // Nạp controller
