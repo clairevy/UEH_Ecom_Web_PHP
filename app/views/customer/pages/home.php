@@ -1,36 +1,37 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jewelry - Luxury Collection</title>
-    <link rel="stylesheet" href="/app/assets/css.css">
+    <link href="/Ecom_website/public/assets/css/css.css?v=<?php echo time(); ?>" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <html xmlns:th="http://www.thymeleaf.org">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     
-    <style>
-        .product-card a:hover {
-            transform: translateY(-5px);
-            transition: transform 0.3s ease;
-        }
-        .list-card-product a:hover {
-            transform: translateY(-5px);
-            transition: transform 0.3s ease;
-        }
-        .related-product-card a:hover {
-            transform: translateY(-5px);
-            transition: transform 0.3s ease;
-        }
-        .product-card, .list-card-product, .related-product-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .product-card:hover, .list-card-product:hover, .related-product-card:hover {
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        }
-    </style>
+    // <!-- <style>
+    //     .product-card a:hover {
+    //         transform: translateY(-5px);
+    //         transition: transform 0.3s ease;
+    //     }
+    //     .list-card-product a:hover {
+    //         transform: translateY(-5px);
+    //         transition: transform 0.3s ease;
+    //     }
+    //     .related-product-card a:hover {
+    //         transform: translateY(-5px);
+    //         transition: transform 0.3s ease;
+    //     }
+    //     .product-card, .list-card-product, .related-product-card {
+    //         transition: transform 0.3s ease, box-shadow 0.3s ease;
+    //     }
+    //     .product-card:hover, .list-card-product:hover, .related-product-card:hover {
+    //         box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    //     }
+    // </style> -->
     
 </head>
 <body>

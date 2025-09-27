@@ -13,8 +13,7 @@ class BaseController{
         if (file_exists($viewPath)) {
             require_once $viewPath;
         } else {
-            // View không tồn tại - hiển thị thông báo debug
             die("View không tồn tại: {$viewPath}");
-        }
+       }
     }
 }

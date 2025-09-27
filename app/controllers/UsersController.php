@@ -52,15 +52,15 @@ class UsersController extends BaseController {
                     $data['errors'] = array_merge($data['errors'], $result['errors']);
                 }
                 $data['error_message'] = $result['message'] ?? 'Đã có lỗi xảy ra.';
-                $this->renderView('testview/signup', $data);
+                $this->view('testview/signup', $data);
             }
         } else {
             // Nếu có lỗi, tải lại view và hiển thị lỗi
-            $this->renderView('testview/signup', $data);
+            $this->view('testview/signup', $data);
         }
     } else {
         // Trường hợp 2: Người dùng chỉ truy cập trang, hiển thị form trống
-        $this->renderView('testview/signup');
+        $this->view('testview/signup');
     }
 }
 
@@ -87,10 +87,10 @@ class UsersController extends BaseController {
         } else {
             // Đăng nhập thất bại, báo lỗi
             $data['errors']['general'] = 'Email hoặc mật khẩu không đúng.';
-            $this->renderView('testview/login', $data);
+            $this->view('testview/login', $data);
         }
     } else {
-        $this->renderView('testview/login');
+        $this->view('testview/login');
     }
 }
 

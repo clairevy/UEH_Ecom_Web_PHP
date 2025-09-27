@@ -6,9 +6,11 @@
     <title>Nhẫn Kim Cương Vàng Trắng 18K - Chi Tiết Sản Phẩm</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/app/assets/css.css">
+    <title>Chi tiết sản phẩm</title>
+    <link href="/Ecom_website/public/assets/css/css.css?v=<?php echo time(); ?>" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">   
     
-    <style>
+    <!-- <style>
         .related-product-card a:hover {
             transform: translateY(-5px);
             transition: transform 0.3s ease;
@@ -19,7 +21,7 @@
         .related-product-card:hover {
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
-    </style>
+    </style> -->
 </head>
 <body>
 
@@ -109,6 +111,7 @@
                                     <div class="thumbnail-item" onclick="changeImage(this, 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500')">
                                         <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=100" alt="Thumbnail 2">
                                     </div>
+
                                     <div class="thumbnail-item" onclick="changeImage(this, 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500')">
                                         <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=100" alt="Thumbnail 3">
                                     </div>
@@ -202,29 +205,25 @@
             <div class="tab-navigation">
                 <button class="tab-btn active" onclick="switchTab(this, 'description')">Mô tả sản phẩm</button>
                 <button class="tab-btn" onclick="switchTab(this, 'additional')">Thông tin bổ sung</button>
-                <button class="tab-btn" onclick="switchTab(this, 'reviews')">Đánh giá (150)</button>
+                <button class="tab-btn" onclick="switchTab(this, 'reviews')">Đánh giá ()</button>
             </div>
 
             <div class="tab-content active" id="description">
                 <div class="row">
                     <div class="col-md-8">
-                        <h4>Mô tả chi tiết sản phẩm</h4>
-                        <p>Nhẫn kim cương vàng trắng 18K là sự kết hợp hoàn hảo giữa vẻ đẹp cổ điển và phong cách hiện đại. Được chế tác từ vàng trắng 18K cao cấp với độ tinh khiết tuyệt đối, chiếc nhẫn này mang đến vẻ đẹp lộng lẫy và sang trọng.</p>
-                        
-                        <p>Kim cương chính ở trung tâm có trọng lượng 1.2 carat với độ tinh khiết IF (Internally Flawless) và màu sắc D (không màu), tạo nên sự rực rỡ và lấp lánh đặc biệt. Xung quanh kim cương chính là 24 viên kim cương nhỏ được sắp xếp tinh tế, tăng thêm vẻ rực rỡ cho toàn bộ thiết kế.</p>
-                        
-                        <h5>Đặc điểm nổi bật:</h5>
-                        <ul>
-                            <li>Chất liệu: Vàng trắng 18K</li>
-                            <li>Kim cương chính: 1.2 carat, độ tinh khiết IF, màu D</li>
-                            <li>Kim cương phụ: 24 viên, tổng trọng lượng 0.5 carat</li>
-                            <li>Thiết kế: Cổ điển kết hợp hiện đại</li>
-                            <li>Bảo hành: 2 năm toàn diện</li>
-                        </ul>
+                    
+                        <?php
+                        if (isset($product) && !empty($product->description)) {
+                            echo '<h4>Mô tả chi tiết sản phẩm</h4>';
+                            echo '<p>' . htmlspecialchars($product->description) . '</p>';
+                        } else {
+                            echo '<h4>Mô tả chi tiết sản phẩm</h4>';
+                            echo '<p>Thông tin mô tả sẽ được cập nhật sau.</p>';
+                        }?>
                     </div>
                     <div class="col-md-4">
                         <div class="inf-images">
-                            <img src="https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=400" alt="Chi tiết nhẫn">
+                            <img src="<?php echo (isset($product) && isset($product->images[0])) ? htmlspecialchars($product->images[0]->file_path) : ''; ?>" alt="Chi tiết ">
                         </div>
                     </div>
                 </div>
@@ -420,59 +419,57 @@
 </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/Ecom_website/public/assets/js/product-detail.js"></script>
+<!-- Load JavaScript từ file external -->
+<!-- <script>
 
-<script>
-    // Đổi ảnh chính khi bấm thumbnail
-    function changeImage(element, imageUrl) {
-        document.getElementById("mainImage").src = imageUrl;
-
-        // Bỏ active ở tất cả thumbnail
-        document.querySelectorAll(".thumbnail-item").forEach(item => {
-            item.classList.remove("active");
-        });
-        // Active thumbnail được chọn
-        element.classList.add("active");
+function changeImage(element, imageUrl) {
+    console.log("Changing image to:", imageUrl);
+    
+    const mainImage = document.getElementById("mainImage");
+    if (mainImage) {
+        // Thêm error handling cho image load
+        mainImage.onerror = function() {
+            console.error("Failed to load image:", imageUrl);
+            this.src = "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=500"; // fallback
+        };
+        
+        mainImage.onload = function() {
+            console.log("Image changed successfully to:", imageUrl);
+        };
+        
+        mainImage.src = imageUrl;
+    } else {
+        console.error("mainImage element not found!");
     }
 
-    // Chọn option (màu, size)
-    function selectOption(element) {
-        let parent = element.parentNode;
-        // Bỏ active ở nhóm hiện tại
-        parent.querySelectorAll(".option-btn").forEach(btn => {
-            btn.classList.remove("active");
-        });
-        // Active option được chọn
-        element.classList.add("active");
-    }
-
-    // Chuyển tab (mô tả / bổ sung / đánh giá)
-    function switchTab(element, tabId) {
-        // Reset button active
-        document.querySelectorAll(".tab-btn").forEach(btn => {
-            btn.classList.remove("active");
-        });
-        element.classList.add("active");
-
-        // Reset content active
-        document.querySelectorAll(".tab-content").forEach(content => {
-            content.classList.remove("active");
-        });
-        document.getElementById(tabId).classList.add("active");
-    }
-
-    // Search functionality
-    document.querySelector('.search-btn').addEventListener('click', function() {
-        const searchTerm = document.querySelector('.search-input').value;
-        if (searchTerm.trim()) {
-            window.location.href = `/Ecom_website/customer/products?search=${encodeURIComponent(searchTerm.trim())}`;
-        }
+    // Bỏ active ở tất cả thumbnail
+    document.querySelectorAll(".thumbnail-item").forEach(item => {
+        item.classList.remove("active");
     });
+    // Active thumbnail được chọn
+    element.classList.add("active");
+}
 
-    // Handle Enter key in search
-    document.querySelector('.search-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            document.querySelector('.search-btn').click();
-        }
+function selectOption(element) {
+    let parent = element.parentNode;
+    parent.querySelectorAll(".option-btn").forEach(btn => {
+        btn.classList.remove("active");
     });
-</script>
+    element.classList.add("active");
+}
 
+function switchTab(element, tabId) {
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.classList.remove("active");
+    });
+    element.classList.add("active");
+
+    document.querySelectorAll(".tab-content").forEach(content => {
+        content.classList.remove("active");
+    });
+    document.getElementById(tabId).classList.add("active");
+}
+
+</script> -->

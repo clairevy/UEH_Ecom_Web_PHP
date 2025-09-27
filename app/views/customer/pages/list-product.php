@@ -9,20 +9,10 @@
     <!-- Font Awesome Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS --> 
-    <link href="/app/assets/css.css" rel="stylesheet">   
+        <title>Danh sách sản phẩm</title>
+    <link href="/Ecom_website/public/assets/css/css.css?v=<?php echo time(); ?>" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">   
     
-    <style>
-        .list-card-product a:hover {
-            transform: translateY(-5px);
-            transition: transform 0.3s ease;
-        }
-        .list-card-product {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .list-card-product:hover {
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        }
-    </style>
 </head>
 <body>
     <!-- Header -->

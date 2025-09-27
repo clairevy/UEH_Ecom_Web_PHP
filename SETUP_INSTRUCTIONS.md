@@ -121,4 +121,3 @@ Sau khi chạy seed data thành công, bạn có thể test các trang:
 
 ---
 
-**🎉 Chúc bạn test website thành công!**
