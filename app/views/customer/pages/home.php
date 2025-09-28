@@ -5,33 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jewelry - Luxury Collection</title>
-    <link href="/Ecom_website/public/assets/css/css.css?v=<?php echo time(); ?>" rel="stylesheet">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <html xmlns:th="http://www.thymeleaf.org">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="<?= asset('css/css.css?v=' . time()) ?>" rel="stylesheet">
+
     
-    // <!-- <style>
-    //     .product-card a:hover {
-    //         transform: translateY(-5px);
-    //         transition: transform 0.3s ease;
-    //     }
-    //     .list-card-product a:hover {
-    //         transform: translateY(-5px);
-    //         transition: transform 0.3s ease;
-    //     }
-    //     .related-product-card a:hover {
-    //         transform: translateY(-5px);
-    //         transition: transform 0.3s ease;
-    //     }
-    //     .product-card, .list-card-product, .related-product-card {
-    //         transition: transform 0.3s ease, box-shadow 0.3s ease;
-    //     }
-    //     .product-card:hover, .list-card-product:hover, .related-product-card:hover {
-    //         box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    //     }
-    // </style> -->
     
 </head>
 <body>
@@ -244,10 +226,10 @@
                         <?php foreach ($categories as $category): ?>
                             <div class="category-item text-center mx-3">
                                 <div class="category-circle">
-                                    <img src="<?= $category->banner_image ? $category->banner_image->file_path : 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=100&h=100&fit=crop' ?>" 
-                                         alt="<?= htmlspecialchars($category->name) ?>">
+                                    <img src="<?= isset($category->banner_image) ? $category->banner_image : 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=100&h=100&fit=crop' ?>" 
+                                         alt="<?= htmlspecialchars($category->category_name ?? $category->name ?? 'Category') ?>">
                                 </div>
-                                <p class="mt-2"><?= htmlspecialchars($category->name) ?></p>
+                                <p class="mt-2"><?= htmlspecialchars($category->category_name ?? $category->name ?? 'Category') ?></p>
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -324,7 +306,7 @@
                     <div class="feedback-card">
                         <div class="row">
                             <div class="col-4">
-                                <img src="/app/assets/Images/17499d23c783d06afbc740850e2624ae.jpg" alt="Customer" class="feedback-image">
+                                <img src="<?= asset('images/placeholder.svg') ?>" alt="Customer" class="feedback-image">
                             </div>
                             <div class="col-8">
                                 <h5>SOPHIA</h5>
@@ -462,8 +444,8 @@
         document.querySelector('.search-btn').addEventListener('click', function() {
             const searchTerm = document.querySelector('.search-input').value;
             if (searchTerm.trim()) {
-                // Redirect to products page with search parameter
-                window.location.href = `/Ecom_website/customer/products?search=${encodeURIComponent(searchTerm.trim())}`;
+                // Redirect to products page with search parameter - Clean URL
+                window.location.href = `/Ecom_website/products?search=${encodeURIComponent(searchTerm.trim())}`;
             }
         });
 
@@ -490,34 +472,45 @@
         // Fetch dữ liệu từ server
         async function fetchProductData() {
             try {
-                // Fetch new arrivals
-                const newArrivalsResponse = await fetch('/Ecom_website/customer/api/new-arrivals?limit=7');
+                // Fetch new arrivals - Clean URL
+                const newArrivalsResponse = await fetch('/Ecom_website/api/new-arrivals?limit=7');
                 const newArrivalsResult = await newArrivalsResponse.json();
+                console.log('New Arrivals API Response:', newArrivalsResult);
                 if (newArrivalsResult.success) {
-                    newArrivalsData = newArrivalsResult.data.map(product => ({
-                        id: product.product_id,
-                        name: product.name.toUpperCase(),
-                        desc: product.description.substring(0, 80) + '...',
-                        price: parseFloat(product.base_price),
-                        img: product.primary_image ? product.primary_image.file_path : "/app/assets/Images/17499d23c783d06afbc740850e2624ae.jpg",
-                        createdAt: product.created_at,
-                        sold: Math.floor(Math.random() * 50) // Mock sold data
-                    }));
+                    newArrivalsData = newArrivalsResult.data.map(product => {
+                        console.log('Processing product:', product);
+                        console.log('Primary image:', product.primary_image);
+                        return {
+                            id: product.product_id,
+                            name: product.name.toUpperCase(),
+                            desc: product.description ? product.description.substring(0, 80) + '...' : 'No description',
+                            price: parseFloat(product.base_price),
+                            img: product.primary_image ? product.primary_image.file_path : "/public/assets/images/placeholder.svg",
+                            createdAt: product.created_at,
+                            sold: Math.floor(Math.random() * 50) // Mock sold data
+                        };
+                    });
+                    console.log('Processed newArrivalsData:', newArrivalsData);
                 }
 
-                // Fetch popular products
-                const popularResponse = await fetch('/Ecom_website/customer/api/popular?limit=7');
+                // Fetch popular products - Clean URL
+                const popularResponse = await fetch('/Ecom_website/api/popular?limit=7');
                 const popularResult = await popularResponse.json();
+                console.log('Popular API Response:', popularResult);
                 if (popularResult.success) {
-                    popularProductsData = popularResult.data.map(product => ({
-                        id: product.product_id,
-                        name: product.name.toUpperCase(),
-                        desc: product.description.substring(0, 80) + '...',
-                        price: parseFloat(product.base_price),
-                        img: product.primary_image ? product.primary_image.file_path : "/app/assets/Images/17499d23c783d06afbc740850e2624ae.jpg",
-                        createdAt: product.created_at,
-                        sold: Math.floor(Math.random() * 50) // Mock sold data
-                    }));
+                    popularProductsData = popularResult.data.map(product => {
+                        console.log('Processing popular product:', product);
+                        return {
+                            id: product.product_id,
+                            name: product.name.toUpperCase(),
+                            desc: product.description ? product.description.substring(0, 80) + '...' : 'No description',
+                            price: parseFloat(product.base_price),
+                            img: product.primary_image ? product.primary_image.file_path : "/public/assets/images/placeholder.svg",
+                            createdAt: product.created_at,
+                            sold: Math.floor(Math.random() * 50) // Mock sold data
+                        };
+                    });
+                    console.log('Processed popularProductsData:', popularProductsData);
                 }
 
                 // Render products after data is loaded
@@ -541,7 +534,7 @@
                     name: "DIAMOND SOLITAIRE RING",
                     desc: "Crafted in 18K white gold, this solitaire ring features a brilliant-cut diamond...",
                     price: 50,
-                    img: "/app/assets/Images/17499d23c783d06afbc740850e2624ae.jpg",
+                    img: "/public/assets/images/placeholder.svg",
                     createdAt: "2025-09-18",
                     sold: 10
                 },
@@ -550,7 +543,7 @@
                     name: "GOLDEN EARRINGS",
                     desc: "18K gold earrings with elegant design.",
                     price: 120,
-                    img: "/app/assets/Images/c3c56e86eb1a6f530e336f978587c93e.jpg",
+                    img: "/public/assets/images/placeholder.svg",
                     createdAt: "2025-09-17",
                     sold: 25
                 },
@@ -559,7 +552,7 @@
                     name: "SILVER BRACELET",
                     desc: "Sterling silver bracelet with diamond accents.",
                     price: 80,
-                    img: "/app/assets/Images/3ac935a5708c4d0a3e0c01ee74b71775.jpg",
+                    img: "/public/assets/images/placeholder.svg",
                     createdAt: "2025-09-16",
                     sold: 18
                 }
@@ -596,7 +589,7 @@ function renderProducts(type, direction = null) {
             items.push(`
       <div class="col-md-4 mb-4">
         <div class="card product-card">
-          <a href="/Ecom_website/customer/product-detail/${p.id}" style="text-decoration: none; color: inherit;">
+          <a href="/Ecom_website/product/${p.slug || p.id}" style="text-decoration: none; color: inherit;">
             <img src="${p.img}" class="card-img-top" alt="${p.name}">
             <div class="card-body text-center">
               <h5 class="card-title">${p.name}</h5>

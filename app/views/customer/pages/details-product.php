@@ -7,21 +7,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <title>Chi tiết sản phẩm</title>
-    <link href="/Ecom_website/public/assets/css/css.css?v=<?php echo time(); ?>" rel="stylesheet">
+    <link href="<?= asset('css/css.css?v=' . time()) ?>" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">   
     
-    <!-- <style>
-        .related-product-card a:hover {
-            transform: translateY(-5px);
-            transition: transform 0.3s ease;
-        }
-        .related-product-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .related-product-card:hover {
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        }
-    </style> -->
 </head>
 <body>
 
@@ -78,10 +66,10 @@
     <div class="container mt-5 pt-4">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/Ecom_website/customer" class="text-decoration-none">Trang chủ</a></li>
-                <li class="breadcrumb-item"><a href="/Ecom_website/customer/products" class="text-decoration-none">Trang sức</a></li>
-                <?php if (isset($productCategories) && !empty($productCategories)): ?>
-                    <li class="breadcrumb-item"><a href="/Ecom_website/customer/products?category=<?= $productCategories[0]->category_id ?>" class="text-decoration-none"><?= htmlspecialchars($productCategories[0]->name) ?></a></li>
+                <li class="breadcrumb-item"><a href="<?= url('') ?>" class="text-decoration-none">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a href="<?= route('products') ?>" class="text-decoration-none">Trang sức</a></li>
+                <?php if (isset($product->categories) && !empty($product->categories)): ?>
+                    <li class="breadcrumb-item"><a href="<?= route('products', ['category' => $product->categories[0]->category_id]) ?>" class="text-decoration-none"><?= htmlspecialchars($product->categories[0]->name) ?></a></li>
                 <?php endif; ?>
                 <li class="breadcrumb-item active"><?= isset($product) ? htmlspecialchars($product->name) : 'Chi tiết sản phẩm' ?></li>
             </ol>
@@ -347,7 +335,7 @@
                         <?php foreach ($relatedProducts as $relatedProduct): ?>
                             <div class="col-lg-3 col-md-6 mb-4">
                                 <div class="related-product-card">
-                                    <a href="/Ecom_website/customer/product-detail/<?= $relatedProduct->product_id ?>" style="text-decoration: none; color: inherit; display: block;">
+                                    <a href="<?= route('product/' . ($relatedProduct->slug ?? $relatedProduct->product_id)) ?>" style="text-decoration: none; color: inherit; display: block;">
                                         <div class="product-image">
                                             <img src="<?= $relatedProduct->primary_image ? $relatedProduct->primary_image->file_path : 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=300' ?>" 
                                                  alt="<?= htmlspecialchars($relatedProduct->name) ?>">
@@ -421,55 +409,4 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/Ecom_website/public/assets/js/product-detail.js"></script>
-<!-- Load JavaScript từ file external -->
-<!-- <script>
 
-function changeImage(element, imageUrl) {
-    console.log("Changing image to:", imageUrl);
-    
-    const mainImage = document.getElementById("mainImage");
-    if (mainImage) {
-        // Thêm error handling cho image load
-        mainImage.onerror = function() {
-            console.error("Failed to load image:", imageUrl);
-            this.src = "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=500"; // fallback
-        };
-        
-        mainImage.onload = function() {
-            console.log("Image changed successfully to:", imageUrl);
-        };
-        
-        mainImage.src = imageUrl;
-    } else {
-        console.error("mainImage element not found!");
-    }
-
-    // Bỏ active ở tất cả thumbnail
-    document.querySelectorAll(".thumbnail-item").forEach(item => {
-        item.classList.remove("active");
-    });
-    // Active thumbnail được chọn
-    element.classList.add("active");
-}
-
-function selectOption(element) {
-    let parent = element.parentNode;
-    parent.querySelectorAll(".option-btn").forEach(btn => {
-        btn.classList.remove("active");
-    });
-    element.classList.add("active");
-}
-
-function switchTab(element, tabId) {
-    document.querySelectorAll(".tab-btn").forEach(btn => {
-        btn.classList.remove("active");
-    });
-    element.classList.add("active");
-
-    document.querySelectorAll(".tab-content").forEach(content => {
-        content.classList.remove("active");
-    });
-    document.getElementById(tabId).classList.add("active");
-}
-
-</script> -->

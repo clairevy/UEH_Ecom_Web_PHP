@@ -1,24 +1,41 @@
 <?php
 
+// Load required models
+require_once __DIR__ . '/../../core/BaseModel.php';
+require_once __DIR__ . '/../models/Product.php';
+require_once __DIR__ . '/../models/Category.php';
+require_once __DIR__ . '/../models/Collection.php';
+require_once __DIR__ . '/../models/Review.php';
+require_once __DIR__ . '/../models/SiteAssets.php';
+
 /**
- * ProductService - Xử lý Business Logic phức tạp
- * Chịu trách nhiệm cho các logic filter, search, pagination
+ * ProductService - Business Logic Layer
+ * Xử lý tất cả logic phức tạp liên quan đến products
  */
-class ProductService  {
+class ProductService extends BaseModel {
+    protected $table = 'products'; // Add table name
     private $productModel;
-    private $siteModel;
     private $categoryModel;
+    private $collectionModel;
+    private $siteAssetsModel;
+    private $reviewModel;
     
     public function __construct() {
+        parent::__construct(); // Initialize database connection from BaseModel
+        
+        // Initialize models
         $this->productModel = new Product();
-        $this->siteModel = new SiteAssets();
         $this->categoryModel = new Category();
+        $this->collectionModel = new Collection(); 
+        $this->reviewModel = new Review();
+        $this->siteAssetsModel = new SiteAssets();
+
     }
     
     /**
      * Lấy sản phẩm với filters phức tạp
      */
-    public function getProductsWithFilters($filters = []) {
+    public function getProductsWithFilters($filters = [], $page = 1, $limit = 12) {
         // Xây dựng SQL động dựa trên filters
         $sql = "SELECT p.*, c.collection_name 
                 FROM products p 
@@ -70,11 +87,9 @@ class ProductService  {
         }
         
         // Pagination
-        $limit = $filters['limit'] ?? 12;
-        $offset = $filters['offset'] ?? 0;
-        $sql .= " LIMIT :limit OFFSET :offset";
-        $params[':limit'] = $limit;
-        $params[':offset'] = $offset;
+        $offset = ($page - 1) * $limit;
+        $sql .= " LIMIT $limit OFFSET $offset";
+
         
         // Execute query
         $this->productModel->db->query($sql);
@@ -86,11 +101,17 @@ class ProductService  {
         
         // Attach images cho mỗi sản phẩm
         foreach ($products as $product) {
-            $product->images = $this->siteModel->getProductImages($product->product_id);
-            $product->primary_image = $this->siteModel->getProductPrimaryImage($product->product_id);
+            $product->images = $this->getProductImages($product->product_id);
+            $product->primary_image = $this->getProductPrimaryImage($product->product_id);
         }
         
-        return $products;
+        // Get total count for pagination
+        $total = $this->countProductsWithFilters($filters);
+        
+        return [
+            'products' => $products,
+            'total' => $total
+        ];
     }
     
     /**
@@ -98,23 +119,88 @@ class ProductService  {
      */
     public function countProductsWithFilters($filters = []) {
         // Tương tự getProductsWithFilters nhưng chỉ COUNT
-        // Implementation...
+        $sql = "SELECT COUNT(*) as total 
+                FROM products p 
+                LEFT JOIN collection c ON p.collection_id = c.collection_id 
+                WHERE p.is_active = 1";
+        
+        $params = [];
+        
+        // Category filter - using relationship table
+        if (!empty($filters['category_slug'])) {
+            // If slug is provided, try to find category by first available text column
+            $sql .= " AND EXISTS (
+                        SELECT 1 FROM product_categories pc 
+                        INNER JOIN categories cat ON pc.category_id = cat.category_id 
+                        WHERE pc.product_id = p.product_id 
+                        AND cat.category_id = :category_slug
+                        AND cat.is_active = 1
+                      )";
+            $params[':category_slug'] = $filters['category_slug'];
+        }
+        
+        // Category filter by ID (more common)
+        if (!empty($filters['category_id'])) {
+            $sql .= " AND EXISTS (
+                        SELECT 1 FROM product_categories pc 
+                        WHERE pc.product_id = p.product_id 
+                        AND pc.category_id = :category_id
+                      )";
+            $params[':category_id'] = $filters['category_id'];
+        }
+        
+        // Collection filter
+        if (!empty($filters['collection_slug'])) {
+            $sql .= " AND c.collection_slug = :collection_slug";
+            $params[':collection_slug'] = $filters['collection_slug'];
+        }
+        
+        // Price filters
+        if (!empty($filters['min_price'])) {
+            $sql .= " AND p.base_price >= :min_price";
+            $params[':min_price'] = $filters['min_price'];
+        }
+        
+        if (!empty($filters['max_price'])) {
+            $sql .= " AND p.base_price <= :max_price";
+            $params[':max_price'] = $filters['max_price'];
+        }
+        
+        // Search filter
+        if (!empty($filters['search'])) {
+            $sql .= " AND (p.name LIKE :search OR p.description LIKE :search)";
+            $params[':search'] = '%' . $filters['search'] . '%';
+        }
+        
+        $this->db->query($sql);
+        foreach ($params as $key => $value) {
+            $this->db->bind($key, $value);
+        }
+        
+        $result = $this->db->single();
+        return $result->total ?? 0;
     }
     
     /**
      * Lấy sản phẩm với đầy đủ thông tin (images, variants, etc.)
      */
-    public function getProductWithFullDetails($productId) {
-        $product = $this->productModel->findById($productId);
+    public function getProductWithFullDetails($slugOrId) {
+        // Try to find by slug first, then by ID if slug fails
+        $product = $this->productModel->findBySlug($slugOrId);
+        
+        if (!$product && is_numeric($slugOrId)) {
+            // If slug not found and input is numeric, try by ID
+            $product = $this->productModel->findById($slugOrId);
+        }
         
         if (!$product) {
             return null;
         }
         
         // Attach additional data
-        $product->images = $this->siteModel->getProductImages($productId);
-        $product->primary_image = $this->siteModel->getProductPrimaryImage($productId);
-        $product->categories = $this->categoryModel->getCategoriesForProduct($productId);
+        $product->images = $this->getProductImages($product->product_id);
+        $product->primary_image = $this->getProductPrimaryImage($product->product_id);
+        $product->categories = $this->getProductCategories($product->product_id);
         
         return $product;
     }
@@ -129,19 +215,162 @@ class ProductService  {
             return [];
         }
         
+        // Sanitize limit parameter
+        $limit = (int) $limit;
+        if ($limit <= 0) $limit = 4;
+        
         // Lấy sản phẩm cùng collection, trừ sản phẩm hiện tại
         $sql = "SELECT * FROM products 
                 WHERE collection_id = :collection_id 
                 AND product_id != :product_id 
                 AND is_active = 1 
                 ORDER BY created_at DESC 
-                LIMIT :limit";
+                LIMIT $limit";
         
         $this->productModel->db->query($sql);
         $this->productModel->db->bind(':collection_id', $product->collection_id);
         $this->productModel->db->bind(':product_id', $productId);
-        $this->productModel->db->bind(':limit', $limit);
         
-        return $this->productModel->db->resultSet();
+        $relatedProducts = $this->productModel->db->resultSet();
+        
+        // Attach images for each related product
+        foreach ($relatedProducts as $relatedProduct) {
+            $relatedProduct->images = $this->getProductImages($relatedProduct->product_id);
+            $relatedProduct->primary_image = $this->getProductPrimaryImage($relatedProduct->product_id);
+        }
+        
+        return $relatedProducts;
+    }
+    
+    // =================== IMAGE HELPER METHODS ===================
+    
+    /**
+     * Get all images for a product
+     */
+    private function getProductImages($productId) {
+        $sql = "SELECT i.*, iu.usage_id, iu.is_primary
+                FROM images i 
+                JOIN image_usages iu ON i.image_id = iu.image_id 
+                WHERE iu.ref_type = 'product' 
+                AND iu.ref_id = :product_id 
+                ORDER BY iu.is_primary DESC, iu.created_at ASC";
+        
+        $this->db->query($sql);
+        $this->db->bind(':product_id', $productId);
+        
+        return $this->db->resultSet();
+    }
+    
+    /**
+     * Get primary image for a product
+     */
+    private function getProductPrimaryImage($productId) {
+        $sql = "SELECT i.*, iu.usage_id, iu.is_primary
+                FROM images i 
+                JOIN image_usages iu ON i.image_id = iu.image_id 
+                WHERE iu.ref_type = 'product' 
+                AND iu.ref_id = :product_id 
+                AND iu.is_primary = 1
+                LIMIT 1";
+        
+        $this->db->query($sql);
+        $this->db->bind(':product_id', $productId);
+        
+        $primaryImage = $this->db->single();
+        
+        // If no primary image, get first available image
+        if (!$primaryImage) {
+            $images = $this->getProductImages($productId);
+            return $images ? $images[0] : null;
+        }
+        
+        return $primaryImage;
+    }
+    
+    // =================== ADDITIONAL BUSINESS LOGIC METHODS ===================
+    
+    /**
+     * Get new arrival products
+     */
+    public function getNewArrivals($limit = 8) {
+        // Sanitize limit parameter to prevent SQL injection
+        $limit = (int) $limit;
+        if ($limit <= 0) $limit = 8;
+        
+        $sql = "SELECT p.*, c.collection_name
+                FROM " . $this->table . " p 
+                LEFT JOIN collection c ON p.collection_id = c.collection_id 
+                WHERE p.is_active = 1 
+                ORDER BY p.created_at DESC
+                LIMIT $limit";
+        $this->db->query($sql);
+        $products = $this->db->resultSet();
+        
+        // Add images for each product
+        foreach ($products as $product) {
+            $product->images = $this->getProductImages($product->product_id);
+            $product->primary_image = $this->getProductPrimaryImage($product->product_id);
+        }
+        
+        return $products;
+    }
+    
+    /**
+     * Get popular products (by view count or sales)
+     */
+    public function getPopularProducts($limit = 8) {
+        // Sanitize limit parameter to prevent SQL injection
+        $limit = (int) $limit;
+        if ($limit <= 0) $limit = 8;
+        
+        $sql = "SELECT p.*, c.collection_name 
+                FROM products p 
+                LEFT JOIN collection c ON p.collection_id = c.collection_id 
+                WHERE p.is_active = 1 
+                ORDER BY p.created_at DESC 
+                LIMIT $limit";
+        
+        $this->db->query($sql);
+        $products = $this->db->resultSet();
+        
+        // Attach images cho mỗi sản phẩm
+        foreach ($products as $product) {
+            $product->images = $this->getProductImages($product->product_id);
+            $product->primary_image = $this->getProductPrimaryImage($product->product_id);
+        }
+        
+        return $products;
+    }
+    
+    /**
+     * Get active categories
+     */
+    public function getActiveCategories() {
+        $sql = "SELECT * FROM categories WHERE is_active = 1 ORDER BY category_id ASC";
+        $this->db->query($sql);
+        return $this->db->resultSet();
+    }
+    
+    /**
+     * Get active collections
+     */
+    public function getActiveCollections() {
+        $sql = "SELECT * FROM collection WHERE is_active = 1 ORDER BY collection_id ASC";
+        $this->db->query($sql);
+        return $this->db->resultSet();
+    }
+    
+    /**
+     * Get categories for a specific product
+     */
+    public function getProductCategories($productId) {
+        $sql = "SELECT c.* FROM categories c 
+                INNER JOIN product_categories pc ON c.category_id = pc.category_id 
+                WHERE pc.product_id = :product_id 
+                AND c.is_active = 1 
+                ORDER BY c.category_id ASC";
+        $this->db->query($sql);
+        $this->db->bind(':product_id', $productId);
+        return $this->db->resultSet();
     }
 }

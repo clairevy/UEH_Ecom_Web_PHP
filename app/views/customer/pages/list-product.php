@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JEWELRY - Danh sách sản phẩm</title>
+    <link href="<?= asset('css/css.css?v=' . time()) ?>" rel="stylesheet">
+
     <!-- Bootstrap CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS --> 
         <title>Danh sách sản phẩm</title>
-    <link href="/Ecom_website/public/assets/css/css.css?v=<?php echo time(); ?>" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">   
     
 </head>
@@ -217,7 +218,7 @@
                             <h3 class="mb-0">Sản phẩm trang sức</h3>
                         </div> -->
                         <div class="results-info col-md-6">
-                            <strong id="resultsCount"><?= isset($totalProducts) ? $totalProducts : 0 ?></strong> sản phẩm được tìm thấy
+                            <strong id="resultsCount"><?= isset($total) ? $total : 0 ?></strong> sản phẩm được tìm thấy
                         </div>
                         <div class="col-md-6">
                             <select class="form-select" id="sortSelect">
@@ -240,9 +241,9 @@
                         <?php foreach ($products as $product): ?>
                             <div class="col-lg-4 col-md-6 mb-4 d-flex justify-content-center">
                                 <div class="list-card-product">
-                                    <a href="/Ecom_website/customer/product-detail/<?= $product->product_id ?>" style="text-decoration: none; color: inherit; display: block;">
+                                    <a href="<?= route('product/' . ($product->slug ?? $product->product_id)) ?>" style="text-decoration: none; color: inherit; display: block;">
                                         <div class="position-relative">
-                                            <img src="<?= $product->primary_image ? $product->primary_image->file_path : '/app/assets/Images/17499d23c783d06afbc740850e2624ae.jpg' ?>" 
+                                            <img src="<?= $product->primary_image ? $product->primary_image->file_path : asset('images/placeholder.svg') ?>" 
                                                  class="card-img-top" alt="<?= htmlspecialchars($product->name) ?>">
                                             <span class="badge bg-danger position-absolute top-0 end-0 m-2">NEW</span>
                                         </div>

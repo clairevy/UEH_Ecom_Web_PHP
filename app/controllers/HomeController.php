@@ -1,4 +1,4 @@
-<?php
+<!-- <?php
 
 class HomeController extends BaseController {
     private $productModel;
@@ -76,4 +76,4 @@ class HomeController extends BaseController {
             'total' => count($products)
         ]);
     }
-}
+} -->

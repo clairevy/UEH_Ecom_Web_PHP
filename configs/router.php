@@ -7,49 +7,93 @@ class Route {
     public function __construct() {
         $url = $this->getUrl();
        
-        // Xử lý Controller
+        // Xử lý Controller với Clean URLs
         if (isset($url[0])) {
-            // Special handling for customer routes
-            if ($url[0] === 'customer') {
-                $this->controller = 'CustomerController';
-                unset($url[0]);
-                
-                // Check for specific customer actions
-                if (isset($url[1])) {
-                    switch ($url[1]) {
-                        case 'products':
-                            $this->method = 'products';
-                            unset($url[1]);
-                            break;
-                        case 'product-detail':
-                        case 'product':
-                            $this->method = 'productDetail';
-                            unset($url[1]);
-                            break;
-                        case 'search':
-                            $this->method = 'searchApi';
-                            unset($url[1]);
-                            break;
-                        case 'api':
-                            unset($url[1]);
-                            if (isset($url[2])) {
-                                switch ($url[2]) {
-                                    case 'new-arrivals':
-                                        $this->method = 'getNewArrivals';
-                                        break;
-                                    case 'popular':
-                                        $this->method = 'getPopularProducts';
-                                        break;
-                                    case 'category':
-                                        $this->method = 'getProductsByCategory';
-                                        break;
-                                }
-                                unset($url[2]);
-                            }
-                            break;
+            // Clean URL routing - direct to CustomerController for main routes
+            switch ($url[0]) {
+                case 'products':
+                    $this->controller = 'CustomerController';
+                    $this->method = 'products';
+                    unset($url[0]);
+                    break;
+                    
+                case 'product':
+                    $this->controller = 'CustomerController';
+                    $this->method = 'productDetail';
+                    unset($url[0]);
+                    break;
+                    
+                case 'search':
+                    $this->controller = 'CustomerController';
+                    $this->method = 'searchApi';
+                    unset($url[0]);
+                    break;
+                    
+                case 'api':
+                    $this->controller = 'CustomerController';
+                    unset($url[0]);
+                    if (isset($url[1])) {
+                        switch ($url[1]) {
+                            case 'new-arrivals':
+                                $this->method = 'getNewArrivals';
+                                break;
+                            case 'popular':
+                            case 'popular-products':
+                                $this->method = 'getPopularProducts';
+                                break;
+                            case 'category':
+                                $this->method = 'getProductsByCategory';
+                                break;
+                        }
+                        unset($url[1]);
                     }
-                }
-            } else {
+                    break;
+                    
+                case 'customer':
+                    // Legacy support for old URLs
+                    $this->controller = 'CustomerController';
+                    unset($url[0]);
+                    
+                    // Check for specific customer actions
+                    if (isset($url[1])) {
+                        switch ($url[1]) {
+                            case 'products':
+                                $this->method = 'products';
+                                unset($url[1]);
+                                break;
+                            case 'product-detail':
+                            case 'product':
+                            case 'productDetail':
+                                $this->method = 'productDetail';
+                                unset($url[1]);
+                                break;
+                            case 'search':
+                                $this->method = 'searchApi';
+                                unset($url[1]);
+                                break;
+                            case 'api':
+                                unset($url[1]);
+                                if (isset($url[2])) {
+                                    switch ($url[2]) {
+                                        case 'new-arrivals':
+                                            $this->method = 'getNewArrivals';
+                                            break;
+                                        case 'popular':
+                                        case 'popular-products':
+                                            $this->method = 'getPopularProducts';
+                                            break;
+                                        case 'category':
+                                            $this->method = 'getProductsByCategory';
+                                            break;
+                                    }
+                                    unset($url[2]);
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                    
+                default:
                 // Chuyển đổi tên từ URL (vd: 'users') thành tên Class (vd: 'UsersController')
                 $controllerName = ucfirst($url[0]) . 'Controller';
                 // Tạo đường dẫn tuyệt đối đến file controller
