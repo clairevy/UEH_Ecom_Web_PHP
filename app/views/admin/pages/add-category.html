@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEWELLERY Admin - Add New Category</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar Component Container -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header Component Container -->
+            <div id="header-container"></div>
+
+            <!-- Content -->
+            <main class="content">
+                <div class="row justify-content-center">
+                    <!-- Category Form -->
+                    <div class="col-lg-6 col-md-8">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="text-center mb-4">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/2920/2920277.png" alt="Category" width="64" height="64" class="mb-3">
+                                    <h4 class="fw-bold">Thêm Danh Mục Mới</h4>
+                                    <p class="text-muted">Tạo danh mục mới cho sản phẩm trang sức</p>
+                                </div>
+
+                                <form id="categoryForm">
+                                    <!-- Category Name -->
+                                    <div class="form-group">
+                                        <label for="categoryName" class="form-label">Tên Danh Mục <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="categoryName" placeholder="Nhập tên danh mục" required>
+                                        <div class="form-text">Ví dụ: Vòng cổ, Nhẫn, Bông tai...</div>
+                                    </div>
+
+                                    <!-- Category Description -->
+                                    <div class="form-group">
+                                        <label for="categoryDescription" class="form-label">Mô Tả Danh Mục</label>
+                                        <textarea class="form-control" id="categoryDescription" rows="3" placeholder="Nhập mô tả chi tiết về danh mục"></textarea>
+                                    </div>
+
+                               
+
+                                    <!-- Category Color -->
+                                    <div class="form-group">
+                                        <label for="categoryColor" class="form-label">Màu Danh Mục</label>
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <input type="color" class="form-control form-control-color" id="categoryColor" value="#28A745">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="border rounded text-center p-2" style="height: 38px;">
+                                                    <div id="colorPreview" style="width: 20px; height: 20px; background-color: #28A745; border-radius: 3px; margin: 0 auto;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Display Order -->
+                                    <div class="form-group">
+                                        <label for="displayOrder" class="form-label">Thứ Tự Hiển Thị</label>
+                                        <input type="number" class="form-control" id="displayOrder" placeholder="1" min="1" value="1">
+                                        <div class="form-text">Số thứ tự hiển thị trong danh sách danh mục (1 = đầu tiên)</div>
+                                    </div>
+
+                                    <!-- Active Status -->
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="isActive" checked>
+                                            <label class="form-check-label fw-bold" for="isActive">
+                                                Kích Hoạt Danh Mục
+                                            </label>
+                                            <div class="form-text">Danh mục sẽ hiển thị trên website khi được kích hoạt</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div class="d-flex gap-2 mt-4">
+                                        <button type="submit" class="btn btn-success-custom btn-custom px-4">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/5610/5610944.png" alt="Save" width="16" height="16" class="me-1">
+                                            TẠO DANH MỤC
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-custom px-4" onclick="cancelAdd()">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/189/189665.png" alt="Cancel" width="16" height="16" class="me-1">
+                                            HỦY BỎ
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Preview -->
+                    <div class="col-lg-4 col-md-8 mt-4 mt-lg-0">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">Xem Trước Danh Mục</h6>
+                                
+                                <div class="preview-container border rounded p-3 mb-3">
+                                    <div class="d-flex align-items-center" id="categoryPreview">
+                                        <div class="me-3">
+                                            <img id="previewIcon" src="https://cdn-icons-png.flaticon.com/512/2920/2920277.png" alt="Category Icon" width="24" height="24">
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold" id="previewName">Tên Danh Mục</div>
+                                            <div class="small text-muted" id="previewDescription">Mô tả danh mục...</div>
+                                        </div>
+                                        <div>
+                                            <span class="badge" id="previewBadge" style="background-color: #28A745;">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h6 class="fw-bold mb-2">Tips cho Danh Mục:</h6>
+                                    <ul class="small text-muted mb-0">
+                                        <li>Sử dụng tên danh mục ngắn gọn và dễ hiểu</li>
+                                        <li>Mô tả rõ ràng để khách hàng dễ tìm kiếm</li>
+                                        <li>Chọn biểu tượng phù hợp với loại sản phẩm</li>
+                                        <li>Màu sắc nên phù hợp với thương hiệu</li>
+                                        <li>Sắp xếp thứ tự theo độ phổ biến</li>
+                                    </ul>
+                                </div>
+
+                                <!-- Existing Categories -->
+                                <div>
+                                    <h6 class="fw-bold mb-2">Danh Mục Hiện Có:</h6>
+                                    <div class="existing-categories">
+                                        <div class="d-flex align-items-center justify-content-between mb-2 p-2 border rounded">
+                                            <span class="small">Vòng cổ</span>
+                                            <span class="badge bg-secondary">12</span>
+                                        </div>
+                                        <div class="d-flex align-items-center justify-content-between mb-2 p-2 border rounded">
+                                            <span class="small">Vòng tay</span>
+                                            <span class="badge bg-secondary">10</span>
+                                        </div>
+                                        <div class="d-flex align-items-center justify-content-between mb-2 p-2 border rounded">
+                                            <span class="small">Bông tai</span>
+                                            <span class="badge bg-secondary">13</span>
+                                        </div>
+                                        <div class="d-flex align-items-center justify-content-between mb-2 p-2 border rounded">
+                                            <span class="small">Nhẫn</span>
+                                            <span class="badge bg-secondary">4</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Component Manager -->
+    <script src="../components/component-manager.js"></script>
+    
+    <!-- Page Configuration -->
+    <script>
+        window.pageConfig = {
+            sidebar: {
+                brandName: 'JEWELLERY',
+                activePage: 'categories',
+                links: {
+                    dashboard: '../index.html',
+                    products: 'products.html',
+                    orders: 'orders.html'
+                },
+                categories: [
+                    { name: 'Vòng cổ', count: 12 },
+                    { name: 'Vòng tay', count: 10 },
+                    { name: 'Bông tai', count: 13 },
+                    { name: 'Nhẫn', count: 4 },
+                    { name: 'Lắc chân', count: 6 }
+                ],
+                categoriesTitle: 'DANH MỤC'
+            },
+            header: {
+                title: 'Add New Category',
+                breadcrumb: 'Home > Categories > Add New Category'
+            }
+        };
+
+        // Real-time preview updates
+        document.getElementById('categoryName').addEventListener('input', function() {
+            const name = this.value || 'Tên Danh Mục';
+            document.getElementById('previewName').textContent = name;
+        });
+
+        document.getElementById('categoryDescription').addEventListener('input', function() {
+            const description = this.value || 'Mô tả danh mục...';
+            document.getElementById('previewDescription').textContent = description;
+        });
+
+        document.getElementById('categoryIcon').addEventListener('input', function() {
+            const iconUrl = this.value;
+            const iconPreview = document.getElementById('iconPreview');
+            const iconPlaceholder = document.getElementById('iconPlaceholder');
+            const previewIcon = document.getElementById('previewIcon');
+            
+            if (iconUrl) {
+                iconPreview.src = iconUrl;
+                iconPreview.style.display = 'inline';
+                iconPlaceholder.style.display = 'none';
+                previewIcon.src = iconUrl;
+                
+                // Handle image load errors
+                iconPreview.onerror = function() {
+                    this.style.display = 'none';
+                    iconPlaceholder.style.display = 'inline';
+                };
+            } else {
+                iconPreview.style.display = 'none';
+                iconPlaceholder.style.display = 'inline';
+                previewIcon.src = 'https://cdn-icons-png.flaticon.com/512/2920/2920277.png';
+            }
+        });
+
+        document.getElementById('categoryColor').addEventListener('input', function() {
+            const color = this.value;
+            document.getElementById('colorPreview').style.backgroundColor = color;
+            document.getElementById('previewBadge').style.backgroundColor = color;
+        });
+
+        // Form submission
+        document.getElementById('categoryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const categoryName = document.getElementById('categoryName').value.trim();
+            
+            if (!categoryName) {
+                alert('Vui lòng nhập tên danh mục!');
+                return;
+            }
+            
+            // Here you would typically send data to backend
+            alert('Danh mục đã được tạo thành công!');
+            // Redirect to categories list or products page
+            window.location.href = 'products.html';
+        });
+
+        // Cancel function
+        function cancelAdd() {
+            if (confirm('Bạn có chắc chắn muốn hủy? Tất cả thông tin sẽ bị mất.')) {
+                window.location.href = 'products.html';
+            }
+        }
+    </script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>

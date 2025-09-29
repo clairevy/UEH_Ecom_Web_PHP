@@ -14,72 +14,13 @@
 </head>
 <body>
     <div class="admin-wrapper">
-        <!-- Sidebar -->
-        <nav class="sidebar">
-            <div class="logo">
-                <strong>KICKS</strong>
-            </div>
-            <ul class="sidebar-nav">
-                <li class="sidebar-nav-item">
-                    <a href="../index.html" class="sidebar-nav-link">
-                        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828765.png" alt="Dashboard" class="sidebar-nav-icon">
-                        Dashboard
-                    </a>
-                </li>
-                <li class="sidebar-nav-item">
-                    <a href="products.html" class="sidebar-nav-link">
-                        <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="Products" class="sidebar-nav-icon">
-                        All Products
-                    </a>
-                </li>
-                <li class="sidebar-nav-item">
-                    <a href="orders.html" class="sidebar-nav-link active">
-                        <img src="https://cdn-icons-png.flaticon.com/512/3063/3063822.png" alt="Orders" class="sidebar-nav-icon">
-                        Order List
-                    </a>
-                </li>
-            </ul>
-        </nav>
+        <!-- Sidebar Component Container -->
+        <div id="sidebar-container"></div>
 
         <!-- Main Content -->
         <div class="main-content">
-            <!-- Header -->
-            <header class="header">
-                <div class="header-content">
-                    <div>
-                        <h1 class="header-title">Orders Details</h1>
-                        <small class="text-muted">Home > Order List > Order Details</small>
-                    </div>
-                    <div class="header-actions">
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                Change Status
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">Delivered</a></li>
-                                <li><a class="dropdown-item" href="#">Cancelled</a></li>
-                                <li><a class="dropdown-item" href="#">Pending</a></li>
-                            </ul>
-                        </div>
-                        <button class="btn btn-primary-custom btn-custom">
-                            <img src="https://cdn-icons-png.flaticon.com/512/3580/3580085.png" alt="Save" width="16" height="16" class="me-1">
-                             Save
-                        </button>
-                        <div class="dropdown user-dropdown">
-                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
-                                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User" width="20" height="20" class="rounded-circle">
-                                ADMIN
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">Profile</a></li>
-                                <li><a class="dropdown-item" href="#">Settings</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#">Logout</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </header>
+            <!-- Header Component Container -->
+            <div id="header-container"></div>
 
             <!-- Content -->
             <main class="content">
@@ -287,6 +228,52 @@
         </div>
     </div>
 
+    <!-- Component Manager -->
+    <script src="../components/component-manager.js"></script>
+    
+    <!-- Page Configuration -->
+    <script>
+        window.pageConfig = {
+            sidebar: {
+                brandName: 'JEWELLERY',
+                activePage: 'orders',
+                links: {
+                    dashboard: '../index.html',
+                    products: 'products.html',
+                    orders: 'orders.html'
+                },
+                categories: [
+                    { name: 'Vòng cổ', count: 12 },
+                    { name: 'Vòng tay', count: 10 },
+                    { name: 'Bông tai', count: 13 },
+                    { name: 'Nhẫn', count: 4 },
+                    { name: 'Lắc chân', count: 6 }
+                ],
+                categoriesTitle: 'DANH MỤC'
+            },
+            header: {
+                title: 'Orders Details',
+                breadcrumb: 'Home > Order List > Order Details',
+                additionalActions: `
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            Change Status
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Delivered</a></li>
+                            <li><a class="dropdown-item" href="#">Cancelled</a></li>
+                            <li><a class="dropdown-item" href="#">Pending</a></li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-primary-custom btn-custom">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3580/3580085.png" alt="Save" width="16" height="16" class="me-1">
+                        Save
+                    </button>
+                `
+            }
+        };
+    </script>
+    
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/js/main.js"></script>

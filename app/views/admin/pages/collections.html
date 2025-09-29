@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEWELLERY Admin - Collections Management</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar Component Container -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header Component Container -->
+            <div id="header-container"></div>
+
+            <!-- Content -->
+            <main class="content">
+                <!-- Collections Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-center mb-2">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/3208/3208676.png" alt="Total Collections" width="32" height="32" class="me-2">
+                                    <h3 class="mb-0 text-primary">12</h3>
+                                </div>
+                                <h6 class="fw-bold">Tổng Bộ Sưu Tập</h6>
+                                <p class="text-muted small mb-0">+2 so với tháng trước</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-center mb-2">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/5610/5610944.png" alt="Active Collections" width="32" height="32" class="me-2">
+                                    <h3 class="mb-0 text-success">10</h3>
+                                </div>
+                                <h6 class="fw-bold">Đang Hoạt Động</h6>
+                                <p class="text-muted small mb-0">83.3% tổng số</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-center mb-2">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="Products" width="32" height="32" class="me-2">
+                                    <h3 class="mb-0 text-warning">147</h3>
+                                </div>
+                                <h6 class="fw-bold">Tổng Sản Phẩm</h6>
+                                <p class="text-muted small mb-0">Trong các bộ sưu tập</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-center mb-2">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/3208/3208676.png" alt="Best Seller" width="32" height="32" class="me-2">
+                                    <h3 class="mb-0 text-info">3</h3>
+                                </div>
+                                <h6 class="fw-bold">Bán Chạy Nhất</h6>
+                                <p class="text-muted small mb-0">Bộ sưu tập hàng đầu</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Collections Management Table -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <h5 class="table-title">Quản Lý Bộ Sưu Tập</h5>
+                        <div class="d-flex gap-2">
+                            <!-- Search -->
+                            <div class="position-relative">
+                                <input type="text" class="form-control form-control-sm" placeholder="Tìm kiếm bộ sưu tập..." style="width: 200px; padding-left: 35px;" id="collectionSearch">
+                                <img src="https://cdn-icons-png.flaticon.com/512/751/751463.png" alt="Search" width="16" height="16" class="position-absolute" style="left: 10px; top: 50%; transform: translateY(-50%);">
+                            </div>
+                            
+                            <!-- Add Collection -->
+                            <button class="btn btn-success-custom btn-sm" onclick="addNewCollection()">
+                                <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Add" width="16" height="16" class="me-1">
+                                Thêm Bộ Sưu Tập
+                            </button>
+                            
+                            <!-- More Actions -->
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/2311/2311524.png" alt="More" width="16" height="16">
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#">Xuất Excel</a></li>
+                                    <li><a class="dropdown-item" href="#">Nhập dữ liệu</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table" id="collectionsTable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <input type="checkbox" class="form-check-input" id="selectAll">
+                                    </th>
+                                    <th>ID</th>
+                                    <th>Tên Bộ Sưu Tập</th>
+                                    <th>Slug</th>
+                                    <th>Mô Tả</th>
+                                    <th>Số Sản Phẩm</th>
+                                    <th>Trạng Thái</th>
+                                    <th>Ngày Tạo</th>
+                                    <th>Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Sample Collection Data -->
+                                <tr>
+                                    <td><input type="checkbox" class="form-check-input row-checkbox"></td>
+                                    <td class="fw-bold">#1</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/3208/3208676.png" alt="Collection" width="32" height="32" class="me-2">
+                                            <div>
+                                                <div class="fw-bold">Trang Sức Cưới</div>
+                                                <div class="small text-muted">wedding-jewelry</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><code>wedding-jewelry</code></td>
+                                    <td>Bộ sưu tập trang sức dành cho ngày cưới đặc biệt</td>
+                                    <td>
+                                        <div class="text-center">
+                                            <span class="fw-bold text-primary">24</span>
+                                            <div class="small text-muted">sản phẩm</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge badge-delivered badge-custom">Hoạt động</span></td>
+                                    <td>15/08/2024</td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                                <img src="https://cdn-icons-png.flaticon.com/512/2311/2311524.png" alt="Actions" width="16" height="16">
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#" onclick="viewCollection(1)">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" alt="View" width="16" height="16" class="me-2">
+                                                    Xem chi tiết
+                                                </a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="editCollection(1)">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Edit" width="16" height="16" class="me-2">
+                                                    Chỉnh sửa
+                                                </a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="viewProducts(1)">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="Products" width="16" height="16" class="me-2">
+                                                    Xem sản phẩm
+                                                </a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item text-warning" href="#" onclick="toggleCollection(1)">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/1828/1828843.png" alt="Toggle" width="16" height="16" class="me-2">
+                                                    Vô hiệu hóa
+                                                </a></li>
+                                                <li><a class="dropdown-item text-danger" href="#" onclick="deleteCollection(1)">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png" alt="Delete" width="16" height="16" class="me-2">
+                                                    Xóa
+                                                </a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td><input type="checkbox" class="form-check-input row-checkbox"></td>
+                                    <td class="fw-bold">#2</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/3208/3208676.png" alt="Collection" width="32" height="32" class="me-2">
+                                            <div>
+                                                <div class="fw-bold">Trang Sức Hàng Ngày</div>
+                                                <div class="small text-muted">daily-jewelry</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><code>daily-jewelry</code></td>
+                                    <td>Trang sức thời trang cho cuộc sống hàng ngày</td>
+                                    <td>
+                                        <div class="text-center">
+                                            <span class="fw-bold text-primary">31</span>
+                                            <div class="small text-muted">sản phẩm</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge badge-delivered badge-custom">Hoạt động</span></td>
+                                    <td>20/07/2024</td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                                <img src="https://cdn-icons-png.flaticon.com/512/2311/2311524.png" alt="Actions" width="16" height="16">
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#" onclick="viewCollection(2)">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" alt="View" width="16" height="16" class="me-2">
+                                                    Xem chi tiết
+                                                </a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="editCollection(2)">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Edit" width="16" height="16" class="me-2">
+                                                    Chỉnh sửa
+                                                </a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="viewProducts(2)">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="Products" width="16" height="16" class="me-2">
+                                                    Xem sản phẩm
+                                                </a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item text-warning" href="#" onclick="toggleCollection(2)">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/1828/1828843.png" alt="Toggle" width="16" height="16" class="me-2">
+                                                    Vô hiệu hóa
+                                                </a></li>
+                                                <li><a class="dropdown-item text-danger" href="#" onclick="deleteCollection(2)">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png" alt="Delete" width="16" height="16" class="me-2">
+                                                    Xóa
+                                                </a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td><input type="checkbox" class="form-check-input row-checkbox"></td>
+                                    <td class="fw-bold">#3</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/3208/3208676.png" alt="Collection" width="32" height="32" class="me-2">
+                                            <div>
+                                                <div class="fw-bold">Bộ Sưu Tập Cao Cấp</div>
+                                                <div class="small text-muted">luxury-collection</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><code>luxury-collection</code></td>
+                                    <td>Trang sức cao cấp với kim cương và đá quý</td>
+                                    <td>
+                                        <div class="text-center">
+                                            <span class="fw-bold text-primary">15</span>
+                                            <div class="small text-muted">sản phẩm</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge badge-canceled badge-custom">Tạm dừng</span></td>
+                                    <td>10/09/2024</td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                                <img src="https://cdn-icons-png.flaticon.com/512/2311/2311524.png" alt="Actions" width="16" height="16">
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#" onclick="viewCollection(3)">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" alt="View" width="16" height="16" class="me-2">
+                                                    Xem chi tiết
+                                                </a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="editCollection(3)">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Edit" width="16" height="16" class="me-2">
+                                                    Chỉnh sửa
+                                                </a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="viewProducts(3)">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="Products" width="16" height="16" class="me-2">
+                                                    Xem sản phẩm
+                                                </a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item text-success" href="#" onclick="toggleCollection(3)">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/5610/5610944.png" alt="Enable" width="16" height="16" class="me-2">
+                                                    Kích hoạt
+                                                </a></li>
+                                                <li><a class="dropdown-item text-danger" href="#" onclick="deleteCollection(3)">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png" alt="Delete" width="16" height="16" class="me-2">
+                                                    Xóa
+                                                </a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div id="pagination-container"></div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Component Manager -->
+    <script src="../components/component-manager.js"></script>
+    
+    <!-- Page Configuration -->
+    <script>
+        window.pageConfig = {
+            sidebar: {
+                brandName: 'JEWELLERY',
+                activePage: 'collections',
+                links: {
+                    dashboard: '../index.html',
+                    products: 'products.html',
+                    orders: 'orders.html',
+                    customers: 'customers.html',
+                    'customer-roles': 'customer-roles.html',
+                    collections: 'collections.html',
+                    reviews: 'reviews.html',
+                    media: 'media.html',
+                    discounts: 'discounts.html',
+                    payments: 'payments.html'
+                },
+                categories: [
+                    { name: 'Vòng cổ', count: 12 },
+                    { name: 'Vòng tay', count: 10 },
+                    { name: 'Bông tai', count: 13 },
+                    { name: 'Nhẫn', count: 4 },
+                    { name: 'Lắc chân', count: 6 }
+                ],
+                categoriesTitle: 'DANH MỤC'
+            },
+            header: {
+                title: 'Collections Management',
+                breadcrumb: 'Home > Product Management > Collections'
+            }
+        };
+
+        // Collection management functions
+        function addNewCollection() {
+            alert('Tính năng thêm bộ sưu tập mới sẽ được triển khai!');
+        }
+
+        function viewCollection(collectionId) {
+            alert('Xem chi tiết bộ sưu tập: ' + collectionId);
+        }
+
+        function editCollection(collectionId) {
+            alert('Chỉnh sửa bộ sưu tập: ' + collectionId);
+        }
+
+        function viewProducts(collectionId) {
+            window.location.href = 'products.html?collection=' + collectionId;
+        }
+
+        function toggleCollection(collectionId) {
+            if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái bộ sưu tập?')) {
+                alert('Trạng thái đã được cập nhật!');
+                location.reload();
+            }
+        }
+
+        function deleteCollection(collectionId) {
+            if (confirm('Bạn có chắc chắn muốn xóa bộ sưu tập này? Hành động này không thể hoàn tác!')) {
+                alert('Bộ sưu tập đã được xóa!');
+                location.reload();
+            }
+        }
+
+        // Search functionality
+        document.getElementById('collectionSearch').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#collectionsTable tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Select all checkbox functionality
+        document.getElementById('selectAll').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+
+        // Initialize pagination
+        document.addEventListener('DOMContentLoaded', function() {
+            const paginationContainer = document.getElementById('pagination-container');
+            if (paginationContainer) {
+                window.ComponentManager.renderPagination(paginationContainer, {
+                    ariaLabel: 'Collections pagination'
+                });
+            }
+        });
+    </script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>

@@ -297,6 +297,54 @@ body {
   box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
 }
 
+.form-control.is-invalid {
+  border-color: var(--danger-color);
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* Upload area styles */
+.upload-area:hover {
+  border-color: var(--accent-color) !important;
+  background-color: rgba(40, 167, 69, 0.05) !important;
+}
+
+/* Category preview styles */
+.preview-container {
+  background-color: var(--bg-light);
+  transition: all 0.3s ease;
+}
+
+.preview-container:hover {
+  background-color: var(--bg-secondary);
+}
+
+/* Form color input */
+.form-control-color {
+  height: 38px;
+  border-radius: var(--border-radius);
+}
+
+/* Customer management section in sidebar */
+#customer-section .sidebar-nav-link {
+  color: var(--text-light);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius);
+  transition: background-color 0.3s ease;
+}
+
+#customer-section .sidebar-nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-light);
+}
+
+#customer-section .sidebar-nav-link.active {
+  background-color: var(--accent-color);
+  color: white;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .sidebar {

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEWELLERY Admin - Component Example</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar Component Container -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header Component Container -->
+            <div id="header-container"></div>
+
+            <!-- Content -->
+            <main class="content">
+                <h2>Ví dụ sử dụng Components</h2>
+                <p>Trang này demonstarte cách sử dụng hệ thống component.</p>
+
+                <!-- Stats Cards Row -->
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-3" id="stats-card-1"></div>
+                    <div class="col-md-4 mb-3" id="stats-card-2"></div>
+                    <div class="col-md-4 mb-3" id="stats-card-3"></div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="row" id="products-grid">
+                    <!-- Product cards sẽ được render động tại đây -->
+                </div>
+
+                <!-- Table Example -->
+                <div id="table-container" class="mb-4"></div>
+
+                <!-- Pagination Example -->
+                <div id="pagination-container"></div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Component Manager -->
+    <script src="../components/component-manager.js"></script>
+    
+    <!-- Page Configuration -->
+    <script>
+        window.pageConfig = {
+            sidebar: {
+                brandName: 'JEWELLERY',
+                activePage: 'dashboard',
+                links: {
+                    dashboard: '../index.html',
+                    products: 'products.html',
+                    orders: 'orders.html'
+                },
+                categories: [
+                    { name: 'Vòng cổ', count: 12 },
+                    { name: 'Vòng tay', count: 10 },
+                    { name: 'Bông tai', count: 13 },
+                    { name: 'Nhẫn', count: 4 },
+                    { name: 'Lắc chân', count: 6 }
+                ],
+                categoriesTitle: 'DANH MỤC'
+            },
+            header: {
+                title: 'Component Example',
+                breadcrumb: 'Home > Example',
+                showDateRange: true,
+                dateRange: 'Feb 16 2022 - Feb 20 2022'
+            }
+        };
+
+        // Custom initialization after components load
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Chờ component manager initialize
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Render stats cards
+            const statsData = [
+                {
+                    value: '$126.560',
+                    label: 'Total Orders',
+                    percentage: '36.7%',
+                    comparison: 'Compared to Jan 2022',
+                    trend: 'positive'
+                },
+                {
+                    value: '$101.560',
+                    label: 'Active Orders', 
+                    percentage: '24.3%',
+                    comparison: 'Compared to Jan 2022',
+                    trend: 'positive'
+                },
+                {
+                    value: '$85.430',
+                    label: 'Shipped Orders',
+                    percentage: '-12.1%',
+                    comparison: 'Compared to Jan 2022',
+                    trend: 'negative'
+                }
+            ];
+
+            for (let i = 0; i < statsData.length; i++) {
+                const container = document.getElementById(`stats-card-${i + 1}`);
+                await window.ComponentManager.renderStatsCard(container, statsData[i]);
+            }
+
+            // Render sample products
+            const productsData = [
+                {
+                    name: 'Vòng cổ Diamond',
+                    category: 'Vòng cổ',
+                    price: '$450.00',
+                    summary: 'Vòng cổ kim cương cao cấp với thiết kế tinh tế.',
+                    salesCount: 89,
+                    stockCount: 45,
+                    image: 'https://images.unsplash.com/photo-1708221382764-299d9e3ad257?w=200',
+                    editLink: 'product-details.html'
+                },
+                {
+                    name: 'Nhẫn Platinum',
+                    category: 'Nhẫn',
+                    price: '$320.00',
+                    summary: 'Nhẫn platinum sang trọng phù hợp với mọi dịp.',
+                    salesCount: 156,
+                    stockCount: 78,
+                    image: 'https://images.unsplash.com/photo-1722410180687-b05b50922362?w=200',
+                    editLink: 'product-details.html'
+                }
+            ];
+
+            const productsGrid = document.getElementById('products-grid');
+            for (const product of productsData) {
+                await window.ComponentManager.renderProductCard(productsGrid, product);
+            }
+
+            // Render table
+            const tableContainer = document.getElementById('table-container');
+            await window.ComponentManager.renderTableCard(tableContainer, {
+                title: 'Recent Sales',
+                headers: ['Product', 'Customer', 'Date', 'Amount', 'Status'],
+                actions: [
+                    { text: 'Export CSV', link: '#' },
+                    { text: 'Export PDF', link: '#' },
+                    { text: 'Print', link: '#' }
+                ]
+            });
+
+            // Render pagination
+            const paginationContainer = document.getElementById('pagination-container');
+            await window.ComponentManager.renderPagination(paginationContainer, {
+                ariaLabel: 'Example pagination'
+            });
+        });
+    </script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>

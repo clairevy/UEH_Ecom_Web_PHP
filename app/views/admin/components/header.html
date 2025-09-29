@@ -1,0 +1,33 @@
+<!-- Header Component -->
+<header class="header">
+    <div class="header-content">
+        <div>
+            <h1 class="header-title" data-page-title="Dashboard">Dashboard</h1>
+            <small class="text-muted" data-breadcrumb="Home > Dashboard">Home > Dashboard</small>
+        </div>
+        <div class="header-actions">
+            <!-- Date Range (optional, can be hidden) -->
+            <div class="d-flex align-items-center gap-2" id="date-range-section" style="display: none;">
+                <img src="https://cdn-icons-png.flaticon.com/512/2693/2693507.png" alt="Calendar" width="20" height="20">
+                <span data-date-range="Feb 16 2022 - Feb 20 2022">Feb 16 2022 - Feb 20 2022</span>
+            </div>
+            
+            <!-- Additional Action Buttons Container -->
+            <div id="additional-actions"></div>
+            
+            <!-- User Dropdown -->
+            <div class="dropdown user-dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User" width="20" height="20" class="rounded-circle">
+                    ADMIN
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#">Profile</a></li>
+                    <li><a class="dropdown-item" href="#">Settings</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</header>

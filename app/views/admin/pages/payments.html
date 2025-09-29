@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEWELLERY Admin - Payments Management</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    
+    <style>
+        .payment-method-icon {
+            width: 24px;
+            height: 16px;
+            object-fit: contain;
+        }
+        .amount-display {
+            font-family: 'Segoe UI', monospace;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar Component Container -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header Component Container -->
+            <div id="header-container"></div>
+
+            <!-- Content -->
+            <main class="content">
+                <!-- Payment Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-center mb-2">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/2659/2659360.png" alt="Total Payments" width="32" height="32" class="me-2">
+                                    <h3 class="mb-0 text-primary">324</h3>
+                                </div>
+                                <h6 class="fw-bold">Tổng Giao Dịch</h6>
+                                <p class="text-muted small mb-0">Tháng này</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-center mb-2">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/5610/5610944.png" alt="Successful" width="32" height="32" class="me-2">
+                                    <h3 class="mb-0 text-success">298</h3>
+                                </div>
+                                <h6 class="fw-bold">Thành Công</h6>
+                                <p class="text-muted small mb-0">92% tỷ lệ thành công</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-center mb-2">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" alt="Pending" width="32" height="32" class="me-2">
+                                    <h3 class="mb-0 text-warning">18</h3>
+                                </div>
+                                <h6 class="fw-bold">Đang Xử Lý</h6>
+                                <p class="text-muted small mb-0">Cần kiểm tra</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-center mb-2">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="Revenue" width="32" height="32" class="me-2">
+                                    <h3 class="mb-0 text-info">2.4B</h3>
+                                </div>
+                                <h6 class="fw-bold">Doanh Thu</h6>
+                                <p class="text-muted small mb-0">VND tháng này</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payments Management Table -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <h5 class="table-title">Quản Lý Thanh Toán</h5>
+                        <div class="d-flex gap-2">
+                            <!-- Filter -->
+                            <select class="form-select form-select-sm" style="width: 150px;" id="statusFilter">
+                                <option value="all">Tất cả trạng thái</option>
+                                <option value="completed">Thành công</option>
+                                <option value="pending">Đang xử lý</option>
+                                <option value="failed">Thất bại</option>
+                                <option value="refunded">Đã hoàn tiền</option>
+                            </select>
+                            
+                            <!-- Payment Method Filter -->
+                            <select class="form-select form-select-sm" style="width: 150px;" id="methodFilter">
+                                <option value="all">Tất cả phương thức</option>
+                                <option value="card">Thẻ tín dụng</option>
+                                <option value="bank">Chuyển khoản</option>
+                                <option value="momo">MoMo</option>
+                                <option value="zalopay">ZaloPay</option>
+                                <option value="cod">COD</option>
+                            </select>
+                            
+                            <!-- Search -->
+                            <div class="position-relative">
+                                <input type="text" class="form-control form-control-sm" placeholder="Tìm kiếm giao dịch..." style="width: 200px; padding-left: 35px;" id="paymentSearch">
+                                <img src="https://cdn-icons-png.flaticon.com/512/751/751463.png" alt="Search" width="16" height="16" class="position-absolute" style="left: 10px; top: 50%; transform: translateY(-50%);">
+                            </div>
+                            
+                            <!-- More Actions -->
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/2311/2311524.png" alt="More" width="16" height="16">
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="exportPayments()">Xuất Excel</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="paymentReport()">Báo cáo chi tiết</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#" onclick="reconciliation()">Đối soát</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table" id="paymentsTable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <input type="checkbox" class="form-check-input" id="selectAll">
+                                    </th>
+                                    <th>ID Giao Dịch</th>
+                                    <th>Đơn Hàng</th>
+                                    <th>Khách Hàng</th>
+                                    <th>Phương Thức</th>
+                                    <th>Số Tiền</th>
+                                    <th>Phí</th>
+                                    <th>Trạng Thái</th>
+                                    <th>Thời Gian</th>
+                                    <th>Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Sample Payment Data -->
+                                <tr>
+                                    <td><input type="checkbox" class="form-check-input row-checkbox"></td>
+                                    <td class="fw-bold text-primary">#PAY001</td>
+                                    <td>
+                                        <div class="fw-bold">#ORD2024001</div>
+                                        <div class="small text-muted">2 sản phẩm</div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://images.unsplash.com/photo-1494790108755-2616b612b804?w=32&h=32&fit=crop&crop=face" alt="Customer" width="32" height="32" class="rounded-circle me-2">
+                                            <div>
+                                                <div class="fw-bold">Nguyễn Thị Mai</div>
+                                                <div class="small text-muted">mai.nguyen@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/349/349221.png" alt="Card" class="payment-method-icon me-2">
+                                            <div>
+                                                <div class="fw-bold">Thẻ Visa</div>
+                                                <div class="small text-muted">****1234</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="amount-display text-success">2,450,000 VND</div>
+                                    </td>
+                                    <td>
+                                        <div class="small text-muted">24,500 VND</div>
+                                    </td>
+                                    <td><span class="badge badge-delivered badge-custom">Thành công</span></td>
+                                    <td>
+                                        <div class="small">
+                                            <div class="fw-bold">22/10/2024</div>
+                                            <div class="text-muted">14:30:25</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                                <img src="https://cdn-icons-png.flaticon.com/512/2311/2311524.png" alt="Actions" width="16" height="16">
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#" onclick="viewPayment('PAY001')">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" alt="View" width="16" height="16" class="me-2">
+                                                    Xem chi tiết
+                                                </a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="viewInvoice('PAY001')">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/1375/1375106.png" alt="Invoice" width="16" height="16" class="me-2">
+                                                    Xem hóa đơn
+                                                </a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item text-warning" href="#" onclick="refundPayment('PAY001')">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/1828/1828843.png" alt="Refund" width="16" height="16" class="me-2">
+                                                    Hoàn tiền
+                                                </a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td><input type="checkbox" class="form-check-input row-checkbox"></td>
+                                    <td class="fw-bold text-primary">#PAY002</td>
+                                    <td>
+                                        <div class="fw-bold">#ORD2024002</div>
+                                        <div class="small text-muted">1 sản phẩm</div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face" alt="Customer" width="32" height="32" class="rounded-circle me-2">
+                                            <div>
+                                                <div class="fw-bold">Trần Văn Nam</div>
+                                                <div class="small text-muted">nam.tran@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/5968/5968120.png" alt="MoMo" class="payment-method-icon me-2">
+                                            <div>
+                                                <div class="fw-bold">MoMo</div>
+                                                <div class="small text-muted">098****567</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="amount-display text-success">1,200,000 VND</div>
+                                    </td>
+                                    <td>
+                                        <div class="small text-muted">0 VND</div>
+                                    </td>
+                                    <td><span class="badge badge-pending badge-custom">Đang xử lý</span></td>
+                                    <td>
+                                        <div class="small">
+                                            <div class="fw-bold">22/10/2024</div>
+                                            <div class="text-muted">13:45:12</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                                <img src="https://cdn-icons-png.flaticon.com/512/2311/2311524.png" alt="Actions" width="16" height="16">
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#" onclick="viewPayment('PAY002')">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" alt="View" width="16" height="16" class="me-2">
+                                                    Xem chi tiết
+                                                </a></li>
+                                                <li><a class="dropdown-item text-success" href="#" onclick="confirmPayment('PAY002')">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/5610/5610944.png" alt="Confirm" width="16" height="16" class="me-2">
+                                                    Xác nhận
+                                                </a></li>
+                                                <li><a class="dropdown-item text-danger" href="#" onclick="cancelPayment('PAY002')">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/1828/1828843.png" alt="Cancel" width="16" height="16" class="me-2">
+                                                    Hủy giao dịch
+                                                </a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td><input type="checkbox" class="form-check-input row-checkbox"></td>
+                                    <td class="fw-bold text-primary">#PAY003</td>
+                                    <td>
+                                        <div class="fw-bold">#ORD2024003</div>
+                                        <div class="small text-muted">3 sản phẩm</div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=32&h=32&fit=crop&crop=face" alt="Customer" width="32" height="32" class="rounded-circle me-2">
+                                            <div>
+                                                <div class="fw-bold">Lê Thị Hoa</div>
+                                                <div class="small text-muted">hoa.le@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/2659/2659360.png" alt="Bank" class="payment-method-icon me-2">
+                                            <div>
+                                                <div class="fw-bold">Chuyển khoản</div>
+                                                <div class="small text-muted">Vietcombank</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="amount-display text-danger">850,000 VND</div>
+                                    </td>
+                                    <td>
+                                        <div class="small text-muted">8,500 VND</div>
+                                    </td>
+                                    <td><span class="badge badge-canceled badge-custom">Thất bại</span></td>
+                                    <td>
+                                        <div class="small">
+                                            <div class="fw-bold">21/10/2024</div>
+                                            <div class="text-muted">16:20:08</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                                <img src="https://cdn-icons-png.flaticon.com/512/2311/2311524.png" alt="Actions" width="16" height="16">
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#" onclick="viewPayment('PAY003')">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" alt="View" width="16" height="16" class="me-2">
+                                                    Xem chi tiết
+                                                </a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="retryPayment('PAY003')">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/2040/2040946.png" alt="Retry" width="16" height="16" class="me-2">
+                                                    Thử lại
+                                                </a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td><input type="checkbox" class="form-check-input row-checkbox"></td>
+                                    <td class="fw-bold text-primary">#PAY004</td>
+                                    <td>
+                                        <div class="fw-bold">#ORD2024004</div>
+                                        <div class="small text-muted">1 sản phẩm</div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face" alt="Customer" width="32" height="32" class="rounded-circle me-2">
+                                            <div>
+                                                <div class="fw-bold">Phạm Minh Tuấn</div>
+                                                <div class="small text-muted">tuan.pham@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="COD" class="payment-method-icon me-2">
+                                            <div>
+                                                <div class="fw-bold">COD</div>
+                                                <div class="small text-muted">Tiền mặt</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="amount-display text-primary">3,200,000 VND</div>
+                                    </td>
+                                    <td>
+                                        <div class="small text-muted">0 VND</div>
+                                    </td>
+                                    <td><span class="badge badge-refunded badge-custom">Đã hoàn tiền</span></td>
+                                    <td>
+                                        <div class="small">
+                                            <div class="fw-bold">20/10/2024</div>
+                                            <div class="text-muted">09:15:42</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                                <img src="https://cdn-icons-png.flaticon.com/512/2311/2311524.png" alt="Actions" width="16" height="16">
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#" onclick="viewPayment('PAY004')">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" alt="View" width="16" height="16" class="me-2">
+                                                    Xem chi tiết
+                                                </a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="viewRefund('PAY004')">
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/1375/1375106.png" alt="Refund Detail" width="16" height="16" class="me-2">
+                                                    Chi tiết hoàn tiền
+                                                </a></li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div id="pagination-container"></div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Component Manager -->
+    <script src="../components/component-manager.js"></script>
+    
+    <!-- Page Configuration -->
+    <script>
+        window.pageConfig = {
+            sidebar: {
+                brandName: 'JEWELLERY',
+                activePage: 'payments',
+                links: {
+                    dashboard: '../index.html',
+                    products: 'products.html',
+                    orders: 'orders.html',
+                    customers: 'customers.html',
+                    'customer-roles': 'customer-roles.html',
+                    collections: 'collections.html',
+                    reviews: 'reviews.html',
+                    media: 'media.html',
+                    discounts: 'discounts.html',
+                    payments: 'payments.html'
+                },
+                categories: [
+                    { name: 'Vòng cổ', count: 12 },
+                    { name: 'Vòng tay', count: 10 },
+                    { name: 'Bông tai', count: 13 },
+                    { name: 'Nhẫn', count: 4 },
+                    { name: 'Lắc chân', count: 6 }
+                ],
+                categoriesTitle: 'DANH MỤC'
+            },
+            header: {
+                title: 'Payments Management',
+                breadcrumb: 'Home > Marketing & Sales > Payments'
+            }
+        };
+
+        // Payment management functions
+        function viewPayment(paymentId) {
+            alert('Xem chi tiết giao dịch: ' + paymentId);
+        }
+
+        function viewInvoice(paymentId) {
+            alert('Xem hóa đơn cho giao dịch: ' + paymentId);
+        }
+
+        function confirmPayment(paymentId) {
+            if (confirm('Bạn có chắc chắn muốn xác nhận giao dịch này?')) {
+                alert('Giao dịch đã được xác nhận: ' + paymentId);
+                location.reload();
+            }
+        }
+
+        function cancelPayment(paymentId) {
+            if (confirm('Bạn có chắc chắn muốn hủy giao dịch này?')) {
+                alert('Giao dịch đã bị hủy: ' + paymentId);
+                location.reload();
+            }
+        }
+
+        function refundPayment(paymentId) {
+            const amount = prompt('Nhập số tiền hoàn (VND):');
+            if (amount && !isNaN(amount) && parseFloat(amount) > 0) {
+                if (confirm(`Bạn có chắc chắn muốn hoàn ${amount} VND cho giao dịch ${paymentId}?`)) {
+                    alert('Đã gửi yêu cầu hoàn tiền!');
+                    location.reload();
+                }
+            } else if (amount !== null) {
+                alert('Vui lòng nhập số tiền hợp lệ!');
+            }
+        }
+
+        function retryPayment(paymentId) {
+            if (confirm('Bạn có muốn tạo giao dịch mới cho đơn hàng này?')) {
+                alert('Đã tạo giao dịch mới: ' + paymentId);
+                location.reload();
+            }
+        }
+
+        function viewRefund(paymentId) {
+            alert('Xem chi tiết hoàn tiền cho giao dịch: ' + paymentId);
+        }
+
+        function exportPayments() {
+            alert('Đang xuất báo cáo thanh toán...');
+        }
+
+        function paymentReport() {
+            alert('Đang tạo báo cáo chi tiết...');
+        }
+
+        function reconciliation() {
+            alert('Đang thực hiện đối soát với ngân hàng...');
+        }
+
+        // Search functionality
+        document.getElementById('paymentSearch').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#paymentsTable tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Status filter functionality
+        document.getElementById('statusFilter').addEventListener('change', function() {
+            const filterValue = this.value;
+            const rows = document.querySelectorAll('#paymentsTable tbody tr');
+            
+            rows.forEach(row => {
+                const statusBadge = row.querySelector('.badge');
+                const status = statusBadge.textContent.toLowerCase();
+                
+                if (filterValue === 'all') {
+                    row.style.display = '';
+                } else if (filterValue === 'completed' && status.includes('thành công')) {
+                    row.style.display = '';
+                } else if (filterValue === 'pending' && status.includes('đang xử lý')) {
+                    row.style.display = '';
+                } else if (filterValue === 'failed' && status.includes('thất bại')) {
+                    row.style.display = '';
+                } else if (filterValue === 'refunded' && status.includes('hoàn tiền')) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Payment method filter functionality
+        document.getElementById('methodFilter').addEventListener('change', function() {
+            const filterValue = this.value;
+            const rows = document.querySelectorAll('#paymentsTable tbody tr');
+            
+            rows.forEach(row => {
+                const methodText = row.cells[4].textContent.toLowerCase();
+                
+                if (filterValue === 'all') {
+                    row.style.display = '';
+                } else if (filterValue === 'card' && methodText.includes('visa')) {
+                    row.style.display = '';
+                } else if (filterValue === 'bank' && methodText.includes('chuyển khoản')) {
+                    row.style.display = '';
+                } else if (filterValue === 'momo' && methodText.includes('momo')) {
+                    row.style.display = '';
+                } else if (filterValue === 'zalopay' && methodText.includes('zalopay')) {
+                    row.style.display = '';
+                } else if (filterValue === 'cod' && methodText.includes('cod')) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Select all checkbox functionality
+        document.getElementById('selectAll').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+
+        // Initialize pagination
+        document.addEventListener('DOMContentLoaded', function() {
+            const paginationContainer = document.getElementById('pagination-container');
+            if (paginationContainer) {
+                window.ComponentManager.renderPagination(paginationContainer, {
+                    ariaLabel: 'Payments pagination'
+                });
+            }
+        });
+    </script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>
