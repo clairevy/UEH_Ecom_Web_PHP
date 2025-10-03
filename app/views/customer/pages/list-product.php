@@ -17,56 +17,7 @@
 </head>
 <body>
     <!-- Header -->
-    <!-- Navigation -->
-<nav th:fragment="header" class="navbar navbar-expand-lg fixed-top">
-    <div class="container">
-        <a class="navbar-brand" href="#"><i class="fas fa-gem me-2"></i>JEWELRY</a>
-        
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav mx-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="#home">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#about">About us</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#category">Category</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#collection">Collection</a>
-                </li>
-            </ul>
-            
-            <div class="d-flex align-items-center">
-                <!-- Search -->
-                <div class="search-container me-3">
-                    <input type="text" class="search-input" placeholder="What are you looking for?" 
-                           value="<?= isset($filters['search']) ? htmlspecialchars($filters['search']) : '' ?>">
-                    <button class="search-btn">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
-                
-                <!-- Auth Links -->
-                <div class="me-3">
-                    <a href="#signin" class="text-decoration-none me-3" style="color: #666;">Sign in</a>
-                    <!-- <a href="#signup" class="text-decoration-none" style="color: #666;">Sign up</a> -->
-                </div>
-                
-                <!-- Icons -->
-                <div class="nav-icons">
-                    <i class="far fa-heart"></i>
-                    <i class="fas fa-shopping-bag"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-</nav>
+    <?php include __DIR__ . '/../components/header-nosignin.php'; ?>
 
     <!-- Banner Section -->
     <section class="banner-section">
@@ -131,49 +82,27 @@
                         <i class="fas fa-gem me-2"></i>Chất liệu
                     </div>
                     <div class="filter-body">
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" value="gold" id="gold">
-                            <label class="form-check-label" for="gold">Vàng</label>
+                        <?php 
+                        $materialLabels = [
+                            'gold' => 'Vàng',
+                            'silver' => 'Bạc', 
+                            'diamond' => 'Kim cương',
+                            'pearl' => 'Ngọc trai'
+                        ];
+                        if (!empty($data['materials'])): 
+                            foreach ($data['materials'] as $index => $material): ?>
+                        <div class="form-check <?= $index < count($data['materials']) - 1 ? 'mb-2' : '' ?>">
+                            <input class="form-check-input" type="checkbox" value="<?= $material->material ?>" id="<?= $material->material ?>">
+                            <label class="form-check-label" for="<?= $material->material ?>">
+                                <?= $materialLabels[$material->material] ?? ucfirst($material->material) ?> 
+                                <span class="text-muted">(<?= $material->product_count ?>)</span>
+                            </label>
                         </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" value="silver" id="silver">
-                            <label class="form-check-label" for="silver">Bạc</label>
-                        </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" value="diamond" id="diamond">
-                            <label class="form-check-label" for="diamond">Kim cương</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="pearl" id="pearl">
-                            <label class="form-check-label" for="pearl">Ngọc trai</label>
-                        </div>
+                        <?php endforeach; endif; ?>
                     </div>
                 </div>
 
-                <!-- Brand Filter -->
-                <div class="filter-card">
-                    <div class="filter-header">
-                        <i class="fas fa-star me-2"></i>Thương hiệu
-                    </div>
-                    <div class="filter-body">
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" value="luxury-gold" id="luxury-gold">
-                            <label class="form-check-label" for="luxury-gold">Luxury Gold</label>
-                        </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" value="diamond-star" id="diamond-star">
-                            <label class="form-check-label" for="diamond-star">Diamond Star</label>
-                        </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" value="pearl-beauty" id="pearl-beauty">
-                            <label class="form-check-label" for="pearl-beauty">Pearl Beauty</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="elegant" id="elegant">
-                            <label class="form-check-label" for="elegant">Elegant</label>
-                        </div>
-                    </div>
-                </div>
+
 
                 <!-- Price Range Filter -->
                 <div class="filter-card">
@@ -207,6 +136,16 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Filter Action Buttons -->
+                <div class="filter-actions mt-4">
+                    <button class="btn btn-primary w-100 mb-2" id="applyFiltersBtn" onclick="applyFilters()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-weight: 500;">
+                        <i class="fas fa-filter me-2"></i>Áp dụng bộ lọc
+                    </button>
+                    <button class="btn btn-outline-secondary w-100" id="clearFiltersBtn" onclick="clearAllFilters()" style="border: 2px solid #6c757d; font-weight: 500;">
+                        <i class="fas fa-times me-2"></i>Xóa tất cả bộ lọc
+                    </button>
+                </div>
             </div>
 
             <!-- Product Section -->
@@ -219,6 +158,13 @@
                         </div> -->
                         <div class="results-info col-md-6">
                             <strong id="resultsCount"><?= isset($total) ? $total : 0 ?></strong> sản phẩm được tìm thấy
+                            <!-- Active Filters Display -->
+                            <div class="active-filters mt-2" id="activeFiltersDisplay" style="display: none;">
+                                <small class="text-muted">Bộ lọc đang áp dụng:</small>
+                                <div class="d-flex flex-wrap gap-1 mt-1" id="activeFilterTags">
+                                    <!-- Filter tags will be generated by JavaScript -->
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <select class="form-select" id="sortSelect">
@@ -349,97 +295,39 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Material Filter JS -->
+    <script src="http://localhost/Ecom_website/public/assets/js/material-filter.js"></script>
 
     <script>
-        // Hàm áp dụng filter và reload trang với parameters mới
-        function applyFilters() {
-            const url = new URL(window.location);
+        // Load current filters from URL on page load
+        function loadCurrentFilters() {
+            const urlParams = new URLSearchParams(window.location.search);
             
-            // Get category filters
-            const categories = Array.from(document.querySelectorAll('input[type=checkbox][id^="category_"]'))
-                .filter(cb => cb.checked)
-                .map(cb => cb.value);
+            // Load categories
+            const categories = urlParams.get('categories');
+            if (categories) {
+                const categoryIds = categories.split(',');
+                categoryIds.forEach(id => {
+                    const checkbox = document.querySelector(`input[id="category_${id}"]`);
+                    if (checkbox) checkbox.checked = true;
+                });
+            }
             
-            if (categories.length > 0) {
-                url.searchParams.set('category', categories[0]); // For now, support single category
-            } else {
-                url.searchParams.delete('category');
+            // Load materials
+            const materials = urlParams.get('materials');
+            if (materials) {
+                const materialList = materials.split(',');
+                materialList.forEach(material => {
+                    const checkbox = document.querySelector(`input[value="${material}"]`);
+                    if (checkbox) checkbox.checked = true;
+                });
             }
-
-            // Get price range
-            const priceRange = document.querySelector('input[name="priceRange"]:checked')?.value;
-            if (priceRange && priceRange !== 'all') {
-                const [minPrice, maxPrice] = priceRange.split('-');
-                url.searchParams.set('min_price', minPrice);
-                url.searchParams.set('max_price', maxPrice);
-            } else {
-                url.searchParams.delete('min_price');
-                url.searchParams.delete('max_price');
-            }
-
-            // Get custom price
-            const customMinPrice = document.getElementById('minPrice')?.value;
-            const customMaxPrice = document.getElementById('maxPrice')?.value;
-            if (customMinPrice) {
-                url.searchParams.set('min_price', customMinPrice);
-            }
-            if (customMaxPrice) {
-                url.searchParams.set('max_price', customMaxPrice);
-            }
-
-            // Get sort
-            const sort = document.getElementById('sortSelect')?.value;
-            if (sort) {
-                url.searchParams.set('sort', sort);
-            }
-
-            // Reset to page 1 when filtering
-            url.searchParams.set('page', '1');
-
-            // Redirect to new URL
-            window.location.href = url.toString();
         }
 
-        // Gắn sự kiện cho filter và sort
-        function attachFilterEvents() {
-            // Checkbox, radio, select
-            document.querySelectorAll('.filter-card input, #sortSelect').forEach(el => {
-                el.addEventListener('change', applyFilters);
-            });
-            
-            // Custom price inputs with debounce
-            let priceTimeout;
-            document.getElementById('minPrice')?.addEventListener('input', function() {
-                clearTimeout(priceTimeout);
-                priceTimeout = setTimeout(applyFilters, 1000); // Wait 1 second after user stops typing
-            });
-            document.getElementById('maxPrice')?.addEventListener('input', function() {
-                clearTimeout(priceTimeout);
-                priceTimeout = setTimeout(applyFilters, 1000);
-            });
-        }
-
-        // Search functionality
-        document.querySelector('.search-btn').addEventListener('click', function() {
-            const searchTerm = document.querySelector('.search-input').value;
-            if (searchTerm.trim()) {
-                const url = new URL(window.location);
-                url.searchParams.set('search', searchTerm.trim());
-                url.searchParams.set('page', '1'); // Reset to page 1
-                window.location.href = url.toString();
-            }
-        });
-
-        // Handle Enter key in search
-        document.querySelector('.search-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.querySelector('.search-btn').click();
-            }
-        });
-
-        // Khởi tạo trang
+        // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
-            attachFilterEvents();
+            loadCurrentFilters();
         });
     </script>
 </body>

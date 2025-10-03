@@ -44,14 +44,57 @@ class ProductService extends BaseModel {
         
         $params = [];
         
-        // Category filter
-        if (!empty($filters['category_id'])) {
+        // Multiple categories filter
+        if (!empty($filters['category_ids']) && is_array($filters['category_ids'])) {
+            $placeholders = [];
+            foreach ($filters['category_ids'] as $index => $categoryId) {
+                $placeholder = ":category_id_$index";
+                $placeholders[] = $placeholder;
+                $params[$placeholder] = $categoryId;
+            }
+            $categoryPlaceholders = implode(',', $placeholders);
+            
+            $sql .= " AND EXISTS (
+                        SELECT 1 FROM product_categories pc 
+                        WHERE pc.product_id = p.product_id 
+                        AND pc.category_id IN ($categoryPlaceholders)
+                      )";
+        }
+        // Single category filter (backward compatibility)
+        elseif (!empty($filters['category_id'])) {
             $sql .= " AND EXISTS (
                         SELECT 1 FROM product_categories pc 
                         WHERE pc.product_id = p.product_id 
                         AND pc.category_id = :category_id
                       )";
             $params[':category_id'] = $filters['category_id'];
+        }
+        
+        // Materials filter - using new material column
+        if (!empty($filters['materials']) && is_array($filters['materials'])) {
+            $placeholders = [];
+            foreach ($filters['materials'] as $index => $material) {
+                $placeholder = ":material_$index";
+                $placeholders[] = $placeholder;
+                $params[$placeholder] = $material;
+            }
+            $materialPlaceholders = implode(',', $placeholders);
+            $sql .= " AND p.material IN ($materialPlaceholders)";
+        }
+        
+        // Brands filter - search in product name and description only
+        if (!empty($filters['brands']) && is_array($filters['brands'])) {
+            $brandConditions = [];
+            foreach ($filters['brands'] as $index => $brand) {
+                $placeholder = ":brand_$index";
+                // Convert slug to readable format for search
+                $searchTerm = str_replace('-', ' ', $brand);
+                $brandConditions[] = "(p.name LIKE $placeholder OR p.description LIKE $placeholder)";
+                $params[$placeholder] = '%' . $searchTerm . '%';
+            }
+            if (!empty($brandConditions)) {
+                $sql .= " AND (" . implode(' OR ', $brandConditions) . ")";
+            }
         }
         
         // Price filter
@@ -126,8 +169,33 @@ class ProductService extends BaseModel {
         
         $params = [];
         
+        // Multiple categories filter
+        if (!empty($filters['category_ids']) && is_array($filters['category_ids'])) {
+            $placeholders = [];
+            foreach ($filters['category_ids'] as $index => $categoryId) {
+                $placeholder = ":category_id_$index";
+                $placeholders[] = $placeholder;
+                $params[$placeholder] = $categoryId;
+            }
+            $categoryPlaceholders = implode(',', $placeholders);
+            
+            $sql .= " AND EXISTS (
+                        SELECT 1 FROM product_categories pc 
+                        WHERE pc.product_id = p.product_id 
+                        AND pc.category_id IN ($categoryPlaceholders)
+                      )";
+        }
+        // Single category filter (backward compatibility)
+        elseif (!empty($filters['category_id'])) {
+            $sql .= " AND EXISTS (
+                        SELECT 1 FROM product_categories pc 
+                        WHERE pc.product_id = p.product_id 
+                        AND pc.category_id = :category_id
+                      )";
+            $params[':category_id'] = $filters['category_id'];
+        }
         // Category filter - using relationship table
-        if (!empty($filters['category_slug'])) {
+        elseif (!empty($filters['category_slug'])) {
             // If slug is provided, try to find category by first available text column
             $sql .= " AND EXISTS (
                         SELECT 1 FROM product_categories pc 
@@ -139,14 +207,31 @@ class ProductService extends BaseModel {
             $params[':category_slug'] = $filters['category_slug'];
         }
         
-        // Category filter by ID (more common)
-        if (!empty($filters['category_id'])) {
-            $sql .= " AND EXISTS (
-                        SELECT 1 FROM product_categories pc 
-                        WHERE pc.product_id = p.product_id 
-                        AND pc.category_id = :category_id
-                      )";
-            $params[':category_id'] = $filters['category_id'];
+        // Materials filter - using new material column
+        if (!empty($filters['materials']) && is_array($filters['materials'])) {
+            $placeholders = [];
+            foreach ($filters['materials'] as $index => $material) {
+                $placeholder = ":material_$index";
+                $placeholders[] = $placeholder;
+                $params[$placeholder] = $material;
+            }
+            $materialPlaceholders = implode(',', $placeholders);
+            $sql .= " AND p.material IN ($materialPlaceholders)";
+        }
+        
+        // Brands filter - search in product name and description only
+        if (!empty($filters['brands']) && is_array($filters['brands'])) {
+            $brandConditions = [];
+            foreach ($filters['brands'] as $index => $brand) {
+                $placeholder = ":brand_$index";
+                // Convert slug to readable format for search
+                $searchTerm = str_replace('-', ' ', $brand);
+                $brandConditions[] = "(p.name LIKE $placeholder OR p.description LIKE $placeholder)";
+                $params[$placeholder] = '%' . $searchTerm . '%';
+            }
+            if (!empty($brandConditions)) {
+                $sql .= " AND (" . implode(' OR ', $brandConditions) . ")";
+            }
         }
         
         // Collection filter
@@ -371,6 +456,19 @@ class ProductService extends BaseModel {
                 ORDER BY c.category_id ASC";
         $this->db->query($sql);
         $this->db->bind(':product_id', $productId);
+        return $this->db->resultSet();
+    }
+    
+    /**
+     * Lấy danh sách materials có trong database
+     */
+    public function getAvailableMaterials() {
+        $sql = "SELECT DISTINCT material, COUNT(*) as product_count 
+                FROM products 
+                WHERE is_active = 1 AND material IS NOT NULL 
+                GROUP BY material 
+                ORDER BY product_count DESC";
+        $this->db->query($sql);
         return $this->db->resultSet();
     }
 }

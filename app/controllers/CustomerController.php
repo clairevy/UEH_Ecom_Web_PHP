@@ -47,9 +47,13 @@ class CustomerController extends BaseController {
         try {
             // Get parameters from request
             $categoryParam = $_GET['category'] ?? null;
+            $categoriesParam = $_GET['categories'] ?? null; // Multiple categories
+            $materialsParam = $_GET['materials'] ?? null;
             $collectionSlug = $_GET['collection'] ?? null;
             $search = $_GET['search'] ?? null;
             $sortBy = $_GET['sort'] ?? 'newest';
+            $minPrice = $_GET['min_price'] ?? null;
+            $maxPrice = $_GET['max_price'] ?? null;
             $page = $_GET['page'] ?? 1;
             $limit = 12;
             
@@ -61,8 +65,12 @@ class CustomerController extends BaseController {
                 'is_active' => 1
             ];
             
-            // Add category filter based on input type
-            if ($categoryParam) {
+            // Handle multiple categories
+            if ($categoriesParam) {
+                $categoryIds = explode(',', $categoriesParam);
+                $filters['category_ids'] = array_map('intval', $categoryIds);
+            } elseif ($categoryParam) {
+                // Backward compatibility for single category
                 if (is_numeric($categoryParam)) {
                     $filters['category_id'] = (int) $categoryParam;
                 } else {
@@ -70,10 +78,27 @@ class CustomerController extends BaseController {
                 }
             }
             
+            // Handle materials filter
+            if ($materialsParam) {
+                $materials = explode(',', $materialsParam);
+                $filters['materials'] = $materials;
+            }
+            
+
+            
+            // Handle price range
+            if ($minPrice !== null && $minPrice !== '') {
+                $filters['min_price'] = (float) $minPrice;
+            }
+            if ($maxPrice !== null && $maxPrice !== '') {
+                $filters['max_price'] = (float) $maxPrice;
+            }
+            
             // Get data from Service Layer
             $result = $this->productService->getProductsWithFilters($filters, $page, $limit);
             $categories = $this->productService->getActiveCategories();
             $collections = $this->productService->getActiveCollections();
+            $materials = $this->productService->getAvailableMaterials();
             
             // Calculate pagination
             $totalPages = ceil($result['total'] / $limit);
@@ -84,6 +109,7 @@ class CustomerController extends BaseController {
                 'products' => $result['products'],
                 'categories' => $categories,
                 'collections' => $collections,
+                'materials' => $materials,
                 'currentPage' => $page,
                 'totalPages' => $totalPages,
                 'filters' => $filters,
@@ -226,6 +252,60 @@ class CustomerController extends BaseController {
             echo json_encode([
                 'success' => true,
                 'data' => $products
+            ]);
+            
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+    
+    /**
+     * About Us page
+     */
+    public function about() {
+        try {
+            $data = [
+                'title' => 'Giới thiệu'
+            ];
+            
+            $this->view('customer/pages/about', $data);
+            
+        } catch (Exception $e) {
+            $this->view('customer/pages/error', ['message' => 'Có lỗi xảy ra: ' . $e->getMessage()]);
+        }
+    }
+    
+    /**
+     * API - Get categories for dropdown
+     */
+    public function getCategories() {
+        header('Content-Type: application/json');
+        
+        try {
+            $categories = $this->productService->getActiveCategories();
+            
+            echo json_encode([
+                'success' => true,
+                'data' => $categories
+            ]);
+            
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+    
+    /**
+     * API - Get collections for dropdown
+     */
+    public function getCollections() {
+        header('Content-Type: application/json');
+        
+        try {
+            $collections = $this->productService->getActiveCollections();
+            
+            echo json_encode([
+                'success' => true,
+                'data' => $collections
             ]);
             
         } catch (Exception $e) {

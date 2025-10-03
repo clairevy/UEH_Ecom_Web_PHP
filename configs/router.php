@@ -23,6 +23,12 @@ class Route {
                     unset($url[0]);
                     break;
                     
+                case 'about':
+                    $this->controller = 'CustomerController';
+                    $this->method = 'about';
+                    unset($url[0]);
+                    break;
+                    
                 case 'search':
                     $this->controller = 'CustomerController';
                     $this->method = 'searchApi';
@@ -43,6 +49,12 @@ class Route {
                                 break;
                             case 'category':
                                 $this->method = 'getProductsByCategory';
+                                break;
+                            case 'categories':
+                                $this->method = 'getCategories';
+                                break;
+                            case 'collections':
+                                $this->method = 'getCollections';
                                 break;
                         }
                         unset($url[1]);
