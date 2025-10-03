@@ -26,8 +26,8 @@
             <main class="content">
                 <div class="row">
                     <!-- Customer Form -->
-                    <div class="col-lg-8">
-                        <div class="card mb-4">
+                    <div class="col-lg-8 col-md-12 mb-4">
+                        <div class="card">
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-4">
                                     <img src="https://cdn-icons-png.flaticon.com/512/1077/1077114.png" alt="Customer" width="32" height="32" class="me-3">
@@ -35,6 +35,24 @@
                                 </div>
 
                                 <form id="customerForm">
+                                    <!-- Profile Image -->
+                                    <div class="row">
+                                        <div class="col-12 mb-4">
+                                            <h6 class="fw-bold border-bottom pb-2 mb-3">Ảnh Đại Diện</h6>
+                                            <div class="text-center">
+                                                <img id="profileImagePreview" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #dee2e6;">
+                                                <div>
+                                                    <div class="border border-2 border-dashed rounded p-3 d-inline-block" style="cursor: pointer;" onclick="document.getElementById('profileImageInput').click()">
+                                                        <input type="file" id="profileImageInput" accept="image/*" style="display: none;">
+                                                        <img src="https://cdn-icons-png.flaticon.com/512/1160/1160358.png" alt="Upload" width="24" height="24" class="me-2">
+                                                        <span class="small">Upload ảnh profile</span>
+                                                    </div>
+                                                    <p class="text-muted small mt-2 mb-0">JPG, PNG (Max 2MB) - Kích thước đề xuất: 400x400px</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
                                     <!-- Basic Information -->
                                     <div class="row">
                                         <div class="col-md-12 mb-4">
@@ -120,31 +138,45 @@
                                             </div>
                                         </div>
 
-                                        <div class="col-md-4">
+                                        <div class="col-md-6 col-12">
                                             <div class="form-group">
-                                                <label for="addressWard" class="form-label">Phường/Xã</label>
-                                                <input type="text" class="form-control" id="addressWard" placeholder="Phường/Xã">
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="addressProvince" class="form-label">Tỉnh/Thành phố</label>
-                                                <select class="form-control" id="addressProvince">
-                                                    <option value="">Chọn tỉnh/thành</option>
-                                                    <option value="Ho Chi Minh">TP. Hồ Chí Minh</option>
-                                                    <option value="Ha Noi">Hà Nội</option>
-                                                    <option value="Da Nang">Đà Nẵng</option>
-                                                    <option value="Can Tho">Cần Thơ</option>
-                                                    <option value="Hai Phong">Hải Phòng</option>
+                                                <label for="addressCountry" class="form-label">Quốc gia <span class="text-danger">*</span></label>
+                                                <select class="form-control" id="addressCountry" required onchange="loadProvinces()">
+                                                    <option value="">Chọn quốc gia</option>
+                                                    <option value="VN" selected>Việt Nam</option>
+                                                    <option value="US">United States</option>
+                                                    <option value="UK">United Kingdom</option>
+                                                    <option value="JP">Japan</option>
+                                                    <option value="KR">South Korea</option>
                                                 </select>
                                             </div>
                                         </div>
 
-                                        <div class="col-md-4">
+                                        <div class="col-md-6 col-12">
                                             <div class="form-group">
-                                                <label for="addressCountry" class="form-label">Quốc gia</label>
-                                                <input type="text" class="form-control" id="addressCountry" value="Vietnam" readonly>
+                                                <label for="addressProvince" class="form-label">Tỉnh/Thành phố <span class="text-danger">*</span></label>
+                                                <select class="form-control" id="addressProvince" required onchange="loadDistricts()">
+                                                    <option value="">Chọn tỉnh/thành</option>
+                                                </select>
+                                                <small class="text-muted">Vui lòng chọn quốc gia trước</small>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 col-12">
+                                            <div class="form-group">
+                                                <label for="addressDistrict" class="form-label">Quận/Huyện</label>
+                                                <select class="form-control" id="addressDistrict" onchange="loadWards()">
+                                                    <option value="">Chọn quận/huyện</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 col-12">
+                                            <div class="form-group">
+                                                <label for="addressWard" class="form-label">Phường/Xã</label>
+                                                <select class="form-control" id="addressWard">
+                                                    <option value="">Chọn phường/xã</option>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -306,6 +338,156 @@
             }
         });
 
+        // Profile Image Upload Handler
+        document.getElementById('profileImageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file size (max 2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Ảnh vượt quá 2MB!');
+                    this.value = '';
+                    return;
+                }
+                
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    alert('Vui lòng chọn file ảnh!');
+                    this.value = '';
+                    return;
+                }
+                
+                // Preview image
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('profileImagePreview').src = event.target.result;
+                    document.getElementById('previewAvatar').src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Vietnam Provinces/Cities Data (using Vietnam Provinces API)
+        const vietnamProvinces = [
+            { code: 'HCM', name: 'TP. Hồ Chí Minh' },
+            { code: 'HN', name: 'Hà Nội' },
+            { code: 'DN', name: 'Đà Nẵng' },
+            { code: 'CT', name: 'Cần Thơ' },
+            { code: 'HP', name: 'Hải Phòng' },
+            { code: 'AG', name: 'An Giang' },
+            { code: 'BV', name: 'Bà Rịa - Vũng Tàu' },
+            { code: 'BD', name: 'Bình Dương' },
+            { code: 'BT', name: 'Bình Thuận' },
+            { code: 'DN2', name: 'Đồng Nai' },
+            { code: 'KH', name: 'Khánh Hòa' },
+            { code: 'LA', name: 'Long An' },
+            { code: 'TG', name: 'Tiền Giang' },
+            { code: 'BG', name: 'Bắc Giang' },
+            { code: 'BN', name: 'Bắc Ninh' },
+            { code: 'HY', name: 'Hưng Yên' },
+            { code: 'NĐ', name: 'Nam Định' },
+            { code: 'QN', name: 'Quảng Ninh' }
+        ];
+
+        // Load provinces based on selected country
+        function loadProvinces() {
+            const country = document.getElementById('addressCountry').value;
+            const provinceSelect = document.getElementById('addressProvince');
+            
+            // Clear existing options
+            provinceSelect.innerHTML = '<option value="">Chọn tỉnh/thành</option>';
+            
+            if (country === 'VN') {
+                // Load Vietnam provinces
+                vietnamProvinces.forEach(province => {
+                    const option = document.createElement('option');
+                    option.value = province.code;
+                    option.textContent = province.name;
+                    provinceSelect.appendChild(option);
+                });
+            } else if (country === 'US') {
+                // Sample US states
+                const usStates = ['California', 'New York', 'Texas', 'Florida'];
+                usStates.forEach(state => {
+                    const option = document.createElement('option');
+                    option.value = state;
+                    option.textContent = state;
+                    provinceSelect.appendChild(option);
+                });
+            } else if (country) {
+                // For other countries, show generic options
+                const option = document.createElement('option');
+                option.value = 'Other';
+                option.textContent = 'Khu vực khác';
+                provinceSelect.appendChild(option);
+            }
+            
+            // Reset dependent dropdowns
+            document.getElementById('addressDistrict').innerHTML = '<option value="">Chọn quận/huyện</option>';
+            document.getElementById('addressWard').innerHTML = '<option value="">Chọn phường/xã</option>';
+        }
+
+        // Load districts based on selected province
+        function loadDistricts() {
+            const province = document.getElementById('addressProvince').value;
+            const districtSelect = document.getElementById('addressDistrict');
+            
+            // Clear existing options
+            districtSelect.innerHTML = '<option value="">Chọn quận/huyện</option>';
+            
+            if (!province) {
+                return;
+            }
+            
+            // Sample districts (in real app, this would be from API)
+            const sampleDistricts = [
+                'Quận 1', 'Quận 2', 'Quận 3', 'Quận 4', 'Quận 5',
+                'Quận 6', 'Quận 7', 'Quận 8', 'Quận 9', 'Quận 10',
+                'Quận 11', 'Quận 12', 'Quận Bình Thạnh', 'Quận Tân Bình',
+                'Quận Phú Nhuận', 'Quận Gò Vấp'
+            ];
+            
+            sampleDistricts.forEach(district => {
+                const option = document.createElement('option');
+                option.value = district;
+                option.textContent = district;
+                districtSelect.appendChild(option);
+            });
+            
+            // Reset ward dropdown
+            document.getElementById('addressWard').innerHTML = '<option value="">Chọn phường/xã</option>';
+        }
+
+        // Load wards based on selected district
+        function loadWards() {
+            const district = document.getElementById('addressDistrict').value;
+            const wardSelect = document.getElementById('addressWard');
+            
+            // Clear existing options
+            wardSelect.innerHTML = '<option value="">Chọn phường/xã</option>';
+            
+            if (!district) {
+                return;
+            }
+            
+            // Sample wards (in real app, this would be from API)
+            const sampleWards = [
+                'Phường 1', 'Phường 2', 'Phường 3', 'Phường 4', 'Phường 5',
+                'Phường 6', 'Phường 7', 'Phường 8', 'Phường 9', 'Phường 10'
+            ];
+            
+            sampleWards.forEach(ward => {
+                const option = document.createElement('option');
+                option.value = ward;
+                option.textContent = ward;
+                wardSelect.appendChild(option);
+            });
+        }
+
+        // Initialize - Load provinces for default country
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProvinces();
+        });
+
         // Toggle password visibility
         function togglePassword(fieldId) {
             const field = document.getElementById(fieldId);
@@ -318,7 +500,7 @@
             e.preventDefault();
             
             // Basic validation
-            const requiredFields = ['customerName', 'customerPhone', 'customerEmail', 'customerRole', 'customerPassword'];
+            const requiredFields = ['customerName', 'customerPhone', 'customerEmail', 'customerRole', 'customerPassword', 'addressCountry', 'addressProvince'];
             let isValid = true;
             
             requiredFields.forEach(fieldId => {

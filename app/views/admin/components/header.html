@@ -1,9 +1,20 @@
 <!-- Header Component -->
 <header class="header">
     <div class="header-content">
-        <div>
-            <h1 class="header-title" data-page-title="Dashboard">Dashboard</h1>
-            <small class="text-muted" data-breadcrumb="Home > Dashboard">Home > Dashboard</small>
+        <div class="d-flex align-items-center gap-3">
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle" type="button" aria-label="Toggle menu">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            
+            <div>
+                <h1 class="header-title" data-page-title="Dashboard">Dashboard</h1>
+                <small class="text-muted d-none d-sm-inline" data-breadcrumb="Home > Dashboard">Home > Dashboard</small>
+            </div>
         </div>
         <div class="header-actions">
             <!-- Date Range (optional, can be hidden) -->

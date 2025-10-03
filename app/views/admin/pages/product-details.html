@@ -41,15 +41,38 @@
                                     <textarea class="form-control" id="description" rows="4">Long distance running requires a lot from athletes.</textarea>
                                 </div>
 
-                                <!-- Category -->
-                                <div class="form-group">
-                                    <label for="category" class="form-label">Category</label>
-                                    <input type="text" class="form-control" id="category" value="Sneaker">
+                                <!-- Category and Collection -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="category" class="form-label">Danh Mục <span class="text-danger">*</span></label>
+                                            <select class="form-select" id="category" required>
+                                                <option value="">-- Chọn danh mục --</option>
+                                                <option value="nhan" selected>Nhẫn</option>
+                                                <option value="vong-co">Vòng cổ</option>
+                                                <option value="bong-tai">Bông tai</option>
+                                                <option value="vong-tay">Vòng tay</option>
+                                                <option value="lac-chan">Lắc chân</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="collection" class="form-label">Collection <span class="text-muted">(Optional)</span></label>
+                                            <select class="form-select" id="collection">
+                                                <option value="">-- Không chọn collection --</option>
+                                                <option value="summer-2024">Summer Collection 2024</option>
+                                                <option value="wedding">Wedding Collection</option>
+                                                <option value="luxury">Luxury Collection</option>
+                                                <option value="bestseller">Bestseller Collection</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Brand Name -->
                                 <div class="form-group">
-                                    <label for="brandName" class="form-label">Brand Name</label>
+                                    <label for="brandName" class="form-label">Thương Hiệu</label>
                                     <input type="text" class="form-control" id="brandName" value="Adidas">
                                 </div>
 
@@ -106,67 +129,85 @@
                         </div>
                     </div>
 
-                    <!-- Product Gallery -->
+                    <!-- Product Images -->
                     <div class="col-lg-4 mb-4">
+                        <!-- Primary Image (Thumbnail) -->
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">
+                                    <span class="badge bg-primary me-2">Primary</span>
+                                    Ảnh Đại Diện (Thumbnail)
+                                </h6>
+                                
+                                <!-- Current Primary Image -->
+                                <div class="text-center mb-3">
+                                    <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=200&h=200&fit=crop" 
+                                         alt="Primary" id="primaryImagePreview" class="img-fluid rounded" style="max-height: 200px;">
+                                </div>
+                                
+                                <!-- Upload Primary -->
+                                <div class="border border-primary border-2 border-dashed rounded p-3 text-center" style="cursor: pointer;" onclick="document.getElementById('primaryImageInput').click()">
+                                    <input type="file" id="primaryImageInput" accept="image/*" style="display: none;">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/1160/1160358.png" alt="Upload" width="32" height="32" class="mb-2">
+                                    <p class="text-muted mb-1 small">Upload ảnh chính</p>
+                                    <p class="text-muted small mb-0">JPG, PNG (Max 5MB)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gallery Images -->
                         <div class="card">
                             <div class="card-body">
-                                <!-- Main Product Image -->
-                                <div class="text-center mb-4">
-                                    <img src="https://cdn-icons-png.flaticon.com/512/2589/2589903.png" alt="Adidas Ultra boost" class="product-img-lg">
+                                <h6 class="fw-bold mb-3">
+                                    <span class="badge bg-secondary me-2">Gallery</span>
+                                    Ảnh Khác (Gallery)
+                                </h6>
+                                
+                                <!-- Upload Gallery -->
+                                <div class="border border-2 border-dashed rounded p-3 text-center mb-3" style="cursor: pointer;" onclick="document.getElementById('galleryImagesInput').click()">
+                                    <input type="file" id="galleryImagesInput" accept="image/*" multiple style="display: none;">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/2920/2920277.png" alt="Upload" width="32" height="32" class="mb-2 opacity-50">
+                                    <p class="text-muted mb-1 small">Upload nhiều ảnh</p>
+                                    <p class="text-muted small mb-0">Chọn nhiều file cùng lúc</p>
                                 </div>
 
-                                <!-- Product Gallery -->
-                                <div class="mb-4">
-                                    <h6 class="fw-bold mb-3">Product Gallery</h6>
-                                    <div class="border-2 border-dashed rounded-custom p-4 text-center" style="border-color: var(--border-color);">
-                                        <img src="https://cdn-icons-png.flaticon.com/512/2920/2920277.png" alt="Upload" width="48" height="48" class="mb-2 opacity-50">
-                                        <p class="text-muted mb-2">Drop your images here, or browse</p>
-                                        <p class="text-muted small">Jpeg, png are allowed</p>
+                                <!-- Gallery Preview -->
+                                <div id="galleryPreview">
+                                    <!-- Sample Gallery Images -->
+                                    <div class="d-flex align-items-center justify-content-between mb-2 p-2 border rounded">
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=50&h=50&fit=crop" 
+                                                 alt="Gallery" width="40" height="40" class="me-2 rounded">
+                                            <span class="small">nhan-detail-1.jpg</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-danger" onclick="removeGalleryImage(this)">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png" alt="Delete" width="14" height="14">
+                                        </button>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2 p-2 border rounded">
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=50&h=50&fit=crop" 
+                                                 alt="Gallery" width="40" height="40" class="me-2 rounded">
+                                            <span class="small">nhan-detail-2.jpg</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-danger" onclick="removeGalleryImage(this)">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png" alt="Delete" width="14" height="14">
+                                        </button>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2 p-2 border rounded">
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=50&h=50&fit=crop" 
+                                                 alt="Gallery" width="40" height="40" class="me-2 rounded">
+                                            <span class="small">nhan-detail-3.jpg</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-danger" onclick="removeGalleryImage(this)">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png" alt="Delete" width="14" height="14">
+                                        </button>
                                     </div>
                                 </div>
-
-                                <!-- Uploaded Images -->
-                                <div class="uploaded-images">
-                                    <div class="d-flex align-items-center justify-content-between mb-2 p-2 border rounded-custom">
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://cdn-icons-png.flaticon.com/512/2589/2589903.png" alt="Product" width="30" height="30" class="me-2 rounded">
-                                            <span class="small">Product thumbnail.jpg</span>
-                                        </div>
-                                        <div class="progress flex-grow-1 mx-2" style="height: 4px;">
-                                            <div class="progress-bar bg-success" style="width: 100%"></div>
-                                        </div>
-                                        <img src="https://cdn-icons-png.flaticon.com/512/5610/5610944.png" alt="Complete" width="16" height="16" class="text-success">
-                                    </div>
-                                    <div class="d-flex align-items-center justify-content-between mb-2 p-2 border rounded-custom">
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://cdn-icons-png.flaticon.com/512/2589/2589903.png" alt="Product" width="30" height="30" class="me-2 rounded">
-                                            <span class="small">Product thumbnail.jpg</span>
-                                        </div>
-                                        <div class="progress flex-grow-1 mx-2" style="height: 4px;">
-                                            <div class="progress-bar bg-success" style="width: 100%"></div>
-                                        </div>
-                                        <img src="https://cdn-icons-png.flaticon.com/512/5610/5610944.png" alt="Complete" width="16" height="16" class="text-success">
-                                    </div>
-                                    <div class="d-flex align-items-center justify-content-between mb-2 p-2 border rounded-custom">
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://cdn-icons-png.flaticon.com/512/2589/2589903.png" alt="Product" width="30" height="30" class="me-2 rounded">
-                                            <span class="small">Product thumbnail.jpg</span>
-                                        </div>
-                                        <div class="progress flex-grow-1 mx-2" style="height: 4px;">
-                                            <div class="progress-bar bg-success" style="width: 100%"></div>
-                                        </div>
-                                        <img src="https://cdn-icons-png.flaticon.com/512/5610/5610944.png" alt="Complete" width="16" height="16" class="text-success">
-                                    </div>
-                                    <div class="d-flex align-items-center justify-content-between mb-2 p-2 border rounded-custom">
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://cdn-icons-png.flaticon.com/512/2589/2589903.png" alt="Product" width="30" height="30" class="me-2 rounded">
-                                            <span class="small">Product thumbnail.jpg</span>
-                                        </div>
-                                        <div class="progress flex-grow-1 mx-2" style="height: 4px;">
-                                            <div class="progress-bar bg-success" style="width: 100%"></div>
-                                        </div>
-                                        <img src="https://cdn-icons-png.flaticon.com/512/5610/5610944.png" alt="Complete" width="16" height="16" class="text-success">
-                                    </div>
+                                
+                                <div class="text-muted small mt-2">
+                                    <strong>Lưu ý:</strong> Ảnh gallery sẽ hiển thị khi khách hàng click vào sản phẩm
                                 </div>
                             </div>
                         </div>
@@ -204,6 +245,80 @@
                 breadcrumb: 'Home > All Products > Product Details'
             }
         };
+
+        // Product Images Handler
+        document.addEventListener('DOMContentLoaded', function() {
+            // Primary Image Upload
+            const primaryImageInput = document.getElementById('primaryImageInput');
+            if (primaryImageInput) {
+                primaryImageInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        if (file.size > 5 * 1024 * 1024) {
+                            alert('Ảnh vượt quá 5MB!');
+                            return;
+                        }
+                        
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            document.getElementById('primaryImagePreview').src = event.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                        
+                        console.log('Primary image uploaded:', file.name);
+                    }
+                });
+            }
+
+            // Gallery Images Upload
+            const galleryImagesInput = document.getElementById('galleryImagesInput');
+            if (galleryImagesInput) {
+                galleryImagesInput.addEventListener('change', function(e) {
+                    const files = e.target.files;
+                    if (files.length > 0) {
+                        Array.from(files).forEach(file => {
+                            if (file.size > 5 * 1024 * 1024) {
+                                alert(`File ${file.name} vượt quá 5MB!`);
+                                return;
+                            }
+                            
+                            // Add to gallery preview
+                            addGalleryImagePreview(file);
+                        });
+                        
+                        console.log('Gallery images uploaded:', files.length, 'files');
+                    }
+                });
+            }
+        });
+
+        // Add Gallery Image Preview
+        function addGalleryImagePreview(file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const galleryPreview = document.getElementById('galleryPreview');
+                const imageDiv = document.createElement('div');
+                imageDiv.className = 'd-flex align-items-center justify-content-between mb-2 p-2 border rounded';
+                imageDiv.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <img src="${event.target.result}" alt="Gallery" width="40" height="40" class="me-2 rounded">
+                        <span class="small">${file.name}</span>
+                    </div>
+                    <button class="btn btn-sm btn-danger" onclick="removeGalleryImage(this)">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png" alt="Delete" width="14" height="14">
+                    </button>
+                `;
+                galleryPreview.appendChild(imageDiv);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Remove Gallery Image
+        function removeGalleryImage(btn) {
+            if (confirm('Bạn có chắc chắn muốn xóa ảnh này?')) {
+                btn.closest('.d-flex').remove();
+            }
+        }
     </script>
     
     <!-- Bootstrap JS -->

@@ -24,172 +24,226 @@
 
             <!-- Content -->
             <main class="content">
-                <!-- Product Cards Grid -->
-                <div class="row">
-                    <!-- Product Card 1 - Nhẫn Kim Cương -->
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="card h-100 shadow-custom">
-                            <div class="position-relative">
-                                <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=200&h=200&fit=crop" 
-                                     class="card-img-top" alt="Nhẫn Kim Cương" style="height: 200px; object-fit: cover;">
-                                <div class="position-absolute top-0 end-0 p-2">
-                                    <div class="dropdown">
-                                        <button class="btn btn-link btn-sm" type="button" data-bs-toggle="dropdown">
-                                            <img src="https://cdn-icons-png.flaticon.com/512/2311/2311524.png" alt="More" width="20" height="20">
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="product-details.html">Edit</a></li>
-                                            <li><a class="dropdown-item text-danger" href="#">Delete</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
+                <!-- Product Management Table -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <h5 class="table-title">Danh Sách Sản Phẩm</h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            <!-- Filters -->
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/3031/3031293.png" alt="Filter" width="16" height="16" class="me-1 d-none d-md-inline">
+                                    <span class="d-none d-md-inline">Lọc</span>
+                                    <span class="d-md-none">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/3031/3031293.png" alt="Filter" width="16" height="16">
+                                    </span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="filterProducts('all')">Tất cả</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="filterProducts('in-stock')">Còn hàng</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="filterProducts('out-of-stock')">Hết hàng</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="filterProducts('best-seller')">Bán chạy</a></li>
+                                </ul>
                             </div>
-                            <div class="card-body">
-                                <h6 class="card-title fw-bold">Nhẫn Kim Cương Cao Cấp</h6>
-                                <p class="card-text text-muted small">Nhẫn</p>
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="h5 mb-0 text-success">2,450,000 VND</span>
-                                </div>
-                                
-                                <div class="border-top pt-3">
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <div class="d-flex align-items-center mb-2">
-                                                <img src="https://cdn-icons-png.flaticon.com/512/3208/3208676.png" alt="Sales" width="16" height="16" class="me-2">
-                                                <span class="small">Đã bán</span>
-                                                <span class="badge bg-warning text-dark ms-auto">45</span>
+                            
+                            <!-- Search -->
+                            <div class="position-relative flex-grow-1" style="max-width: 300px;">
+                                <input type="text" class="form-control form-control-sm" placeholder="Tìm kiếm..." style="padding-left: 35px;" id="productSearch">
+                                <img src="https://cdn-icons-png.flaticon.com/512/751/751463.png" alt="Search" width="16" height="16" class="position-absolute" style="left: 10px; top: 50%; transform: translateY(-50%);">
+                            </div>
+                            
+                            <!-- Add Product -->
+                            <button class="btn btn-success-custom btn-sm" onclick="window.location.href='product-details.html'">
+                                <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Add" width="16" height="16" class="me-1">
+                                <span class="d-none d-md-inline">Thêm Sản Phẩm</span>
+                                <span class="d-md-none">Thêm</span>
+                            </button>
+                            
+                            <!-- More Actions -->
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/2311/2311524.png" alt="More" width="16" height="16">
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#">Xuất Excel</a></li>
+                                    <li><a class="dropdown-item" href="#">Xuất PDF</a></li>
+                                    <li><a class="dropdown-item" href="#">In danh sách</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table" id="productsTable">
+                            <thead>
+                                <tr>
+                                    <th width="50" class="d-none d-md-table-cell">
+                                        <input type="checkbox" class="form-check-input" id="selectAll">
+                                    </th>
+                                    <th>Sản Phẩm</th>
+                                    <th class="d-none d-lg-table-cell">Danh Mục</th>
+                                    <th>Giá</th>
+                                    <th class="d-none d-md-table-cell">Tồn Kho</th>
+                                    <th class="d-none d-lg-table-cell">Đã Bán</th>
+                                    <th class="d-none d-sm-table-cell">Trạng Thái</th>
+                                    <th width="100">Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Sample Product Data -->
+                                <tr>
+                                    <td class="d-none d-md-table-cell"><input type="checkbox" class="form-check-input row-checkbox"></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=50&h=50&fit=crop" alt="Product" width="40" height="40" class="rounded me-2">
+                                            <div>
+                                                <div class="fw-bold">Nhẫn Kim Cương Cao Cấp</div>
+                                                <div class="small text-muted">SKU: #NK001</div>
                                             </div>
                                         </div>
-                                        <div class="col-6">
-                                            <div class="d-flex align-items-center mb-2">
-                                                <img src="https://cdn-icons-png.flaticon.com/512/2920/2920277.png" alt="Stock" width="16" height="16" class="me-2">
-                                                <span class="small">Còn lại</span>
-                                                <span class="badge bg-secondary ms-auto">15</span>
+                                    </td>
+                                    <td class="d-none d-lg-table-cell"><span class="badge bg-info">Nhẫn</span></td>
+                                    <td class="fw-bold text-success">2,450,000 VND</td>
+                                    <td class="d-none d-md-table-cell">
+                                        <div class="text-center">
+                                            <div class="fw-bold">15</div>
+                                            <div class="small text-muted">chiếc</div>
+                                        </div>
+                                    </td>
+                                    <td class="d-none d-lg-table-cell">
+                                        <div class="text-center">
+                                            <div class="fw-bold">45</div>
+                                            <div class="small text-muted">đơn</div>
+                                        </div>
+                                    </td>
+                                    <td class="d-none d-sm-table-cell"><span class="badge badge-delivered badge-custom">Còn hàng</span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button type="button" class="btn btn-outline-primary" onclick="editProduct('NK001')" title="Chỉnh sửa">
+                                                <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Edit" width="14" height="14">
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger" onclick="deleteProduct('NK001')" title="Xóa">
+                                                <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png" alt="Delete" width="14" height="14">
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td><input type="checkbox" class="form-check-input row-checkbox"></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?w=50&h=50&fit=crop" alt="Product" width="40" height="40" class="rounded me-2">
+                                            <div>
+                                                <div class="fw-bold">Vòng Cổ Vàng 18K</div>
+                                                <div class="small text-muted">SKU: #VC002</div>
                                             </div>
                                         </div>
-                                    </div>
-                                    
-                                    <div class="mt-3">
-                                        <button class="btn btn-primary-custom btn-custom w-100" onclick="window.location.href='product-details.html'">
-                                            <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" alt="View" width="16" height="16" class="me-1">
-                                            Xem chi tiết sản phẩm
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                    </td>
+                                    <td><span class="badge bg-warning">Vòng cổ</span></td>
+                                    <td class="fw-bold text-success">1,850,000 VND</td>
+                                    <td>
+                                        <div class="text-center">
+                                            <div class="fw-bold">23</div>
+                                            <div class="small text-muted">chiếc</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-center">
+                                            <div class="fw-bold">67</div>
+                                            <div class="small text-muted">đơn</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge badge-delivered badge-custom">Còn hàng</span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button type="button" class="btn btn-outline-primary" onclick="editProduct('VC002')" title="Chỉnh sửa">
+                                                <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Edit" width="14" height="14">
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger" onclick="deleteProduct('VC002')" title="Xóa">
+                                                <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png" alt="Delete" width="14" height="14">
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
 
-                    <!-- Product Card 2 - Vòng Cổ Vàng -->
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="card h-100 shadow-custom">
-                            <div class="position-relative">
-                                <img src="https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?w=200&h=200&fit=crop" 
-                                     class="card-img-top" alt="Vòng Cổ Vàng" style="height: 200px; object-fit: cover;">
-                            </div>
-                            <div class="card-body">
-                                <h6 class="card-title fw-bold">Vòng Cổ Vàng 18K</h6>
-                                <p class="card-text text-muted small">Vòng cổ</p>
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="h5 mb-0 text-success">1,850,000 VND</span>
-                                </div>
-                                
-                                <div class="mt-3">
-                                    <button class="btn btn-primary-custom btn-custom w-100" onclick="window.location.href='product-details.html'">
-                                        <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" alt="View" width="16" height="16" class="me-1">
-                                        Xem chi tiết sản phẩm
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                <tr>
+                                    <td><input type="checkbox" class="form-check-input row-checkbox"></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=50&h=50&fit=crop" alt="Product" width="40" height="40" class="rounded me-2">
+                                            <div>
+                                                <div class="fw-bold">Bông Tai Ngọc Trai</div>
+                                                <div class="small text-muted">SKU: #BT003</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-primary">Bông tai</span></td>
+                                    <td class="fw-bold text-success">950,000 VND</td>
+                                    <td>
+                                        <div class="text-center">
+                                            <div class="fw-bold text-danger">0</div>
+                                            <div class="small text-muted">chiếc</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-center">
+                                            <div class="fw-bold">89</div>
+                                            <div class="small text-muted">đơn</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge badge-canceled badge-custom">Hết hàng</span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button type="button" class="btn btn-outline-primary" onclick="editProduct('BT003')" title="Chỉnh sửa">
+                                                <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Edit" width="14" height="14">
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger" onclick="deleteProduct('BT003')" title="Xóa">
+                                                <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png" alt="Delete" width="14" height="14">
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
 
-                    <!-- Product Card 3 - Bông Tai Ngọc Trai -->
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="card h-100 shadow-custom">
-                            <div class="position-relative">
-                                <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=200&h=200&fit=crop" 
-                                     class="card-img-top" alt="Bông Tai Ngọc Trai" style="height: 200px; object-fit: cover;">
-                            </div>
-                            <div class="card-body">
-                                <h6 class="card-title fw-bold">Bông Tai Ngọc Trai</h6>
-                                <p class="card-text text-muted small">Bông tai</p>
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="h5 mb-0 text-success">950,000 VND</span>
-                                </div>
-                                
-                                <div class="mt-3">
-                                    <button class="btn btn-primary-custom btn-custom w-100" onclick="window.location.href='product-details.html'">
-                                        <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" alt="View" width="16" height="16" class="me-1">
-                                        Xem chi tiết sản phẩm
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product Card 4 - Vòng Tay Bạc -->
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <div class="card h-100 shadow-custom">
-                            <div class="position-relative">
-                                <img src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=200&h=200&fit=crop" 
-                                     class="card-img-top" alt="Vòng Tay Bạc" style="height: 200px; object-fit: cover;">
-                            </div>
-                            <div class="card-body">
-                                <h6 class="card-title fw-bold">Vòng Tay Bạc Ý</h6>
-                                <p class="card-text text-muted small">Vòng tay</p>
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="h5 mb-0 text-success">650,000 VND</span>
-                                </div>
-                                
-                                <div class="mt-3">
-                                    <button class="btn btn-primary-custom btn-custom w-100" onclick="window.location.href='product-details.html'">
-                                        <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" alt="View" width="16" height="16" class="me-1">
-                                        Xem chi tiết sản phẩm
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Add Category Form -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Add Category" width="24" height="24" class="me-2">
-                            Thêm Danh Mục Mới
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="addCategoryForm">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <label for="categoryName" class="form-label">Tên Danh Mục</label>
-                                    <input type="text" class="form-control" id="categoryName" placeholder="VD: Nhẫn, Dây chuyền..." required>
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="categoryDescription" class="form-label">Mô Tả</label>
-                                    <input type="text" class="form-control" id="categoryDescription" placeholder="Mô tả ngắn về danh mục">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="categoryStatus" class="form-label">Trạng Thái</label>
-                                    <select class="form-select" id="categoryStatus" required>
-                                        <option value="active">Hoạt động</option>
-                                        <option value="inactive">Không hoạt động</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <button type="submit" class="btn btn-success-custom btn-custom">
-                                    <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Add" width="16" height="16" class="me-1">
-                                    Thêm Danh Mục
-                                </button>
-                                <button type="reset" class="btn btn-secondary-custom btn-custom ms-2">
-                                    Reset
-                                </button>
-                            </div>
-                        </form>
+                                <tr>
+                                    <td><input type="checkbox" class="form-check-input row-checkbox"></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=50&h=50&fit=crop" alt="Product" width="40" height="40" class="rounded me-2">
+                                            <div>
+                                                <div class="fw-bold">Vòng Tay Bạc Ý</div>
+                                                <div class="small text-muted">SKU: #VT004</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-secondary">Vòng tay</span></td>
+                                    <td class="fw-bold text-success">650,000 VND</td>
+                                    <td>
+                                        <div class="text-center">
+                                            <div class="fw-bold">34</div>
+                                            <div class="small text-muted">chiếc</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-center">
+                                            <div class="fw-bold">52</div>
+                                            <div class="small text-muted">đơn</div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge badge-delivered badge-custom">Còn hàng</span></td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button type="button" class="btn btn-outline-primary" onclick="editProduct('VT004')" title="Chỉnh sửa">
+                                                <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Edit" width="14" height="14">
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger" onclick="deleteProduct('VT004')" title="Xóa">
+                                                <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png" alt="Delete" width="14" height="14">
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -347,33 +401,66 @@
 
         // Products page initialization
         function initializeProductsPage() {
-            // Add Category Form Handler
-            const addCategoryForm = document.getElementById('addCategoryForm');
-            if (addCategoryForm) {
-                addCategoryForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    const categoryName = document.getElementById('categoryName').value;
-                    const categoryDescription = document.getElementById('categoryDescription').value;
-                    const categoryStatus = document.getElementById('categoryStatus').value;
-                    
-                    if (!categoryName.trim()) {
-                        alert('Vui lòng nhập tên danh mục');
-                        return;
-                    }
-                    
-                    // Simulate adding category (replace with actual API call)
-                    console.log('Adding category:', {
-                        name: categoryName,
-                        description: categoryDescription,
-                        status: categoryStatus
+            // Select All Checkbox
+            const selectAll = document.getElementById('selectAll');
+            const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+            
+            if (selectAll) {
+                selectAll.addEventListener('change', function() {
+                    rowCheckboxes.forEach(checkbox => {
+                        checkbox.checked = selectAll.checked;
                     });
-                    
-                    alert('Đã thêm danh mục "' + categoryName + '" thành công!');
-                    
-                    // Reset form
-                    addCategoryForm.reset();
                 });
+            }
+
+            // Product Search
+            const searchInput = document.getElementById('productSearch');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const rows = document.querySelectorAll('#productsTable tbody tr');
+                    
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                });
+            }
+        }
+
+        // Filter Products
+        function filterProducts(type) {
+            const rows = document.querySelectorAll('#productsTable tbody tr');
+            rows.forEach(row => {
+                const status = row.querySelector('.badge-custom')?.textContent.trim();
+                
+                if (type === 'all') {
+                    row.style.display = '';
+                } else if (type === 'in-stock' && status === 'Còn hàng') {
+                    row.style.display = '';
+                } else if (type === 'out-of-stock' && status === 'Hết hàng') {
+                    row.style.display = '';
+                } else if (type === 'best-seller') {
+                    const sold = parseInt(row.cells[5]?.querySelector('.fw-bold')?.textContent || '0');
+                    row.style.display = sold > 50 ? '' : 'none';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Edit Product
+        function editProduct(sku) {
+            console.log('Editing product:', sku);
+            window.location.href = 'product-details.html?id=' + sku + '&edit=true';
+        }
+
+        // Delete Product
+        function deleteProduct(sku) {
+            if (confirm('Bạn có chắc chắn muốn xóa sản phẩm ' + sku + '?')) {
+                console.log('Deleting product:', sku);
+                alert('Đã xóa sản phẩm thành công!');
+                // Reload or update table
             }
         }
     </script>

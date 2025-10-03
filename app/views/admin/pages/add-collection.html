@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEWELLERY Admin - Add Collection</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    
+    <style>
+        .image-upload-box {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .image-upload-box:hover {
+            border-color: var(--primary-color);
+            background: #e7f3ff;
+        }
+        
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .preview-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .remove-image-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #dc3545;
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .form-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar Component -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header Component -->
+            <div id="header-container"></div>
+
+            <!-- Page Content -->
+            <main class="content-area">
+                <!-- Page Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold mb-1">Thêm Collection Mới</h2>
+                        <p class="text-muted mb-0">Tạo bộ sưu tập sản phẩm mới</p>
+                    </div>
+                    <button class="btn btn-outline-secondary" onclick="window.location.href='collections.html'">
+                        <img src="https://cdn-icons-png.flaticon.com/512/189/189665.png" alt="Back" width="16" height="16" class="me-1">
+                        Quay lại
+                    </button>
+                </div>
+
+                <form id="addCollectionForm">
+                    <div class="row">
+                        <!-- Left Column - Form Fields -->
+                        <div class="col-lg-8">
+                            <!-- Basic Information -->
+                            <div class="form-section">
+                                <h5 class="fw-bold mb-3">Thông Tin Cơ Bản</h5>
+                                
+                                <div class="mb-3">
+                                    <label for="collectionName" class="form-label">Tên Collection <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="collectionName" placeholder="VD: Summer Collection 2024" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="collectionSlug" class="form-label">Slug (URL)</label>
+                                    <input type="text" class="form-control" id="collectionSlug" placeholder="summer-collection-2024" readonly>
+                                    <small class="text-muted">Tự động tạo từ tên collection</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="collectionDescription" class="form-label">Mô Tả Ngắn</label>
+                                    <textarea class="form-control" id="collectionDescription" rows="3" placeholder="Mô tả ngắn về collection..."></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="collectionContent" class="form-label">Nội Dung Chi Tiết</label>
+                                    <textarea class="form-control" id="collectionContent" rows="5" placeholder="Nội dung chi tiết về collection, câu chuyện, cảm hứng..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Collection Settings -->
+                            <div class="form-section">
+                                <h5 class="fw-bold mb-3">Cài Đặt Collection</h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="collectionType" class="form-label">Loại Collection</label>
+                                        <select class="form-select" id="collectionType">
+                                            <option value="seasonal">Theo Mùa</option>
+                                            <option value="event">Sự Kiện</option>
+                                            <option value="trending">Xu Hướng</option>
+                                            <option value="bestseller">Bán Chạy</option>
+                                            <option value="new">Mới Ra Mắt</option>
+                                            <option value="luxury">Cao Cấp</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="collectionStatus" class="form-label">Trạng Thái</label>
+                                        <select class="form-select" id="collectionStatus">
+                                            <option value="active">Hoạt động</option>
+                                            <option value="inactive">Không hoạt động</option>
+                                            <option value="draft">Nháp</option>
+                                            <option value="scheduled">Đã lên lịch</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="startDate" class="form-label">Ngày Bắt Đầu</label>
+                                        <input type="date" class="form-control" id="startDate">
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="endDate" class="form-label">Ngày Kết Thúc</label>
+                                        <input type="date" class="form-control" id="endDate">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="collectionTags" class="form-label">Tags</label>
+                                    <input type="text" class="form-control" id="collectionTags" placeholder="Nhập tags cách nhau bởi dấu phấy (VD: summer, wedding, luxury)">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Right Column - Image Upload -->
+                        <div class="col-lg-4">
+                            <!-- Cover Image -->
+                            <div class="form-section">
+                                <h5 class="fw-bold mb-3">
+                                    <span class="badge bg-primary me-2">Cover</span>
+                                    Ảnh Bìa Collection
+                                </h5>
+                                
+                                <div class="image-upload-box" id="coverUploadBox" onclick="document.getElementById('coverImageInput').click()">
+                                    <input type="file" id="coverImageInput" accept="image/*" style="display: none;" required>
+                                    <div id="coverUploadPlaceholder">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/1160/1160358.png" alt="Upload" width="48" height="48" class="mb-2">
+                                        <p class="text-muted mb-1">Upload ảnh bìa</p>
+                                        <p class="text-muted small mb-0">JPG, PNG (Max 5MB)</p>
+                                        <p class="text-muted small mb-0">Khuyến nghị: 1200x800px</p>
+                                    </div>
+                                    <div id="coverPreview" style="display: none;" class="w-100">
+                                        <div class="preview-container">
+                                            <img id="coverPreviewImg" src="" alt="Cover Preview" class="image-preview">
+                                            <div class="remove-image-btn" onclick="event.stopPropagation(); removeCoverImage()">
+                                                <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png" alt="Remove" width="16" height="16">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            
+
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="form-section mt-4">
+                        <div class="d-flex gap-2 justify-content-end">
+                            <button type="button" class="btn btn-outline-secondary btn-custom px-4" onclick="window.location.href='collections.html'">
+                                <img src="https://cdn-icons-png.flaticon.com/512/189/189665.png" alt="Cancel" width="16" height="16" class="me-1">
+                                Hủy
+                            </button>
+                            <button type="button" class="btn btn-secondary-custom btn-custom px-4" onclick="saveDraft()">
+                                <img src="https://cdn-icons-png.flaticon.com/512/2920/2920277.png" alt="Draft" width="16" height="16" class="me-1">
+                                Lưu Nháp
+                            </button>
+                            <button type="submit" class="btn btn-success-custom btn-custom px-4">
+                                <img src="https://cdn-icons-png.flaticon.com/512/5610/5610944.png" alt="Save" width="16" height="16" class="me-1">
+                                Tạo Collection
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </main>
+        </div>
+    </div>
+
+    <!-- Component Manager -->
+    <script src="../components/component-manager.js"></script>
+    
+    <!-- Page Configuration -->
+    <script>
+        window.pageConfig = {
+            sidebar: {
+                brandName: 'JEWELLERY',
+                activePage: 'collections',
+                links: {
+                    dashboard: '../index.html',
+                    products: 'products.html',
+                    categories: 'categories.html',
+                    collections: 'collections.html',
+                    orders: 'orders.html',
+                    customers: 'customers.html'
+                }
+            }
+        };
+
+        // Wait for component manager to initialize
+        if (window.ComponentManager) {
+            window.ComponentManager.init().then(() => {
+                console.log('Add collection page initialized');
+                initializeAddCollectionPage();
+            });
+        }
+
+        // Add Collection page initialization
+        function initializeAddCollectionPage() {
+            // Auto-generate slug from collection name
+            const collectionNameInput = document.getElementById('collectionName');
+            const collectionSlugInput = document.getElementById('collectionSlug');
+            
+            collectionNameInput.addEventListener('input', function() {
+                const slug = this.value
+                    .toLowerCase()
+                    .replace(/[^a-z0-9\s-]/g, '')
+                    .replace(/\s+/g, '-')
+                    .replace(/-+/g, '-')
+                    .trim();
+                collectionSlugInput.value = slug;
+            });
+
+            // Cover Image Upload
+            const coverImageInput = document.getElementById('coverImageInput');
+            coverImageInput.addEventListener('change', function(e) {
+                handleImageUpload(e, 'cover', 5);
+            });
+
+            // Thumbnail Image Upload
+            const thumbnailImageInput = document.getElementById('thumbnailImageInput');
+            thumbnailImageInput.addEventListener('change', function(e) {
+                handleImageUpload(e, 'thumbnail', 2);
+            });
+
+            // Banner Image Upload
+            const bannerImageInput = document.getElementById('bannerImageInput');
+            bannerImageInput.addEventListener('change', function(e) {
+                handleImageUpload(e, 'banner', 5);
+            });
+
+            // Form Submit
+            const form = document.getElementById('addCollectionForm');
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitCollection();
+            });
+        }
+
+        // Handle Image Upload
+        function handleImageUpload(event, type, maxSizeMB) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > maxSizeMB * 1024 * 1024) {
+                alert(`Ảnh ${type} vượt quá ${maxSizeMB}MB!`);
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById(`${type}PreviewImg`).src = e.target.result;
+                document.getElementById(`${type}UploadPlaceholder`).style.display = 'none';
+                document.getElementById(`${type}Preview`).style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Remove Cover Image
+        function removeCoverImage() {
+            document.getElementById('coverImageInput').value = '';
+            document.getElementById('coverUploadPlaceholder').style.display = 'block';
+            document.getElementById('coverPreview').style.display = 'none';
+        }
+
+        // Remove Thumbnail Image
+        function removeThumbnailImage() {
+            document.getElementById('thumbnailImageInput').value = '';
+            document.getElementById('thumbnailUploadPlaceholder').style.display = 'block';
+            document.getElementById('thumbnailPreview').style.display = 'none';
+        }
+
+        // Remove Banner Image
+        function removeBannerImage() {
+            document.getElementById('bannerImageInput').value = '';
+            document.getElementById('bannerUploadPlaceholder').style.display = 'block';
+            document.getElementById('bannerPreview').style.display = 'none';
+        }
+
+        // Save Draft
+        function saveDraft() {
+            const collectionName = document.getElementById('collectionName').value;
+            if (!collectionName.trim()) {
+                alert('Vui lòng nhập tên collection!');
+                return;
+            }
+
+            console.log('Saving draft...');
+            alert('Đã lưu nháp collection "' + collectionName + '" thành công!');
+        }
+
+        // Submit Collection
+        function submitCollection() {
+            const collectionName = document.getElementById('collectionName').value;
+            const collectionSlug = document.getElementById('collectionSlug').value;
+            const collectionDescription = document.getElementById('collectionDescription').value;
+            const collectionContent = document.getElementById('collectionContent').value;
+            const collectionType = document.getElementById('collectionType').value;
+            const collectionStatus = document.getElementById('collectionStatus').value;
+            const coverImage = document.getElementById('coverImageInput').files[0];
+            const thumbnailImage = document.getElementById('thumbnailImageInput').files[0];
+            const bannerImage = document.getElementById('bannerImageInput').files[0];
+
+            if (!collectionName.trim()) {
+                alert('Vui lòng nhập tên collection!');
+                return;
+            }
+
+            if (!coverImage) {
+                alert('Vui lòng upload ảnh bìa!');
+                return;
+            }
+
+            // Prepare data
+            const collectionData = {
+                name: collectionName,
+                slug: collectionSlug,
+                description: collectionDescription,
+                content: collectionContent,
+                type: collectionType,
+                status: collectionStatus,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                tags: document.getElementById('collectionTags').value,
+                metaTitle: document.getElementById('metaTitle').value,
+                metaDescription: document.getElementById('metaDescription').value,
+                metaKeywords: document.getElementById('metaKeywords').value,
+                coverImage: coverImage.name,
+                thumbnailImage: thumbnailImage ? thumbnailImage.name : null,
+                bannerImage: bannerImage ? bannerImage.name : null
+            };
+
+            console.log('Creating collection:', collectionData);
+            
+            // Simulate API call
+            alert('Đã tạo collection "' + collectionName + '" thành công!');
+            
+            // Redirect to collections page
+            setTimeout(() => {
+                window.location.href = 'collections.html';
+            }, 1000);
+        }
+    </script>
+
+    <!-- Bootstrap 5 JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

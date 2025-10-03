@@ -11,20 +11,59 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Sidebar toggle for mobile
     const sidebarToggle = document.querySelector('.sidebar-toggle');
+    const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
     const sidebar = document.querySelector('.sidebar');
     
+    // Create overlay element
+    const overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    document.body.appendChild(overlay);
+    
+    // Toggle sidebar function
+    function toggleSidebar() {
+        sidebar.classList.toggle('show');
+        overlay.classList.toggle('show');
+        document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : '';
+    }
+    
+    // Mobile menu toggle button
+    if (mobileMenuToggle) {
+        mobileMenuToggle.addEventListener('click', toggleSidebar);
+    }
+    
+    // Legacy sidebar toggle
     if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('show');
-        });
+        sidebarToggle.addEventListener('click', toggleSidebar);
     }
 
+    // Close sidebar when clicking overlay
+    overlay.addEventListener('click', function() {
+        sidebar.classList.remove('show');
+        overlay.classList.remove('show');
+        document.body.style.overflow = '';
+    });
+    
     // Close sidebar when clicking outside on mobile
     document.addEventListener('click', function(e) {
-        if (window.innerWidth <= 768) {
-            if (!sidebar.contains(e.target) && !e.target.matches('.sidebar-toggle')) {
+        if (window.innerWidth <= 991) {
+            if (!sidebar.contains(e.target) && 
+                !e.target.matches('.sidebar-toggle') && 
+                !e.target.matches('.mobile-menu-toggle') &&
+                !e.target.closest('.sidebar-toggle') &&
+                !e.target.closest('.mobile-menu-toggle')) {
                 sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
             }
+        }
+    });
+    
+    // Close sidebar on window resize if screen becomes large
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 991) {
+            sidebar.classList.remove('show');
+            overlay.classList.remove('show');
+            document.body.style.overflow = '';
         }
     });
 
