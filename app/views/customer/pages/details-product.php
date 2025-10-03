@@ -29,6 +29,15 @@
     </div>
 
     <!-- Product Detail Section -->
+    <?php
+    // Đảm bảo data được khởi tạo đúng
+    $product = isset($data['product']) ? $data['product'] : null;
+    $reviewStats = (!empty($product) && !empty($product->review_stats)) ? $product->review_stats : null;
+    $reviews = isset($data['reviews']) ? $data['reviews'] : [];
+  $relatedProducts = $data['relatedProducts'] ?? []; // Thêm dòng này
+
+    ?>
+    
     <div class="container">
         <div class="row">
             <!-- Product Images -->
@@ -76,12 +85,14 @@
                 <div class="rating-reviews d-flex align-items-center mb-3">
                     <div class="rating">
                         <?php 
-                        $avgRating = isset($reviewStats->average_rating) ? round($reviewStats->average_rating) : 5;
+                        $avgRating = ($reviewStats && isset($reviewStats->average_rating)) 
+                            ? round($reviewStats->average_rating) 
+                            : 5;
                         for ($i = 1; $i <= 5; $i++): ?>
                             <i class="<?= $i <= $avgRating ? 'fas' : 'far' ?> fa-star"></i>
                         <?php endfor; ?>
                     </div>
-                    <span class="text-muted">(<?= isset($reviewStats->total_reviews) ? $reviewStats->total_reviews : 0 ?> đánh giá)</span>
+                    <span class="text-muted">(<?= ($reviewStats && isset($reviewStats->total_reviews)) ? $reviewStats->total_reviews : 0 ?> đánh giá)</span>
                     <span class="badge bg-success ms-3">Còn hàng</span>
                 </div>
 
@@ -145,7 +156,7 @@
             <div class="tab-navigation">
                 <button class="tab-btn active" onclick="switchTab(this, 'description')">Mô tả sản phẩm</button>
                 <button class="tab-btn" onclick="switchTab(this, 'additional')">Thông tin bổ sung</button>
-                <button class="tab-btn" onclick="switchTab(this, 'reviews')">Đánh giá ()</button>
+                <button class="tab-btn" onclick="switchTab(this, 'reviews')">Đánh giá (<?= ($reviewStats && isset($reviewStats->total_reviews)) ? $reviewStats->total_reviews : 0 ?>)</button>
             </div>
 
             <div class="tab-content active" id="description">
@@ -213,64 +224,110 @@
 
             <div class="tab-content" id="reviews">
                 <h4>Đánh giá từ khách hàng</h4>
+                <?php if ($reviewStats && $reviewStats->total_reviews > 0): ?>
                 <div class="row">
                     <div class="col-md-4">
                         <div class="text-center">
-                            <h2 class="display-4">4.8</h2>
+                            <h2 class="display-4"><?= number_format($reviewStats->average_rating, 1) ?></h2>
                             <div class="rating mb-2">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
+                                <?php 
+                                // require_once __DIR__ . '/../../services/ReviewService.php';
+                                $reviewService = new ReviewService();
+                                echo $reviewService->renderStars($reviewStats->average_rating);
+                                ?>
                             </div>
-                            <p class="text-muted">Dựa trên 150 đánh giá</p>
+                            <p class="text-muted">Dựa trên <?= $reviewStats->total_reviews ?> đánh giá</p>
                         </div>
                     </div>
                     <div class="col-md-8">
-                        <div class="review-item border-bottom pb-3 mb-3">
-                            <div class="d-flex justify-content-between">
-                                <h6>Minh Anh</h6>
-                                <div class="rating">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
+                        <?php if (!empty($data['product']->reviews)): ?>
+                            <?php foreach ($data['product']->reviews as $index => $review): ?>
+                            <div class="review-item <?= $index < count($data['product']->reviews) - 1 ? 'border-bottom pb-3 mb-3' : '' ?>">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1"><?= htmlspecialchars($review->reviewer_name) ?></h6>
+                                        <?php if (!empty($review->title)): ?>
+                                        <p class="fw-bold text-dark mb-1">"<?= htmlspecialchars($review->title) ?>"</p>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="rating">
+                                        <?= $reviewService->renderStars($review->rating) ?>
+                                    </div>
                                 </div>
+                                <p class="mb-1"><?= htmlspecialchars($review->comment) ?></p>
+                                <small class="text-muted"><?= $reviewService->formatReviewTime($review->created_at) ?></small>
                             </div>
-                            <p class="mb-1">"Nhẫn rất đẹp, kim cương lấp lánh, chất lượng tuyệt vời. Giao hàng nhanh, đóng gói cẩn thận."</p>
-                            <small class="text-muted">2 ngày trước</small>
-                        </div>
-                        
-                        <div class="review-item border-bottom pb-3 mb-3">
-                            <div class="d-flex justify-content-between">
-                                <h6>Thu Hương</h6>
-                                <div class="rating">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p class="text-muted">Chưa có đánh giá nào.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php else: ?>
+                <div class="text-center py-5">
+                    <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Chưa có đánh giá nào</h5>
+                    <p class="text-muted">Hãy là người đầu tiên đánh giá sản phẩm này!</p>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Add Review Form -->
+                <div class="mt-5">
+                    <h5>Viết đánh giá của bạn</h5>
+                    <div class="card">
+                        <div class="card-body">
+                            <form id="reviewForm" class="needs-validation" novalidate>
+                                <input type="hidden" id="productId" value="<?= $data['product']->product_id ?>">
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Đánh giá của bạn *</label>
+                                    <div class="rating-input">
+                                        <input type="radio" name="rating" value="5" id="star5">
+                                        <label for="star5"><i class="fas fa-star"></i></label>
+                                        <input type="radio" name="rating" value="4" id="star4">
+                                        <label for="star4"><i class="fas fa-star"></i></label>
+                                        <input type="radio" name="rating" value="3" id="star3">
+                                        <label for="star3"><i class="fas fa-star"></i></label>
+                                        <input type="radio" name="rating" value="2" id="star2">
+                                        <label for="star2"><i class="fas fa-star"></i></label>
+                                        <input type="radio" name="rating" value="1" id="star1">
+                                        <label for="star1"><i class="fas fa-star"></i></label>
+                                    </div>
+                                    <div class="invalid-feedback">Vui lòng chọn số sao đánh giá.</div>
                                 </div>
-                            </div>
-                            <p class="mb-1">"Thiết kế sang trọng, đúng như mô tả. Rất hài lòng với sản phẩm này!"</p>
-                            <small class="text-muted">5 ngày trước</small>
-                        </div>
-                        
-                        <div class="review-item">
-                            <div class="d-flex justify-content-between">
-                                <h6>Văn Hùng</h6>
-                                <div class="rating">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="far fa-star"></i>
+                                
+                                <div class="mb-3">
+                                    <label for="reviewTitle" class="form-label">Tiêu đề đánh giá *</label>
+                                    <input type="text" class="form-control" id="reviewTitle" 
+                                           placeholder="Nhập tiêu đề đánh giá..." maxlength="200" required>
+                                    <div class="invalid-feedback">Vui lòng nhập tiêu đề đánh giá.</div>
                                 </div>
-                            </div>
-                            <p class="mb-1">"Sản phẩm đẹp, chất lượng tốt. Tuy nhiên thời gian giao hàng hơi lâu."</p>
-                            <small class="text-muted">1 tuần trước</small>
+                                
+                                <div class="mb-3">
+                                    <label for="reviewComment" class="form-label">Nhận xét của bạn *</label>
+                                    <textarea class="form-control" id="reviewComment" rows="4" 
+                                              placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..." required></textarea>
+                                    <div class="invalid-feedback">Vui lòng nhập nhận xét của bạn.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="reviewerName" class="form-label">Tên của bạn *</label>
+                                    <input type="text" class="form-control" id="reviewerName" 
+                                           placeholder="Nhập tên của bạn..." required>
+                                    <div class="invalid-feedback">Vui lòng nhập tên của bạn.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="reviewerEmail" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="reviewerEmail" 
+                                           placeholder="Nhập email của bạn..." required>
+                                    <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>Gửi đánh giá
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -360,5 +417,68 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/Ecom_website/public/assets/js/product-detail.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Test if JS file loads -->
+<script>
+console.log('🧪 Testing JS file loading...');
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+console.log('🧪 Testing JS file loading...');
+</script>
+<!-- Test if JS file loads -->
+<script src="<?= asset('js/product-detail.js') ?>" defer></script>
+
+<style>
+/* Rating Input Styles */
+.rating-input {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+.rating-input input[type="radio"] {
+    display: none;
+}
+
+.rating-input label {
+    color: #ddd;
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin-right: 5px;
+    transition: color 0.2s;
+}
+
+.rating-input label:hover,
+.rating-input label:hover ~ label,
+.rating-input input[type="radio"]:checked ~ label {
+    color: #ffc107;
+}
+
+.rating-input label:hover {
+    transform: scale(1.1);
+}
+
+/* Review Cards */
+.review-item {
+    transition: background-color 0.2s;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.review-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Tab Content Visibility */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+</style>
 

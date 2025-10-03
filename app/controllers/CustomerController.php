@@ -141,7 +141,7 @@ class CustomerController extends BaseController {
             
             // Pass data to view
             $data = [
-                'title' => $product->product_name,
+                'title' => $product->name,
                 'product' => $product,
                 'relatedProducts' => $relatedProducts
             ];

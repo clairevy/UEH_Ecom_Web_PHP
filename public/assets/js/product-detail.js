@@ -1,4 +1,4 @@
-// Định nghĩa hàm changeImage ngay lập tức
+// ==================== IMAGE GALLERY ====================
 function changeImage(element, imageUrl) {
   const mainImage = document.getElementById("mainImage");
   if (mainImage) {
@@ -13,7 +13,7 @@ function changeImage(element, imageUrl) {
   element.classList.add("active");
 }
 
-// Chọn option (màu, size)
+// ==================== PRODUCT OPTIONS ====================
 function selectOption(element) {
   let parent = element.parentNode;
   // Bỏ active ở nhóm hiện tại
@@ -24,8 +24,10 @@ function selectOption(element) {
   element.classList.add("active");
 }
 
-// Chuyển tab (mô tả / bổ sung / đánh giá)
+// ==================== TAB SWITCHING ====================
 function switchTab(element, tabId) {
+  console.log("🔄 switchTab called with:", tabId);
+
   // Reset button active
   document.querySelectorAll(".tab-btn").forEach((btn) => {
     btn.classList.remove("active");
@@ -36,13 +38,97 @@ function switchTab(element, tabId) {
   document.querySelectorAll(".tab-content").forEach((content) => {
     content.classList.remove("active");
   });
-  document.getElementById(tabId).classList.add("active");
+
+  const targetTab = document.getElementById(tabId);
+  if (targetTab) {
+    targetTab.classList.add("active");
+    console.log("✅ Tab switched to:", tabId);
+  } else {
+    console.error("❌ Tab not found:", tabId);
+  }
 }
 
+// ==================== REVIEW FORM ====================
+function submitReview(formData) {
+  console.log("📝 Submitting review:", formData);
+
+  // For now, just show success message
+  // Later you can implement AJAX call to submit review
+  alert(
+    "Cảm ơn bạn đã đánh giá! Đánh giá của bạn sẽ được xem xét và phê duyệt sớm."
+  );
+
+  // Reset form
+  const reviewForm = document.getElementById("reviewForm");
+  if (reviewForm) {
+    reviewForm.reset();
+    document
+      .querySelectorAll('input[name="rating"]')
+      .forEach((input) => (input.checked = false));
+    reviewForm.classList.remove("was-validated");
+  }
+
+  console.log("✅ Review form reset");
+}
+
+// ==================== INITIALIZATION ====================
 document.addEventListener("DOMContentLoaded", function () {
+  console.log("🚀 Product Detail Page Initialized");
+
+  // Initialize tabs - show description by default
+  const descTab = document.getElementById("description");
+  if (descTab) {
+    descTab.classList.add("active");
+    console.log("✅ Description tab activated by default");
+  }
+
+  // Review Form Event Listener
+  const reviewForm = document.getElementById("reviewForm");
+  if (reviewForm) {
+    console.log("📝 Review form found, attaching events");
+
+    reviewForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      console.log("📝 Review form submitted");
+
+      // Validate form
+      if (!reviewForm.checkValidity()) {
+        e.stopPropagation();
+        reviewForm.classList.add("was-validated");
+        console.log("❌ Form validation failed");
+        return;
+      }
+
+      // Check if rating is selected
+      const rating = document.querySelector('input[name="rating"]:checked');
+      if (!rating) {
+        alert("Vui lòng chọn số sao đánh giá!");
+        console.log("❌ No rating selected");
+        return;
+      }
+
+      // Collect form data
+      const formData = {
+        product_id: document.getElementById("productId")?.value,
+        rating: rating.value,
+        title: document.getElementById("reviewTitle")?.value,
+        comment: document.getElementById("reviewComment")?.value,
+        reviewer_name: document.getElementById("reviewerName")?.value,
+        reviewer_email: document.getElementById("reviewerEmail")?.value,
+      };
+
+      // Submit review
+      submitReview(formData);
+    });
+  } else {
+    console.log("ℹ️ No review form found on this page");
+  }
+
   // Search functionality
   const searchBtn = document.querySelector(".search-btn");
   if (searchBtn) {
+    console.log("🔍 Search functionality initialized");
+
     searchBtn.addEventListener("click", function () {
       const searchTerm = document.querySelector(".search-input").value;
       if (searchTerm.trim()) {
@@ -63,4 +149,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
+
+  console.log("✅ Product Detail JS Fully Loaded");
 });

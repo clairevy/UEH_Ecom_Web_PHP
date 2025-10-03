@@ -7,6 +7,7 @@ require_once __DIR__ . '/../models/Category.php';
 require_once __DIR__ . '/../models/Collection.php';
 require_once __DIR__ . '/../models/Review.php';
 require_once __DIR__ . '/../models/SiteAssets.php';
+require_once __DIR__ . '/ReviewService.php';
 
 /**
  * ProductService - Business Logic Layer
@@ -19,6 +20,7 @@ class ProductService extends BaseModel {
     private $collectionModel;
     private $siteAssetsModel;
     private $reviewModel;
+    private $reviewService;
     
     public function __construct() {
         parent::__construct(); // Initialize database connection from BaseModel
@@ -29,6 +31,7 @@ class ProductService extends BaseModel {
         $this->collectionModel = new Collection(); 
         $this->reviewModel = new Review();
         $this->siteAssetsModel = new SiteAssets();
+        $this->reviewService = new ReviewService();
 
     }
     
@@ -286,6 +289,10 @@ class ProductService extends BaseModel {
         $product->images = $this->getProductImages($product->product_id);
         $product->primary_image = $this->getProductPrimaryImage($product->product_id);
         $product->categories = $this->getProductCategories($product->product_id);
+        
+        // Attach review data
+        $product->reviews = $this->reviewService->getProductReviews($product->product_id, 10);
+        $product->review_stats = $this->reviewService->getProductReviewStats($product->product_id);
         
         return $product;
     }
