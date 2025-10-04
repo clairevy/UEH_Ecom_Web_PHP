@@ -71,4 +71,22 @@ class Database{
     public function rowCount() {
         return $this->stmt->rowCount();
     }
+
+    // Get last insert ID
+    public function lastInsertId() {
+        return $this->conn->lastInsertId();
+    }
+
+    // Transaction methods
+    public function beginTransaction() {
+        return $this->conn->beginTransaction();
+    }
+
+    public function commit() {
+        return $this->conn->commit();
+    }
+
+    public function rollback() {
+        return $this->conn->rollback();
+    }
 }
