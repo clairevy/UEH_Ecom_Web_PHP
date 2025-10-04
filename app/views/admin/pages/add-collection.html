@@ -11,64 +11,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="../assets/css/variables.css">
     <link rel="stylesheet" href="../assets/css/main.css">
-    
-    <style>
-        .image-upload-box {
-            border: 2px dashed var(--border-color);
-            border-radius: 8px;
-            padding: 30px;
-            text-align: center;
-            background: #f8f9fa;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            min-height: 200px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .image-upload-box:hover {
-            border-color: var(--primary-color);
-            background: #e7f3ff;
-        }
-        
-        .image-preview {
-            max-width: 100%;
-            max-height: 300px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .preview-container {
-            position: relative;
-            display: inline-block;
-        }
-        
-        .remove-image-btn {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: #dc3545;
-            border: 2px solid white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .form-section {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-    </style>
+    <link rel="stylesheet" href="../assets/css/add-collection.css">
 </head>
 <body>
     <div class="admin-container">
@@ -243,167 +186,23 @@
                     collections: 'collections.html',
                     orders: 'orders.html',
                     customers: 'customers.html'
-                }
+                },
+                categories: [
+                    { name: 'Vòng cổ', count: 12 },
+                    { name: 'Vòng tay', count: 10 },
+                    { name: 'Bông tai', count: 13 },
+                    { name: 'Nhẫn', count: 4 },
+                    { name: 'Lắc chân', count: 6 }
+                ],
+                categoriesTitle: 'DANH MỤC'
+            },
+            header: {
+                title: 'Add New Collection',
+                breadcrumb: 'Home > Collections > Add New'
             }
         };
-
-        // Wait for component manager to initialize
-        if (window.ComponentManager) {
-            window.ComponentManager.init().then(() => {
-                console.log('Add collection page initialized');
-                initializeAddCollectionPage();
-            });
-        }
-
-        // Add Collection page initialization
-        function initializeAddCollectionPage() {
-            // Auto-generate slug from collection name
-            const collectionNameInput = document.getElementById('collectionName');
-            const collectionSlugInput = document.getElementById('collectionSlug');
-            
-            collectionNameInput.addEventListener('input', function() {
-                const slug = this.value
-                    .toLowerCase()
-                    .replace(/[^a-z0-9\s-]/g, '')
-                    .replace(/\s+/g, '-')
-                    .replace(/-+/g, '-')
-                    .trim();
-                collectionSlugInput.value = slug;
-            });
-
-            // Cover Image Upload
-            const coverImageInput = document.getElementById('coverImageInput');
-            coverImageInput.addEventListener('change', function(e) {
-                handleImageUpload(e, 'cover', 5);
-            });
-
-            // Thumbnail Image Upload
-            const thumbnailImageInput = document.getElementById('thumbnailImageInput');
-            thumbnailImageInput.addEventListener('change', function(e) {
-                handleImageUpload(e, 'thumbnail', 2);
-            });
-
-            // Banner Image Upload
-            const bannerImageInput = document.getElementById('bannerImageInput');
-            bannerImageInput.addEventListener('change', function(e) {
-                handleImageUpload(e, 'banner', 5);
-            });
-
-            // Form Submit
-            const form = document.getElementById('addCollectionForm');
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                submitCollection();
-            });
-        }
-
-        // Handle Image Upload
-        function handleImageUpload(event, type, maxSizeMB) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            if (file.size > maxSizeMB * 1024 * 1024) {
-                alert(`Ảnh ${type} vượt quá ${maxSizeMB}MB!`);
-                event.target.value = '';
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById(`${type}PreviewImg`).src = e.target.result;
-                document.getElementById(`${type}UploadPlaceholder`).style.display = 'none';
-                document.getElementById(`${type}Preview`).style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // Remove Cover Image
-        function removeCoverImage() {
-            document.getElementById('coverImageInput').value = '';
-            document.getElementById('coverUploadPlaceholder').style.display = 'block';
-            document.getElementById('coverPreview').style.display = 'none';
-        }
-
-        // Remove Thumbnail Image
-        function removeThumbnailImage() {
-            document.getElementById('thumbnailImageInput').value = '';
-            document.getElementById('thumbnailUploadPlaceholder').style.display = 'block';
-            document.getElementById('thumbnailPreview').style.display = 'none';
-        }
-
-        // Remove Banner Image
-        function removeBannerImage() {
-            document.getElementById('bannerImageInput').value = '';
-            document.getElementById('bannerUploadPlaceholder').style.display = 'block';
-            document.getElementById('bannerPreview').style.display = 'none';
-        }
-
-        // Save Draft
-        function saveDraft() {
-            const collectionName = document.getElementById('collectionName').value;
-            if (!collectionName.trim()) {
-                alert('Vui lòng nhập tên collection!');
-                return;
-            }
-
-            console.log('Saving draft...');
-            alert('Đã lưu nháp collection "' + collectionName + '" thành công!');
-        }
-
-        // Submit Collection
-        function submitCollection() {
-            const collectionName = document.getElementById('collectionName').value;
-            const collectionSlug = document.getElementById('collectionSlug').value;
-            const collectionDescription = document.getElementById('collectionDescription').value;
-            const collectionContent = document.getElementById('collectionContent').value;
-            const collectionType = document.getElementById('collectionType').value;
-            const collectionStatus = document.getElementById('collectionStatus').value;
-            const coverImage = document.getElementById('coverImageInput').files[0];
-            const thumbnailImage = document.getElementById('thumbnailImageInput').files[0];
-            const bannerImage = document.getElementById('bannerImageInput').files[0];
-
-            if (!collectionName.trim()) {
-                alert('Vui lòng nhập tên collection!');
-                return;
-            }
-
-            if (!coverImage) {
-                alert('Vui lòng upload ảnh bìa!');
-                return;
-            }
-
-            // Prepare data
-            const collectionData = {
-                name: collectionName,
-                slug: collectionSlug,
-                description: collectionDescription,
-                content: collectionContent,
-                type: collectionType,
-                status: collectionStatus,
-                startDate: document.getElementById('startDate').value,
-                endDate: document.getElementById('endDate').value,
-                tags: document.getElementById('collectionTags').value,
-                metaTitle: document.getElementById('metaTitle').value,
-                metaDescription: document.getElementById('metaDescription').value,
-                metaKeywords: document.getElementById('metaKeywords').value,
-                coverImage: coverImage.name,
-                thumbnailImage: thumbnailImage ? thumbnailImage.name : null,
-                bannerImage: bannerImage ? bannerImage.name : null
-            };
-
-            console.log('Creating collection:', collectionData);
-            
-            // Simulate API call
-            alert('Đã tạo collection "' + collectionName + '" thành công!');
-            
-            // Redirect to collections page
-            setTimeout(() => {
-                window.location.href = 'collections.html';
-            }, 1000);
-        }
     </script>
-
-    <!-- Bootstrap 5 JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    
+    <!-- Add Collection Page Script -->
+    <script src="../assets/js/add-collection.js"></script>
+                            

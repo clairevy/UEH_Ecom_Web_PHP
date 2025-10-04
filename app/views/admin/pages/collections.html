@@ -363,36 +363,10 @@
                 location.reload();
             }
         }
-
-        // Search functionality
-        document.getElementById('collectionSearch').addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const rows = document.querySelectorAll('#collectionsTable tbody tr');
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
-        });
-
-        // Select all checkbox functionality
-        document.getElementById('selectAll').addEventListener('change', function() {
-            const checkboxes = document.querySelectorAll('.row-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
-            });
-        });
-
-        // Initialize pagination
-        document.addEventListener('DOMContentLoaded', function() {
-            const paginationContainer = document.getElementById('pagination-container');
-            if (paginationContainer) {
-                window.ComponentManager.renderPagination(paginationContainer, {
-                    ariaLabel: 'Collections pagination'
-                });
-            }
-        });
     </script>
+    
+    <!-- Collections Page Script -->
+    <script src="../assets/js/collections.js"></script>
     
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

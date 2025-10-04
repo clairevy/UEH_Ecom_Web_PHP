@@ -298,207 +298,31 @@
         window.pageConfig = {
             sidebar: {
                 brandName: 'JEWELLERY',
-                activePage: 'discounts'
+                activePage: 'discounts',
+                links: {
+                    dashboard: '../index.html',
+                    products: 'products.html',
+                    orders: 'orders.html',
+                    discounts: 'discounts.html'
+                },
+                categories: [
+                    { name: 'Vòng cổ', count: 12 },
+                    { name: 'Vòng tay', count: 10 },
+                    { name: 'Bông tai', count: 13 },
+                    { name: 'Nhẫn', count: 4 },
+                    { name: 'Lắc chân', count: 6 }
+                ],
+                categoriesTitle: 'DANH MỤC'
             },
             header: {
                 title: 'Add Discount',
                 breadcrumb: 'Home > Discounts > Add New'
             }
         };
-
-        // Form handling
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set default dates
-            const now = new Date();
-            const startDate = new Date(now.getTime() + 24 * 60 * 60 * 1000); // Tomorrow
-            const endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days later
-            
-            document.getElementById('startDate').value = startDate.toISOString().slice(0, 16);
-            document.getElementById('endDate').value = endDate.toISOString().slice(0, 16);
-
-            // Real-time preview updates
-            document.getElementById('discountCode').addEventListener('input', updatePreview);
-            document.getElementById('programName').addEventListener('input', updatePreview);
-            document.getElementById('description').addEventListener('input', updatePreview);
-            document.getElementById('discountType').addEventListener('change', updatePreview);
-            document.getElementById('discountValue').addEventListener('input', updatePreview);
-            document.getElementById('maxDiscount').addEventListener('input', updatePreview);
-            document.getElementById('minOrderValue').addEventListener('input', updatePreview);
-            document.getElementById('usageLimit').addEventListener('input', updatePreview);
-            document.getElementById('startDate').addEventListener('change', updatePreview);
-            document.getElementById('endDate').addEventListener('change', updatePreview);
-            document.getElementById('status').addEventListener('change', updatePreview);
-
-            // Form submission
-            document.getElementById('discountForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // Validate form
-                if (!validateForm()) {
-                    return;
-                }
-
-                // Collect form data
-                const formData = collectFormData();
-                
-                console.log('Discount data:', formData);
-                alert('Đã tạo mã giảm giá thành công!');
-                
-                // Redirect to discounts list
-                window.location.href = 'discounts.html';
-            });
-        });
-
-        function toggleDiscountFields() {
-            const discountType = document.getElementById('discountType').value;
-            const valueField = document.getElementById('discountValueField');
-            const maxField = document.getElementById('maxDiscountField');
-            
-            if (discountType === 'percentage') {
-                valueField.style.display = 'block';
-                maxField.style.display = 'block';
-                document.getElementById('discountValue').placeholder = '20';
-                document.getElementById('discountValue').max = '100';
-            } else if (discountType === 'fixed') {
-                valueField.style.display = 'block';
-                maxField.style.display = 'none';
-                document.getElementById('discountValue').placeholder = '100000';
-                document.getElementById('discountValue').removeAttribute('max');
-            } else if (discountType === 'free_shipping') {
-                valueField.style.display = 'none';
-                maxField.style.display = 'none';
-            }
-            
-            updatePreview();
-        }
-
-        function updatePreview() {
-            // Code
-            const code = document.getElementById('discountCode').value || 'SAMPLE2024';
-            document.getElementById('previewCode').textContent = code.toUpperCase();
-            
-            // Name
-            const name = document.getElementById('programName').value || 'Chương Trình Giảm Giá';
-            document.getElementById('previewName').textContent = name;
-            
-            // Description
-            const desc = document.getElementById('description').value || 'Mô tả chương trình';
-            document.getElementById('previewDescription').textContent = desc;
-            
-            // Value
-            const type = document.getElementById('discountType').value;
-            const value = document.getElementById('discountValue').value;
-            let valueText = 'Chưa thiết lập';
-            
-            if (type === 'percentage' && value) {
-                const maxDiscount = document.getElementById('maxDiscount').value;
-                valueText = `Giảm ${value}%`;
-                if (maxDiscount) {
-                    valueText += ` (Tối đa ${parseInt(maxDiscount).toLocaleString()} VND)`;
-                }
-            } else if (type === 'fixed' && value) {
-                valueText = `Giảm ${parseInt(value).toLocaleString()} VND`;
-            } else if (type === 'free_shipping') {
-                valueText = 'Miễn Phí Vận Chuyển';
-            }
-            document.getElementById('previewValue').textContent = valueText;
-            
-            // Duration
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            if (startDate && endDate) {
-                const start = new Date(startDate);
-                const end = new Date(endDate);
-                const duration = `${start.toLocaleDateString('vi-VN')} - ${end.toLocaleDateString('vi-VN')}`;
-                document.getElementById('previewDuration').textContent = duration;
-            }
-            
-            // Min Order
-            const minOrder = document.getElementById('minOrderValue').value;
-            document.getElementById('previewMinOrder').textContent = minOrder 
-                ? `${parseInt(minOrder).toLocaleString()} VND` 
-                : 'Không giới hạn';
-            
-            // Usage Limit
-            const usageLimit = document.getElementById('usageLimit').value;
-            document.getElementById('previewUsageLimit').textContent = usageLimit 
-                ? `${usageLimit} lần` 
-                : 'Không giới hạn';
-            
-            // Status
-            const status = document.getElementById('status').value;
-            const statusBadge = document.getElementById('previewStatus');
-            statusBadge.className = 'badge';
-            
-            if (status === 'active') {
-                statusBadge.classList.add('bg-success');
-                statusBadge.textContent = 'Hoạt động';
-            } else if (status === 'inactive') {
-                statusBadge.classList.add('bg-secondary');
-                statusBadge.textContent = 'Không hoạt động';
-            } else if (status === 'scheduled') {
-                statusBadge.classList.add('bg-warning', 'text-dark');
-                statusBadge.textContent = 'Đã lên lịch';
-            }
-        }
-
-        function validateForm() {
-            const code = document.getElementById('discountCode').value;
-            const startDate = new Date(document.getElementById('startDate').value);
-            const endDate = new Date(document.getElementById('endDate').value);
-            
-            // Check code format
-            if (!/^[A-Z0-9_-]+$/.test(code)) {
-                alert('Mã giảm giá chỉ được chứa chữ cái, số, dấu gạch ngang và gạch dưới!');
-                return false;
-            }
-            
-            // Check date range
-            if (endDate <= startDate) {
-                alert('Ngày kết thúc phải sau ngày bắt đầu!');
-                return false;
-            }
-            
-            return true;
-        }
-
-        function collectFormData() {
-            return {
-                code: document.getElementById('discountCode').value.toUpperCase(),
-                programName: document.getElementById('programName').value,
-                description: document.getElementById('description').value,
-                type: document.getElementById('discountType').value,
-                value: document.getElementById('discountValue').value,
-                maxDiscount: document.getElementById('maxDiscount').value,
-                minOrderValue: document.getElementById('minOrderValue').value,
-                usageLimit: document.getElementById('usageLimit').value,
-                usageLimitPerUser: document.getElementById('usageLimitPerUser').value,
-                customerType: document.getElementById('customerType').value,
-                startDate: document.getElementById('startDate').value,
-                endDate: document.getElementById('endDate').value,
-                applicableProducts: document.getElementById('applicableProducts').value,
-                status: document.getElementById('status').value,
-                priority: document.getElementById('priority').value,
-                combinable: document.getElementById('combinable').checked,
-                showOnWebsite: document.getElementById('showOnWebsite').checked
-            };
-        }
-
-        function saveAsDraft() {
-            const formData = collectFormData();
-            formData.status = 'draft';
-            
-            console.log('Saving draft:', formData);
-            alert('Đã lưu nháp thành công!');
-            window.location.href = 'discounts.html';
-        }
-
-        function cancelAdd() {
-            if (confirm('Bạn có chắc chắn muốn hủy bỏ? Các thay đổi sẽ không được lưu.')) {
-                window.location.href = 'discounts.html';
-            }
-        }
     </script>
+    
+    <!-- Add Discount Page Script -->
+    <script src="../assets/js/add-discount.js"></script>
     
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
