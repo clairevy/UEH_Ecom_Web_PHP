@@ -238,9 +238,9 @@ class ProductService extends BaseModel {
         }
         
         // Collection filter
-        if (!empty($filters['collection_slug'])) {
-            $sql .= " AND c.collection_slug = :collection_slug";
-            $params[':collection_slug'] = $filters['collection_slug'];
+        if (!empty($filters['slug'])) {
+            $sql .= " AND c.slug = :slug";
+            $params[':slug'] = $filters['slug'];
         }
         
         // Price filters

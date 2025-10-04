@@ -59,7 +59,7 @@ class CustomerController extends BaseController {
             
             // Build filter array - handle both category ID and slug
             $filters = [
-                'collection_slug' => $collectionSlug,
+                'slug' => $collectionSlug,
                 'search' => $search,
                 'sort_by' => $sortBy,
                 'is_active' => 1
