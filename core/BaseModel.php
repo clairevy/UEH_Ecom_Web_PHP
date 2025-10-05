@@ -13,14 +13,21 @@ class BaseModel {
         return $this->db->resultSet();
     }
     //đếm số dòng
-     public function findById($id){
-        $this->db->query("SELECT * FROM " . $this->table . " WHERE id = :id");
-        $this->db->bind(':id', $id);
-        return $this->db->single();
-    }
+    //  public function findById($id){
+    //     $this->db->query("SELECT * FROM " . $this->table . " WHERE id = :id");
+    //     $this->db->bind(':id', $id);
+    //     return $this->db->single();
+    // }
     public function deleteById($id){
         $this->db->query("DELETE FROM " . $this->table . " WHERE id = :id");
         $this->db->bind(':id', $id);
         return $this->db->execute();
+    }
+
+    public function getById($id) {
+        $primaryKey = $this->primaryKey ?? 'id';
+        $this->db->query("SELECT * FROM " . $this->table . " WHERE " . $primaryKey . " = :id");
+        $this->db->bind(':id', $id);
+        return $this->db->single();
     }
 }

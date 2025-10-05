@@ -1,0 +1,300 @@
+<?php
+
+require_once __DIR__ . '/../../core/BaseModel.php';
+
+class User extends BaseModel {
+    protected $table = 'users';
+    protected $primaryKey = 'user_id';
+
+    //Customer registration
+    public function signup($userData){
+        $errors = [];
+        
+        // Validate name
+        if(empty($userData['name'])) {
+            $errors['name'] = 'Vui lòng nhập họ tên';
+        } elseif(strlen($userData['name']) < 2) {
+            $errors['name'] = 'Họ tên phải có ít nhất 2 ký tự';
+        }
+
+        // Validate email
+        if(empty($userData['email'])) {
+            $errors['email'] = 'Vui lòng nhập địa chỉ email';
+        } elseif(!preg_match("/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/", $userData['email'])) {
+            $errors['email'] = 'Vui lòng nhập địa chỉ email hợp lệ';
+        } elseif($this->findByEmail($userData['email'])) {
+            $errors['email'] = 'Email này đã được đăng ký';
+        }
+
+        // Validate password
+        if(empty($userData['password'])) {
+            $errors['password'] = 'Vui lòng nhập mật khẩu';
+        } elseif(strlen($userData['password']) < 6) {
+            $errors['password'] = 'Mật khẩu phải có ít nhất 6 ký tự';
+        }
+
+        // Validate confirm password
+        if(empty($userData['confirm_password'])) {
+            $errors['confirm_password'] = 'Vui lòng xác nhận mật khẩu';
+        } elseif($userData['password'] !== $userData['confirm_password']) {
+            $errors['confirm_password'] = 'Mật khẩu xác nhận không khớp';
+        }
+
+        // If no errors, create user
+        if(empty($errors)) {
+            if($this->createNewUser($userData)) {
+                return ['success' => true, 'message' => 'Đăng ký thành công'];
+            } else {
+                return ['success' => false, 'message' => 'Có lỗi xảy ra khi tạo tài khoản'];
+            }
+        }
+
+        return ['success' => false, 'errors' => $errors];
+    }
+
+    //Customer login
+    public function login($email, $password) {
+        // Validate input
+        if(empty($email)) {
+            return ['success' => false, 'message' => 'Vui lòng nhập email'];
+        }
+        
+        if(empty($password)) {
+            return ['success' => false, 'message' => 'Vui lòng nhập mật khẩu'];
+        }
+
+        // Find user by email
+        $user = $this->findByEmail($email);
+        
+        if(!$user) {
+            return ['success' => false, 'message' => 'Email không tồn tại'];
+        }
+
+        // Check if user is active
+        if(!$user->is_active) {
+            return ['success' => false, 'message' => 'Tài khoản đã bị khóa'];
+        }
+
+        // Verify password
+        if(password_verify($password, $user->password_hash)) {
+            // Remove password from user data for security
+            unset($user->password_hash);
+            
+            return [
+                'success' => true, 
+                'message' => 'Đăng nhập thành công',
+                'user' => $user
+            ];
+        } else {
+            return ['success' => false, 'message' => 'Mật khẩu không chính xác'];
+        }
+    }
+
+    // Create a new user
+    public function createNewUser($data) {
+        try {
+            // Debug: Kiểm tra dữ liệu đầu vào
+            error_log("Creating user with data: " . print_r($data, true));
+            
+            // Kiểm tra xem có role customer (ID = 2) không
+            $this->db->query("SELECT role_id FROM roles WHERE role_id = 2");
+            $this->db->execute();
+            $customerRole = $this->db->single();
+            
+            if (!$customerRole) {
+                // Nếu chưa có roles, tạo cả admin và customer theo đúng ID
+                error_log("No customer role found, creating default roles...");
+                
+                // Tạo role admin (ID = 1)
+                $this->db->query("INSERT INTO roles (role_id, role_name, description) VALUES (1, 'admin', 'Quản trị viên')");
+                $this->db->execute();
+                
+                // Tạo role customer (ID = 2) 
+                $this->db->query("INSERT INTO roles (role_id, role_name, description) VALUES (2, 'customer', 'Khách hàng')");
+                $this->db->execute();
+                
+                error_log("Created default roles: admin (ID=1) and customer (ID=2)");
+            }
+            
+            // Tạo user với role_id = 2 (customer)
+            $this->db->query("INSERT INTO " . $this->table . " (email, password_hash, name, phone, is_active, role_id, created_at, updated_at) VALUES (:email, :password_hash, :name, :phone, 1, 2, NOW(), NOW())");
+            $this->db->bind(':email', $data['email']);
+            $this->db->bind(':password_hash', password_hash($data['password'], PASSWORD_BCRYPT));
+            $this->db->bind(':name', $data['name']);
+            $this->db->bind(':phone', $data['phone'] ?? null);
+            
+            $result = $this->db->execute();
+            
+            // Debug: Kiểm tra kết quả
+            error_log("Database execute result: " . ($result ? 'SUCCESS' : 'FAILED'));
+            if ($result) {
+                error_log("User created with role_id = 2 (customer)");
+            }
+            
+            return $result;
+        } catch (Exception $e) {
+            error_log("Error creating user: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function findByEmail($email) {
+        $this->db->query("SELECT * FROM " . $this->table . " WHERE email = :email");
+        $this->db->bind(':email', $email);
+        return $this->db->single();
+    }
+    
+    public function findById($id) {
+        $this->db->query("SELECT * FROM " . $this->table . " WHERE user_id = :id");
+        $this->db->bind(':id', $id);
+        return $this->db->single();
+    }
+    
+     public function findByPhoneNumber($phone) {
+        $this->db->query("SELECT * FROM " . $this->table . " WHERE phone = :phone");
+        $this->db->bind(':phone', $phone);
+        return $this->db->single();
+    }
+    
+     public function deleteById($id) {
+        $this->db->query("DELETE FROM " . $this->table . " WHERE user_id = :id");
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
+
+    public function getAllUsers() {
+        $this->db->query("SELECT user_id, email, name, phone, is_active, created_at FROM " . $this->table . " ORDER BY created_at DESC");
+        return $this->db->resultSet();
+    }
+
+    /**
+     * Lấy tất cả users với thống kê đơn hàng
+     */
+    public function getAllWithOrderCount($onlyActive = true) {
+        $sql = "SELECT u.*, 
+                       COALESCE(oc.order_count, 0) as order_count,
+                       r.role_name
+                FROM {$this->table} u
+                LEFT JOIN (
+                    SELECT user_id, COUNT(*) as order_count
+                    FROM orders
+                    GROUP BY user_id
+                ) oc ON u.user_id = oc.user_id
+                LEFT JOIN roles r ON u.role_id = r.role_id";
+        
+        if ($onlyActive) {
+            $sql .= " WHERE u.is_active = 1";
+        }
+        
+        $sql .= " ORDER BY u.created_at DESC";
+        $this->db->query($sql);
+        return $this->db->resultSet();
+    }
+
+    /**
+     * Đếm tổng số users
+     */
+    public function getTotalCount() {
+        $sql = "SELECT COUNT(*) as total FROM {$this->table}";
+        $this->db->query($sql);
+        $result = $this->db->single();
+        return $result->total;
+    }
+
+    /**
+     * Đếm số users active
+     */
+    public function getActiveCount() {
+        $sql = "SELECT COUNT(*) as total FROM {$this->table} WHERE is_active = 1";
+        $this->db->query($sql);
+        $result = $this->db->single();
+        return $result->total;
+    }
+
+    /**
+     * Đếm số users có đơn hàng
+     */
+    public function getUsersWithOrdersCount() {
+        $sql = "SELECT COUNT(DISTINCT u.user_id) as total 
+                FROM {$this->table} u 
+                INNER JOIN orders o ON u.user_id = o.user_id";
+        $this->db->query($sql);
+        $result = $this->db->single();
+        return $result->total;
+    }
+
+    /**
+     * Đếm số users mới trong tháng này
+     */
+    public function getNewUsersThisMonthCount() {
+        $sql = "SELECT COUNT(*) as total 
+                FROM {$this->table} 
+                WHERE MONTH(created_at) = MONTH(CURRENT_DATE()) 
+                AND YEAR(created_at) = YEAR(CURRENT_DATE())";
+        $this->db->query($sql);
+        $result = $this->db->single();
+        return $result->total;
+    }
+
+    // Update user profile
+    public function updateProfile($userId, $data) {
+        $this->db->query("UPDATE " . $this->table . " SET name = :name, phone = :phone, updated_at = NOW() WHERE user_id = :id");
+        $this->db->bind(':name', $data['name']);
+        $this->db->bind(':phone', $data['phone']);
+        $this->db->bind(':id', $userId);
+        return $this->db->execute();
+    }
+
+    // Change password
+    public function changePassword($userId, $newPassword) {
+        $this->db->query("UPDATE " . $this->table . " SET password_hash = :password_hash, updated_at = NOW() WHERE user_id = :id");
+        $this->db->bind(':password_hash', password_hash($newPassword, PASSWORD_BCRYPT));
+        $this->db->bind(':id', $userId);
+        return $this->db->execute();
+    }
+
+    // Toggle user active status
+    public function toggleActive($userId) {
+        $this->db->query("UPDATE " . $this->table . " SET is_active = NOT is_active, updated_at = NOW() WHERE user_id = :id");
+        $this->db->bind(':id', $userId);
+        return $this->db->execute();
+    }
+
+    // Check if email exists (for forgot password feature)
+    public function emailExists($email) {
+        return $this->findByEmail($email) !== false;
+    }
+
+    /**
+     * Lấy tất cả khách hàng với thống kê
+     */
+    public function getCustomersWithStats() {
+        $sql = "SELECT u.*, 
+                       COALESCE(o.order_count, 0) as order_count,
+                       COALESCE(o.total_spent, 0) as total_spent
+                FROM {$this->table} u
+                LEFT JOIN (
+                    SELECT user_id, 
+                           COUNT(*) as order_count,
+                           SUM(total_amount) as total_spent
+                    FROM orders
+                    GROUP BY user_id
+                ) o ON u.user_id = o.user_id
+                WHERE u.role = 'customer'
+                ORDER BY u.created_at DESC";
+        $this->db->query($sql);
+        return $this->db->resultSet();
+    }
+
+
+    /**
+     * Cập nhật trạng thái người dùng
+     */
+    public function updateUserStatus($id, $isActive) {
+        $sql = "UPDATE {$this->table} SET is_active = :is_active WHERE user_id = :id";
+        $this->db->query($sql);
+        $this->db->bind(':is_active', $isActive);
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
+}

@@ -1,3 +1,6 @@
+// Categories Page - Pure UI JavaScript (No Business Logic)
+// Only handles UI interactions, no data processing
+
 // Wait for component manager to initialize
 if (window.ComponentManager) {
     window.ComponentManager.init().then(() => {
@@ -6,9 +9,9 @@ if (window.ComponentManager) {
     });
 }
 
-// Categories page initialization
+// Categories page initialization - UI only
 function initializeCategoriesPage() {
-    // Select All Checkbox
+    // Select All Checkbox - UI interaction only
     const selectAll = document.getElementById('selectAll');
     const rowCheckboxes = document.querySelectorAll('.row-checkbox');
     
@@ -20,7 +23,7 @@ function initializeCategoriesPage() {
         });
     }
 
-    // Category Search
+    // Category Search - Client-side filtering only
     const searchInput = document.getElementById('categorySearch');
     if (searchInput) {
         searchInput.addEventListener('input', function(e) {
@@ -33,9 +36,30 @@ function initializeCategoriesPage() {
             });
         });
     }
+
+    // Image Preview - UI enhancement only
+    const imageInput = document.getElementById('categoryImage');
+    const previewContainer = document.getElementById('categoryImagePreview');
+    const previewImg = document.getElementById('previewImg');
+    
+    if (imageInput && previewContainer && previewImg) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        });
+    }
 }
 
-// Filter Categories
+// Filter Categories - UI filtering only (no server calls)
 function filterCategories(type) {
     const rows = document.querySelectorAll('#categoriesTable tbody tr');
     rows.forEach(row => {
@@ -45,7 +69,7 @@ function filterCategories(type) {
             row.style.display = '';
         } else if (type === 'active' && status === 'Hoạt động') {
             row.style.display = '';
-        } else if (type === 'inactive' && status === 'Tạm dừng') {
+        } else if (type === 'inactive' && status === 'Không hoạt động') {
             row.style.display = '';
         } else {
             row.style.display = 'none';
@@ -53,31 +77,5 @@ function filterCategories(type) {
     });
 }
 
-// Edit Category
-function editCategory(categoryId) {
-    console.log('Editing category:', categoryId);
-    window.location.href = 'add-category.html?id=' + categoryId + '&edit=true';
-}
-
-// Delete Category
-function deleteCategory(categoryId) {
-    if (confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
-        console.log('Deleting category:', categoryId);
-        alert('Đã xóa danh mục thành công!');
-        location.reload();
-    }
-}
-
-// View Products in Category
-function viewCategoryProducts(categoryId) {
-    window.location.href = 'products.html?category=' + categoryId;
-}
-
-// Toggle Category Status
-function toggleCategoryStatus(categoryId) {
-    if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái của danh mục này?')) {
-        console.log('Toggling status for category:', categoryId);
-        alert('Đã thay đổi trạng thái!');
-        location.reload();
-    }
-}
+// Note: editCategory() and deleteCategory() functions are defined in the view file
+// to ensure they use the correct Front Controller URLs and maintain MVC separation

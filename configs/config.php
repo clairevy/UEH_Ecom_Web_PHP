@@ -5,8 +5,11 @@ const _DB = 'db_ecom';
 const _USER = 'root';
 const _PASSWORD = '';
 const _DRIVER = 'mysql';
-// define('_URL', 'http://'. $_SERVER['HTTP_HOST'].'/Ecom_website/');
-// define('_URL_VIEW', 'http://'. $_SERVER['HTTP_HOST'].'/Ecom_website/app/views/' );
 
-// echo _URL;
-// echo _URL_VIEW;
+// Base URL configuration
+// For localhost:3000, BASE_URL should be empty or just '/'
+define('BASE_URL', '');
+define('FULL_BASE_URL', 'http://' . $_SERVER['HTTP_HOST'] . BASE_URL);
+
+// Include URL helper functions
+require_once __DIR__ . '/../helpers/url_helper.php';

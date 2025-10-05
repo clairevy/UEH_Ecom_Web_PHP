@@ -9,13 +9,15 @@ foreach (glob(__DIR__ . '/core/*.php') as $file) {
     require_once $file;
 }
 
+// Nạp các file model
 foreach (glob(__DIR__ . '/app/models/*.php') as $file) {
     require_once $file;
 }
-
-foreach (glob(__DIR__ . '/app/controllers/*.php') as $file) {
+// Nạp các file service
+foreach (glob(__DIR__ . '/app/services/*.php') as $file) {
     require_once $file;
 }
 
-
-$test = new BaseModel();
+// Khởi tạo Router để xử lý URL
+$router = new Route();
+?>

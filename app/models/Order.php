@@ -1,0 +1,217 @@
+<?php
+
+class Order extends BaseModel {
+    protected $table = 'orders';
+    protected $primaryKey = 'order_id';
+
+    public function createOrder($data) {
+        $this->db->query("INSERT INTO " . $this->table . " 
+                         (user_id, full_name, email, phone, street, ward, province, country, 
+                          order_status, shipping_fee, total_amount, discount_code, discount_amount, created_at, updated_at) 
+                         VALUES (:user_id, :full_name, :email, :phone, :street, :ward, :province, :country, 
+                                 :order_status, :shipping_fee, :total_amount, :discount_code, :discount_amount, NOW(), NOW())");
+        
+        $this->db->bind(':user_id', $data['user_id'] ?? null);
+        $this->db->bind(':full_name', $data['full_name']);
+        $this->db->bind(':email', $data['email']);
+        $this->db->bind(':phone', $data['phone']);
+        $this->db->bind(':street', $data['street']);
+        $this->db->bind(':ward', $data['ward']);
+        $this->db->bind(':province', $data['province']);
+        $this->db->bind(':country', $data['country'] ?? 'Vietnam');
+        $this->db->bind(':order_status', $data['order_status'] ?? 'pending');
+        $this->db->bind(':shipping_fee', $data['shipping_fee'] ?? 0);
+        $this->db->bind(':total_amount', $data['total_amount']);
+        $this->db->bind(':discount_code', $data['discount_code'] ?? null);
+        $this->db->bind(':discount_amount', $data['discount_amount'] ?? 0);
+        
+        return $this->db->execute();
+    }
+
+    public function updateOrderStatus($id, $status) {
+        $validStatuses = ['pending', 'paid', 'shipped', 'delivered', 'cancelled'];
+        if (!in_array($status, $validStatuses)) {
+            return false;
+        }
+        
+        $this->db->query("UPDATE " . $this->table . " SET order_status = :status, updated_at = NOW() WHERE order_id = :id");
+        $this->db->bind(':status', $status);
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
+
+    public function getOrdersByUserId($userId) {
+        $this->db->query("SELECT * FROM " . $this->table . " WHERE user_id = :user_id ORDER BY created_at DESC");
+        $this->db->bind(':user_id', $userId);
+        return $this->db->resultSet();
+    }
+
+    public function findByStatus($status) {
+        $this->db->query("SELECT o.*, u.name as user_name FROM " . $this->table . " o 
+                         LEFT JOIN users u ON o.user_id = u.user_id 
+                         WHERE o.order_status = :status 
+                         ORDER BY o.created_at DESC");
+        $this->db->bind(':status', $status);
+        return $this->db->resultSet();
+    }
+
+    public function deleteById($id) {
+        // Soft delete by setting status to cancelled
+        $this->db->query("UPDATE " . $this->table . " SET order_status = 'cancelled', updated_at = NOW() WHERE order_id = :id");
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
+
+    public function countOrders() {
+        $this->db->query("SELECT COUNT(*) as total FROM " . $this->table);
+        $result = $this->db->single();
+        return $result->total;
+    }
+
+    public function countUserOrders($userId) {
+        $this->db->query("SELECT COUNT(*) as total FROM " . $this->table . " WHERE user_id = :user_id");
+        $this->db->bind(':user_id', $userId);
+        $result = $this->db->single();
+        return $result->total;
+    }
+
+
+    public function getOrderDetails($orderId) {
+        $this->db->query("SELECT o.*, u.name as user_name, u.email as user_email 
+                         FROM " . $this->table . " o 
+                         LEFT JOIN users u ON o.user_id = u.user_id 
+                         WHERE o.order_id = :id");
+        $this->db->bind(':id', $orderId);
+        return $this->db->single();
+    }
+
+    // Get order items
+    public function getOrderItems($orderId) {
+        $this->db->query("SELECT oi.*, p.name as product_name, p.base_price, pv.variant_name, pv.variant_price 
+                         FROM order_items oi 
+                         JOIN products p ON oi.product_id = p.product_id 
+                         LEFT JOIN product_variants pv ON oi.variant_id = pv.variant_id 
+                         WHERE oi.order_id = :order_id");
+        $this->db->bind(':order_id', $orderId);
+        return $this->db->resultSet();
+    }
+
+    // Add item to order
+    public function addOrderItem($orderData) {
+        $this->db->query("INSERT INTO order_items 
+                         (order_id, product_id, variant_id, quantity, unit_price, total_price) 
+                         VALUES (:order_id, :product_id, :variant_id, :quantity, :unit_price, :total_price)");
+        
+        $this->db->bind(':order_id', $orderData['order_id']);
+        $this->db->bind(':product_id', $orderData['product_id']);
+        $this->db->bind(':variant_id', $orderData['variant_id'] ?? null);
+        $this->db->bind(':quantity', $orderData['quantity']);
+        $this->db->bind(':unit_price', $orderData['unit_price']);
+        $this->db->bind(':total_price', $orderData['total_price']);
+        
+        return $this->db->execute();
+    }
+
+    // Get orders with pagination
+    public function getOrdersWithPagination($limit = 10, $offset = 0) {
+        $this->db->query("SELECT o.*, u.name as user_name 
+                         FROM " . $this->table . " o 
+                         LEFT JOIN users u ON o.user_id = u.user_id 
+                         ORDER BY o.created_at DESC 
+                         LIMIT :limit OFFSET :offset");
+        $this->db->bind(':limit', $limit);
+        $this->db->bind(':offset', $offset);
+        return $this->db->resultSet();
+    }
+
+    // Calculate total revenue
+    public function calculateTotalRevenue() {
+        $this->db->query("SELECT SUM(total_amount) as total_revenue 
+                         FROM " . $this->table . " 
+                         WHERE order_status IN ('paid', 'shipped', 'delivered')");
+        $result = $this->db->single();
+        return $result->total_revenue ?? 0;
+    }
+
+    // Get orders by date range
+    public function getOrdersByDateRange($startDate, $endDate) {
+        $this->db->query("SELECT o.*, u.name as user_name 
+                         FROM " . $this->table . " o 
+                         LEFT JOIN users u ON o.user_id = u.user_id 
+                         WHERE DATE(o.created_at) BETWEEN :start_date AND :end_date 
+                         ORDER BY o.created_at DESC");
+        $this->db->bind(':start_date', $startDate);
+        $this->db->bind(':end_date', $endDate);
+        return $this->db->resultSet();
+    }
+
+    // Get revenue by date range
+    public function getRevenueByDateRange($startDate, $endDate) {
+        $this->db->query("SELECT DATE(created_at) as date, SUM(total_amount) as daily_revenue 
+                         FROM " . $this->table . " 
+                         WHERE order_status IN ('paid', 'shipped', 'delivered') 
+                         AND DATE(created_at) BETWEEN :start_date AND :end_date 
+                         GROUP BY DATE(created_at) 
+                         ORDER BY date DESC");
+        $this->db->bind(':start_date', $startDate);
+        $this->db->bind(':end_date', $endDate);
+        return $this->db->resultSet();
+    }
+
+    // Get order statistics
+    public function getOrderStatistics() {
+        $this->db->query("SELECT 
+                             order_status, 
+                             COUNT(*) as count, 
+                             SUM(total_amount) as total_amount 
+                         FROM " . $this->table . " 
+                         GROUP BY order_status");
+        return $this->db->resultSet();
+    }
+
+    /**
+     * Lấy tất cả đơn hàng với thông tin chi tiết
+     */
+    public function getAllOrders() {
+        $sql = "SELECT o.*, u.name as customer_name, u.email as customer_email,
+                       oi.product_id, oi.quantity, p.name as product_name, p.main_image as product_image
+                FROM {$this->table} o 
+                LEFT JOIN users u ON o.user_id = u.user_id
+                LEFT JOIN order_items oi ON o.order_id = oi.order_id
+                LEFT JOIN products p ON oi.product_id = p.product_id
+                ORDER BY o.created_at DESC";
+        $this->db->query($sql);
+        return $this->db->resultSet();
+    }
+
+    /**
+     * Lấy đơn hàng gần đây
+     */
+    public function getRecentOrders($limit = 10) {
+        $sql = "SELECT o.*, u.name as customer_name, u.email as customer_email
+                FROM {$this->table} o 
+                LEFT JOIN users u ON o.user_id = u.user_id
+                ORDER BY o.created_at DESC 
+                LIMIT :limit";
+        $this->db->query($sql);
+        $this->db->bind(':limit', $limit, PDO::PARAM_INT);
+        return $this->db->resultSet();
+    }
+
+    /**
+     * Đếm tổng số đơn hàng
+     */
+    public function getTotalCount() {
+        $sql = "SELECT COUNT(*) as total FROM {$this->table}";
+        $this->db->query($sql);
+        $result = $this->db->single();
+        return $result ? (int)$result->total : 0;
+    }
+
+    /**
+     * Cập nhật trạng thái đơn hàng
+     */
+    public function updateStatus($id, $status) {
+        return $this->updateOrderStatus($id, $status);
+    }
+}

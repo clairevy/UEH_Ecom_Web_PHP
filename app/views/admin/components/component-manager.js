@@ -158,7 +158,7 @@ class ComponentManager {
     }
 
     /**
-     * Configure all navigation links with proper relative paths
+     * Configure all navigation links to use Front Controller
      */
     configureAllNavigation() {
         const allNavLinks = document.querySelectorAll('.sidebar-nav-link[data-page]');
@@ -167,28 +167,18 @@ class ComponentManager {
                 e.preventDefault();
                 
                 const page = link.getAttribute('data-page');
-                const currentPath = window.location.pathname;
-                let targetPath;
                 
-                if (page === 'dashboard') {
-                    // Handle dashboard specially
-                    if (currentPath.includes('/pages/')) {
-                        targetPath = '../index.html';
-                    } else {
-                        targetPath = 'index.html';
-                    }
-                } else {
-                    // Handle other pages
-                    if (currentPath.includes('/pages/')) {
-                        // Already in pages directory
-                        targetPath = `${page}.html`;
-                    } else {
-                        // In root directory
-                        targetPath = `pages/${page}.html`;
+                // Use window.pageConfig if available, otherwise construct default path
+                if (window.pageConfig && window.pageConfig.sidebar && window.pageConfig.sidebar.links) {
+                    const targetPath = window.pageConfig.sidebar.links[page];
+                    if (targetPath) {
+                        window.location.href = targetPath;
+                        return;
                     }
                 }
                 
-                window.location.href = targetPath;
+                // Fallback: construct Front Controller URL
+                window.location.href = `/admin/index.php?url=${page}`;
             });
         });
     }
