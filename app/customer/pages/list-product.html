@@ -615,5 +615,37 @@
             attachFilterEvents();
         });
     </script>
+    <!-- ...existing code... -->
+<script>
+    // ...existing JS code...
+
+    // Sự kiện chuyển trang cho navbar
+    document.addEventListener('DOMContentLoaded', function() {
+        // Home
+        document.querySelectorAll('.nav-link[href="#home"]').forEach(el => {
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = 'index.html';
+            });
+        });
+        // Category
+        document.querySelectorAll('.nav-link[href="#category"]').forEach(el => {
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = 'list-product.html';
+            });
+        });
+        // Sign in
+        document.querySelectorAll('a[href="#signin"]').forEach(el => {
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = 'signin-signup.html';
+            });
+        });
+    });
+
+    // ...existing JS code...
+</script>
+<!-- ...existing code... -->
 </body>
 </html>
