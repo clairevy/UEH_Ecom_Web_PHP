@@ -28,6 +28,9 @@ foreach (glob(__DIR__ . '/../app/services/*.php') as $file) {
     require_once $file;
 }
 
+// Register error handlers
+ErrorHandler::register();
+
 // Khởi tạo AdminRouter để xử lý URL admin
 $adminRouter = new AdminRouter();
 ?>

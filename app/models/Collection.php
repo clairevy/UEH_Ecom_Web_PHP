@@ -50,6 +50,10 @@ class Collection extends BaseModel {
         return $this->db->resultSet();
     }
 
+    public function getAll($onlyActive = true) {
+        return $this->getAllCollections($onlyActive);
+    }
+
     // Get all products in a collection
     public function getProductsInCollection($collectionId) {
         $this->db->query("SELECT p.* FROM products p WHERE p.collection_id = :collection_id AND p.is_active = 1 ORDER BY p.name ASC");

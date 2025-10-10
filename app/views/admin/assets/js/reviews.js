@@ -1,23 +1,153 @@
-// JS extracted from reviews.html
+// Reviews page specific JavaScript
 window.pageConfig = window.pageConfig || {};
 window.pageConfig.sidebar = window.pageConfig.sidebar || {};
 window.pageConfig.sidebar.activePage = 'reviews';
 
-function viewReview(id){ alert('Xem chi tiết đánh giá: '+id); }
-function approveReview(id){ if(confirm('Duyệt đánh giá?')){ alert('Đã duyệt!'); location.reload(); } }
-function rejectReview(id){ if(confirm('Từ chối đánh giá?')){ alert('Đã từ chối!'); location.reload(); } }
-function replyReview(id){ const r = prompt('Nhập phản hồi:'); if(r && r.trim()) alert('Phản hồi đã gửi!'); }
-function hideReview(id){ if(confirm('Ẩn đánh giá?')){ alert('Đã ẩn!'); location.reload(); } }
-function bulkApprove(){ const checked = document.querySelectorAll('.row-checkbox:checked'); if(checked.length===0){ alert('Vui lòng chọn ít nhất một đánh giá!'); return; } if(confirm(`Duyệt ${checked.length} đánh giá?`)){ alert('Đã duyệt!'); location.reload(); } }
-function bulkReject(){ const checked = document.querySelectorAll('.row-checkbox:checked'); if(checked.length===0){ alert('Vui lòng chọn ít nhất một đánh giá!'); return; } if(confirm(`Từ chối ${checked.length} đánh giá?`)){ alert('Đã từ chối!'); location.reload(); } }
-
 document.addEventListener('DOMContentLoaded', function() {
-    const search = document.getElementById('reviewSearch');
-    if (search) search.addEventListener('input', function(){ const t=this.value.toLowerCase(); document.querySelectorAll('#reviewsTable tbody tr').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(t)?'':'none'); });
-
-    const filter = document.getElementById('statusFilter');
-    if (filter) filter.addEventListener('change', function(){ const v=this.value; document.querySelectorAll('#reviewsTable tbody tr').forEach(row=>{ const status=(row.querySelector('.badge')||{}).textContent||''; if(v==='all') row.style.display=''; else if(v==='pending'&&status.toLowerCase().includes('chờ')) row.style.display=''; else if(v==='approved'&&status.toLowerCase().includes('duyệt')) row.style.display=''; else if(v==='rejected'&&status.toLowerCase().includes('từ')) row.style.display=''; else row.style.display='none'; }); });
-
-    const selectAll = document.getElementById('selectAll');
-    if(selectAll) selectAll.addEventListener('change', function(){ document.querySelectorAll('.row-checkbox').forEach(cb=>cb.checked=this.checked); });
+    console.log('Reviews page JavaScript loaded');
+    
+    // Initialize reviews page functionality
+    initializeReviewsPage();
 });
+
+function initializeReviewsPage() {
+    // Search functionality
+    const searchInput = document.getElementById('reviewSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const productName = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+                const customerName = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+                const content = row.querySelector('td:nth-child(5)')?.textContent.toLowerCase() || '';
+                
+                if (productName.includes(searchTerm) || customerName.includes(searchTerm) || content.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+    
+    // Status filter functionality
+    const statusFilter = document.getElementById('statusFilter');
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function() {
+            const selectedStatus = this.value;
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const statusBadge = row.querySelector('.badge');
+                const statusText = statusBadge?.textContent.toLowerCase() || '';
+                
+                if (selectedStatus === 'all') {
+                    row.style.display = '';
+                } else if (statusText.includes(selectedStatus)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+    
+    // Rating filter functionality
+    const ratingFilter = document.getElementById('ratingFilter');
+    if (ratingFilter) {
+        ratingFilter.addEventListener('change', function() {
+            const selectedRating = this.value;
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const ratingStars = row.querySelector('td:nth-child(4)');
+                const ratingText = ratingStars?.textContent || '';
+                
+                if (selectedRating === 'all') {
+                    row.style.display = '';
+                } else if (ratingText.includes(selectedRating)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+    
+    // Bulk actions
+    const bulkActions = document.querySelectorAll('.bulk-action');
+    bulkActions.forEach(action => {
+        action.addEventListener('click', function() {
+            const selectedRows = document.querySelectorAll('tbody input[type="checkbox"]:checked');
+            
+            if (selectedRows.length === 0) {
+                alert('Vui lòng chọn ít nhất một đánh giá!');
+                return;
+            }
+            
+            const actionType = this.dataset.action;
+            if (confirm(`Bạn có chắc chắn muốn ${actionType} ${selectedRows.length} đánh giá?`)) {
+                // Implement bulk action logic here
+                console.log(`Bulk ${actionType} for ${selectedRows.length} reviews`);
+            }
+        });
+    });
+}
+
+// Review management functions
+function viewReview(reviewId) {
+    window.location.href = `index.php?url=review-details&id=${reviewId}`;
+}
+
+function approveReview(reviewId) {
+    if (confirm('Bạn có chắc chắn muốn duyệt đánh giá này?')) {
+        window.location.href = `index.php?url=reviews&action=approve&id=${reviewId}`;
+    }
+}
+
+function rejectReview(reviewId) {
+    if (confirm('Bạn có chắc chắn muốn từ chối đánh giá này?')) {
+        window.location.href = `index.php?url=reviews&action=reject&id=${reviewId}`;
+    }
+}
+
+function deleteReview(reviewId) {
+    if (confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) {
+        window.location.href = `index.php?url=reviews&action=delete&id=${reviewId}`;
+    }
+}
+
+function replyReview(reviewId) {
+    const reply = prompt('Nhập phản hồi cho đánh giá:');
+    if (reply && reply.trim()) {
+        // Implement reply logic here
+        console.log(`Replying to review ${reviewId}: ${reply}`);
+    }
+}
+
+// Bulk actions
+function bulkApprove() {
+    const checked = document.querySelectorAll('tbody input[type="checkbox"]:checked');
+    if (checked.length === 0) {
+        alert('Vui lòng chọn ít nhất một đánh giá!');
+        return;
+    }
+    if (confirm(`Duyệt ${checked.length} đánh giá?`)) {
+        // Implement bulk approve logic
+        console.log(`Bulk approving ${checked.length} reviews`);
+    }
+}
+
+function bulkReject() {
+    const checked = document.querySelectorAll('tbody input[type="checkbox"]:checked');
+    if (checked.length === 0) {
+        alert('Vui lòng chọn ít nhất một đánh giá!');
+        return;
+    }
+    if (confirm(`Từ chối ${checked.length} đánh giá?`)) {
+        // Implement bulk reject logic
+        console.log(`Bulk rejecting ${checked.length} reviews`);
+    }
+}

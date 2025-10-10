@@ -9,7 +9,8 @@ class Review extends BaseModel
     const REVIEW_STATUS = [
         'pending' => 'Chờ duyệt',
         'approved' => 'Đã duyệt',
-        'rejected' => 'Từ chối'
+        'rejected' => 'Từ chối',
+        'hidden' => 'Ẩn'
     ];
 
     // Tạo review mới
@@ -149,11 +150,7 @@ class Review extends BaseModel
     public function getUserReviews($userId, $limit = 10, $offset = 0)
     {
         try {
-            $sql = "SELECT r.*, p.name as product_name, p.slug, p.base_price,
-                           (SELECT image_path FROM images img 
-                            JOIN image_usages iu ON img.image_id = iu.image_id 
-                            WHERE iu.entity_id = p.product_id AND iu.entity_type = 'product' 
-                            AND iu.is_primary = 1 LIMIT 1) as primary_image
+            $sql = "SELECT r.*, p.name as product_name, p.slug, p.base_price
                     FROM {$this->table} r
                     JOIN products p ON r.product_id = p.product_id
                     WHERE r.user_id = :user_id
@@ -341,11 +338,7 @@ class Review extends BaseModel
     public function getLatestReviews($limit = 5)
     {
         try {
-            $sql = "SELECT r.*, u.name as user_name, p.name as product_name, p.slug,
-                           (SELECT image_path FROM images img 
-                            JOIN image_usages iu ON img.image_id = iu.image_id 
-                            WHERE iu.entity_id = p.product_id AND iu.entity_type = 'product' 
-                            AND iu.is_primary = 1 LIMIT 1) as primary_image
+            $sql = "SELECT r.*, u.name as user_name, p.name as product_name, p.slug
                     FROM {$this->table} r
                     JOIN users u ON r.user_id = u.user_id
                     JOIN products p ON r.product_id = p.product_id
@@ -367,11 +360,7 @@ class Review extends BaseModel
     public function getTopRatedProducts($limit = 10, $minReviews = 3)
     {
         try {
-            $sql = "SELECT p.*, AVG(r.rating) as average_rating, COUNT(r.review_id) as review_count,
-                           (SELECT image_path FROM images img 
-                            JOIN image_usages iu ON img.image_id = iu.image_id 
-                            WHERE iu.entity_id = p.product_id AND iu.entity_type = 'product' 
-                            AND iu.is_primary = 1 LIMIT 1) as primary_image
+            $sql = "SELECT p.*, AVG(r.rating) as average_rating, COUNT(r.review_id) as review_count
                     FROM products p
                     JOIN {$this->table} r ON p.product_id = r.product_id
                     WHERE r.status = 'approved' AND p.is_active = 1
@@ -433,11 +422,7 @@ class Review extends BaseModel
     public function getProductsUserCanReview($userId, $limit = 10, $offset = 0)
     {
         try {
-            $sql = "SELECT DISTINCT p.*, o.created_at as purchase_date,
-                           (SELECT image_path FROM images img 
-                            JOIN image_usages iu ON img.image_id = iu.image_id 
-                            WHERE iu.entity_id = p.product_id AND iu.entity_type = 'product' 
-                            AND iu.is_primary = 1 LIMIT 1) as primary_image
+            $sql = "SELECT DISTINCT p.*, o.created_at as purchase_date
                     FROM products p
                     JOIN order_items oi ON p.product_id = oi.product_id
                     JOIN orders o ON oi.order_id = o.order_id
@@ -467,7 +452,7 @@ class Review extends BaseModel
      * Lấy tất cả đánh giá với thông tin chi tiết
      */
     public function getAll() {
-        $sql = "SELECT r.*, p.name as product_name, p.main_image as product_image, u.name as user_name
+        $sql = "SELECT r.*, p.name as product_name, u.name as user_name
                 FROM {$this->table} r
                 LEFT JOIN products p ON r.product_id = p.product_id
                 LEFT JOIN users u ON r.user_id = u.user_id
@@ -486,16 +471,6 @@ class Review extends BaseModel
         return $result ? (int)$result->total : 0;
     }
 
-    /**
-     * Cập nhật trạng thái đánh giá
-     */
-    public function updateStatus($id, $status) {
-        $sql = "UPDATE {$this->table} SET status = :status WHERE review_id = :id";
-        $this->db->query($sql);
-        $this->db->bind(':status', $status);
-        $this->db->bind(':id', $id);
-        return $this->db->execute();
-    }
 
     /**
      * Xóa đánh giá
@@ -503,6 +478,59 @@ class Review extends BaseModel
     public function delete($id) {
         $sql = "DELETE FROM {$this->table} WHERE review_id = :id";
         $this->db->query($sql);
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
+
+    /**
+     * Lấy tất cả reviews với thông tin chi tiết
+     */
+    public function getAllWithDetails() {
+        $sql = "SELECT pr.*, 
+                       u.name as customer_name, 
+                       u.email as customer_email,
+                       p.name as product_name,
+                       p.sku as product_sku
+                FROM {$this->table} pr 
+                LEFT JOIN users u ON pr.user_id = u.user_id 
+                LEFT JOIN products p ON pr.product_id = p.product_id 
+                ORDER BY pr.created_at DESC";
+        $this->db->query($sql);
+        return $this->db->resultSet();
+    }
+
+    /**
+     * Lấy thống kê reviews
+     */
+    public function getReviewStats() {
+        $sql = "SELECT 
+                    COUNT(*) as total_reviews,
+                    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_reviews,
+                    SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved_reviews,
+                    SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected_reviews,
+                    AVG(rating) as average_rating,
+                    SUM(CASE WHEN admin_reply IS NOT NULL AND admin_reply != '' THEN 1 ELSE 0 END) as replied_reviews
+                FROM {$this->table}";
+        $this->db->query($sql);
+        $result = $this->db->single();
+        
+        return [
+            'total_reviews' => (int)$result->total_reviews,
+            'pending_reviews' => (int)$result->pending_reviews,
+            'approved_reviews' => (int)$result->approved_reviews,
+            'rejected_reviews' => (int)$result->rejected_reviews,
+            'average_rating' => round($result->average_rating, 1),
+            'response_rate' => $result->total_reviews > 0 ? round(($result->replied_reviews / $result->total_reviews) * 100, 1) : 0
+        ];
+    }
+
+    /**
+     * Cập nhật trạng thái review
+     */
+    public function updateStatus($id, $status) {
+        $sql = "UPDATE {$this->table} SET status = :status, updated_at = NOW() WHERE review_id = :id";
+        $this->db->query($sql);
+        $this->db->bind(':status', $status);
         $this->db->bind(':id', $id);
         return $this->db->execute();
     }

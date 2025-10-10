@@ -22,37 +22,37 @@ class AdminRouter {
                     break;
                     
                 case 'products':
-                    $this->controller = 'AdminProductController';
+                    $this->controller = 'ProductsController';
                     $this->method = 'index';
                     unset($url[0]);
                     break;
                     
                 case 'categories':
-                    $this->controller = 'AdminCategoryController';
+                    $this->controller = 'CategoriesController';
                     $this->method = 'index';
                     unset($url[0]);
                     break;
                     
                 case 'collections':
-                    $this->controller = 'AdminCollectionController';
+                    $this->controller = 'CollectionsController';
                     $this->method = 'index';
                     unset($url[0]);
                     break;
                     
                 case 'orders':
-                    $this->controller = 'AdminOrderController';
+                    $this->controller = 'OrdersController';
                     $this->method = 'index';
                     unset($url[0]);
                     break;
                     
                 case 'customers':
-                    $this->controller = 'AdminCustomerController';
+                    $this->controller = 'CustomersController';
                     $this->method = 'index';
                     unset($url[0]);
                     break;
                     
                 case 'reviews':
-                    $this->controller = 'AdminReviewController';
+                    $this->controller = 'ReviewsController';
                     $this->method = 'index';
                     unset($url[0]);
                     break;
@@ -66,8 +66,8 @@ class AdminRouter {
                 default:
                     // Chuyển đổi tên từ URL (vd: 'users') thành tên Class (vd: 'UsersController')
                     $controllerName = ucfirst($url[0]) . 'Controller';
-                    // Tạo đường dẫn tuyệt đối đến file controller
-                    $controllerFile = __DIR__ . '/../app/controllers/' . $controllerName . '.php';
+                    // Tạo đường dẫn tuyệt đối đến file controller trong thư mục admin
+                    $controllerFile = __DIR__ . '/../app/controllers/admin/' . $controllerName . '.php';
 
                     if (file_exists($controllerFile)) {
                         $this->controller = $controllerName;
@@ -80,14 +80,17 @@ class AdminRouter {
             $this->method = 'index';
         }
 
-        // Nạp controller
-        $controllerFilePath = __DIR__ . '/../app/controllers/' . $this->controller . '.php';
+        // Nạp BaseController trước
+        require_once __DIR__ . '/../core/BaseController.php';
+        
+        // Nạp controller từ thư mục admin
+        $controllerFilePath = __DIR__ . '/../app/controllers/admin/' . $this->controller . '.php';
         if (file_exists($controllerFilePath)) {
             require_once $controllerFilePath;
             $this->controller = new $this->controller;
         } else {
             // Xử lý lỗi nếu không tìm thấy file controller
-            die("Admin Controller '{$this->controller}' not found.");
+            die("Admin Controller '{$this->controller}' not found in admin folder.");
         }
 
         // Xử lý Method từ URL hoặc action parameter

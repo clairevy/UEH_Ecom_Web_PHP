@@ -1,6 +1,9 @@
 <?php
-class BaseController{
-    public function model($model){
+class BaseController {
+    /**
+     * Load model
+     */
+    protected function model($model) {
         require_once __DIR__ . "/../app/models/{$model}.php";
         return new $model;
     }
@@ -14,6 +17,22 @@ class BaseController{
             require_once $viewPath;
         } else {
             die("View không tồn tại: {$viewPath}");
-       }
+        }
+    }
+
+    /**
+     * Render admin page with layout
+     */
+    protected function renderAdminPage($contentView, $data = []) {
+        // Load content
+        ob_start();
+        $this->view($contentView, $data);
+        $content = ob_get_clean();
+        
+        // Add content to data
+        $data['content'] = $content;
+        
+        // Render main layout
+        $this->view('admin/layouts/main', $data);
     }
 }

@@ -99,14 +99,14 @@ class Order extends BaseModel {
     // Add item to order
     public function addOrderItem($orderData) {
         $this->db->query("INSERT INTO order_items 
-                         (order_id, product_id, variant_id, quantity, unit_price, total_price) 
-                         VALUES (:order_id, :product_id, :variant_id, :quantity, :unit_price, :total_price)");
+                         (order_id, product_id, variant_id, quantity, unit_price_snapshot, total_price) 
+                         VALUES (:order_id, :product_id, :variant_id, :quantity, :unit_price_snapshot, :total_price)");
         
         $this->db->bind(':order_id', $orderData['order_id']);
         $this->db->bind(':product_id', $orderData['product_id']);
         $this->db->bind(':variant_id', $orderData['variant_id'] ?? null);
         $this->db->bind(':quantity', $orderData['quantity']);
-        $this->db->bind(':unit_price', $orderData['unit_price']);
+        $this->db->bind(':unit_price_snapshot', $orderData['unit_price'] ?? $orderData['price'] ?? 0);
         $this->db->bind(':total_price', $orderData['total_price']);
         
         return $this->db->execute();
@@ -213,5 +213,12 @@ class Order extends BaseModel {
      */
     public function updateStatus($id, $status) {
         return $this->updateOrderStatus($id, $status);
+    }
+
+    /**
+     * Lấy tổng doanh thu
+     */
+    public function getTotalRevenue() {
+        return $this->calculateTotalRevenue();
     }
 }

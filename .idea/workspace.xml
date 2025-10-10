@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="20200891-0c43-468c-9fb3-f08ef1c33ef9" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/admin/index.php" beforeDir="false" afterPath="$PROJECT_DIR$/admin/index.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/public/uploads/categories/category_68e2c24809895_133881443361748509.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/public/uploads/categories/category_68e2c30f75207_133881443361748509.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/public/uploads/categories/category_68e2c4435e051_133881443361748509.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/admin/public/uploads/categories/category_68e2c6dcc84d3_133881443361748509.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/AdminCategoryController.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/AdminCollectionController.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/AdminCustomerController.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/AdminOrderController.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/AdminProductController.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/AdminReviewController.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/CategoryController.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/CollectionController.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/CustomerController.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/DashboardController.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/OrderController.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/ProductController.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/ProductsController.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/ReviewController.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/UsersController.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/Cart.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/Cart.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/Category.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/Category.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/Collection.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/Collection.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/Order.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/Order.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/Product.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/Product.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/Review.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/Review.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/ProductService.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/ProductService.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/views/admin/assets/js/collections.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/admin/assets/js/collections.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/views/admin/assets/js/products.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/admin/assets/js/products.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/views/admin/components/component-manager.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/admin/components/component-manager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/views/admin/components/sidebar.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/admin/components/sidebar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/views/admin/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/admin/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/views/admin/index.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/admin/index.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/views/admin/pages/categories.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/admin/pages/categories.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/views/admin/pages/collections.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/admin/pages/collections.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/views/admin/pages/customers.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/admin/pages/customers.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/configs/admin_router.php" beforeDir="false" afterPath="$PROJECT_DIR$/configs/admin_router.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/configs/config.php" beforeDir="false" afterPath="$PROJECT_DIR$/configs/config.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/configs/router.php" beforeDir="false" afterPath="$PROJECT_DIR$/configs/router.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.php" beforeDir="false" afterPath="$PROJECT_DIR$/index.php" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings">
+    <execution />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "clairevy"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/KHNHI/Ecom_Web_Php.git",
+    "accountId": "29568853-1ae5-4fac-9b0e-3662f54df827"
+  }
+}]]></component>
+  <component name="PhpWorkspaceProjectConfiguration" interpreter_name="PHP" />
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="33oeKwbI6eDMMFCS3ervr0Ngjjv" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;backend/feature/admin-api&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26199.169" />
+        <option value="bundled-js-predefined-d6986cc7102b-9c94529fcfe0-JavaScript-IU-252.26199.169" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="20200891-0c43-468c-9fb3-f08ef1c33ef9" name="Changes" comment="" />
+      <created>1759987796949</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1759987796949</updated>
+      <workItem from="1759987801520" duration="74000" />
+      <workItem from="1759988416615" duration="38000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

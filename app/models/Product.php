@@ -8,6 +8,19 @@ class Product extends BaseModel {
     protected $table = 'products';
     protected $primaryKey = 'product_id';
 
+    // Các trường dữ liệu trong bảng
+    protected $fillable = [
+        'name',
+        'description',
+        'material',
+        'base_price',
+        'sku',
+        'slug',
+        'collection_id',
+        'is_active',
+        'main_image'
+    ];
+
     // ============= CORE CRUD OPERATIONS =============
     
     /**
@@ -15,11 +28,12 @@ class Product extends BaseModel {
      */
     public function create($data) {
         $sql = "INSERT INTO {$this->table} 
-                (name, description, base_price, sku, slug, collection_id, is_active, created_at, updated_at) 
-                VALUES (:name, :description, :base_price, :sku, :slug, :collection_id, :is_active, NOW(), NOW())";
+                (name, material, description, base_price, sku, slug, collection_id, is_active, created_at, updated_at) 
+                VALUES (:name, :material, :description, :base_price, :sku, :slug, :collection_id, :is_active, NOW(), NOW())";
         
         $this->db->query($sql);
         $this->db->bind(':name', $data['name']);
+        $this->db->bind(':material', $data['material'] ?? 'gold');
         $this->db->bind(':description', $data['description']);
         $this->db->bind(':base_price', $data['base_price']);
         $this->db->bind(':sku', $data['sku'] ?? null);
@@ -52,11 +66,21 @@ class Product extends BaseModel {
     }
     
     /**
+     * READ - Lấy sản phẩm theo material
+     */
+    public function findByMaterial($material) {
+        $sql = "SELECT * FROM {$this->table} WHERE material = :material AND is_active = 1 ORDER BY created_at DESC";
+        $this->db->query($sql);
+        $this->db->bind(':material', $material);
+        return $this->db->resultSet();
+    }
+    
+    /**
      * UPDATE - Cập nhật sản phẩm
      */
     public function update($id, $data) {
         $sql = "UPDATE {$this->table} 
-                SET name = :name, description = :description, base_price = :base_price, 
+                SET name = :name, material = :material, description = :description, base_price = :base_price, 
                     sku = :sku, slug = :slug, collection_id = :collection_id,
                     is_active = :is_active, updated_at = NOW() 
                 WHERE product_id = :id";
@@ -64,6 +88,7 @@ class Product extends BaseModel {
         $this->db->query($sql);
         $this->db->bind(':id', $id);
         $this->db->bind(':name', $data['name']);
+        $this->db->bind(':material', $data['material'] ?? 'gold');
         $this->db->bind(':description', $data['description']);
         $this->db->bind(':base_price', $data['base_price']);
         $this->db->bind(':sku', $data['sku']);
@@ -125,9 +150,18 @@ class Product extends BaseModel {
      * Lấy tất cả sản phẩm với thông tin chi tiết
      */
     public function getAllWithDetails() {
-        $sql = "SELECT p.*, c.name as collection_name 
+        $sql = "SELECT p.*, 
+                       c.collection_name,
+                       cat.name as category_name,
+                       COALESCE(SUM(oi.quantity), 0) as total_sold,
+                       COALESCE(COUNT(oi.order_id), 0) as order_count
                 FROM {$this->table} p 
-                LEFT JOIN collections c ON p.collection_id = c.collection_id 
+                LEFT JOIN collection c ON p.collection_id = c.collection_id 
+                LEFT JOIN product_categories pc ON p.product_id = pc.product_id
+                LEFT JOIN categories cat ON pc.category_id = cat.category_id
+                LEFT JOIN order_items oi ON p.product_id = oi.product_id
+                LEFT JOIN orders o ON oi.order_id = o.order_id AND o.order_status IN ('paid', 'shipped', 'delivered')
+                GROUP BY p.product_id
                 ORDER BY p.created_at DESC";
         $this->db->query($sql);
         return $this->db->resultSet();
@@ -137,12 +171,13 @@ class Product extends BaseModel {
      * Lấy sản phẩm bán chạy nhất
      */
     public function getBestSellers($limit = 10) {
-        $sql = "SELECT p.*, COUNT(oi.order_id) as order_count 
+        $sql = "SELECT p.*, COALESCE(SUM(oi.quantity), 0) as total_sold, COALESCE(COUNT(oi.order_id), 0) as order_count
                 FROM {$this->table} p 
                 LEFT JOIN order_items oi ON p.product_id = oi.product_id 
+                LEFT JOIN orders o ON oi.order_id = o.order_id AND o.order_status IN ('paid', 'shipped', 'delivered')
                 WHERE p.is_active = 1 
                 GROUP BY p.product_id 
-                ORDER BY order_count DESC 
+                ORDER BY total_sold DESC, order_count DESC 
                 LIMIT :limit";
         $this->db->query($sql);
         $this->db->bind(':limit', $limit, PDO::PARAM_INT);
@@ -157,6 +192,39 @@ class Product extends BaseModel {
         $this->db->query($sql);
         $result = $this->db->single();
         return $result ? (int)$result->total : 0;
+    }
+
+    /**
+     * Lấy tổng doanh thu từ sản phẩm
+     */
+    public function getTotalRevenue() {
+        $sql = "SELECT SUM(oi.total_price) as total_revenue 
+                FROM order_items oi 
+                JOIN orders o ON oi.order_id = o.order_id 
+                WHERE o.order_status IN ('paid', 'shipped', 'delivered')";
+        $this->db->query($sql);
+        $result = $this->db->single();
+        return $result ? (float)$result->total_revenue : 0;
+    }
+
+    /**
+     * Lấy danh sách materials có sẵn
+     */
+    public function getAvailableMaterials() {
+        return ['gold', 'silver', 'diamond', 'pearl'];
+    }
+    
+    /**
+     * Lấy thống kê theo material
+     */
+    public function getMaterialStats() {
+        $sql = "SELECT material, COUNT(*) as count, AVG(base_price) as avg_price 
+                FROM {$this->table} 
+                WHERE is_active = 1 
+                GROUP BY material 
+                ORDER BY count DESC";
+        $this->db->query($sql);
+        return $this->db->resultSet();
     }
 
     /**

@@ -50,6 +50,10 @@ class Category extends BaseModel {
         return $this->db->resultSet();
     }
 
+    public function getAll($onlyActive = true) {
+        return $this->getAllCategories($onlyActive);
+    }
+
     // Get all active categories (alias for getAllCategories with active filter)
     public function getAllActiveCategories() {
         return $this->getAllCategories(true);
