@@ -359,6 +359,30 @@
     
     <!-- Custom JavaScript -->
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        // Home
+        document.querySelectorAll('.nav-link[href="#index"]').forEach(el => {
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = 'index.html';
+            });
+        });
+        // Category
+        document.querySelectorAll('.nav-link[href="#category"]').forEach(el => {
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = 'list-product.html';
+            });
+        });
+        // Sign in
+        document.querySelectorAll('a[href="#signin"]').forEach(el => {
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = 'signin-signup.html';
+            });
+        });
+    });
+
         // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
