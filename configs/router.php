@@ -105,6 +105,65 @@ class Route {
                     }
                     break;
                     
+                case 'signin':
+                case 'login':
+                    $this->controller = 'AuthController';
+                    $this->method = 'showSignIn';
+                    unset($url[0]);
+                    break;
+                    
+                case 'signup':
+                case 'register':
+                    $this->controller = 'AuthController';
+                    $this->method = 'showSignUp';
+                    unset($url[0]);
+                    break;
+                    
+                case 'forgot-password':
+                    $this->controller = 'AuthController';
+                    $this->method = 'showForgotPassword';
+                    unset($url[0]);
+                    break;
+                    
+                case 'reset-password':
+                    $this->controller = 'AuthController';
+                    $this->method = 'showResetPassword';
+                    unset($url[0]);
+                    break;
+                    
+                case 'auth':
+                    $this->controller = 'AuthController';
+                    unset($url[0]);
+                    if (isset($url[1])) {
+                        switch ($url[1]) {
+                            case 'signin':
+                            case 'login':
+                                $this->method = 'signIn';
+                                break;
+                            case 'signup':
+                            case 'register':
+                                $this->method = 'signUp';
+                                break;
+                            case 'verify':
+                                $this->method = 'verifyEmail';
+                                break;
+                            case 'logout':
+                                $this->method = 'logout';
+                                break;
+                            case 'resend-verification':
+                                $this->method = 'resendVerification';
+                                break;
+                            case 'forgot-password':
+                                $this->method = 'forgotPassword';
+                                break;
+                            case 'reset-password':
+                                $this->method = 'resetPassword';
+                                break;
+                        }
+                        unset($url[1]);
+                    }
+                    break;
+                    
                 default:
                 // Chuyển đổi tên từ URL (vd: 'users') thành tên Class (vd: 'UsersController')
                 $controllerName = ucfirst($url[0]) . 'Controller';

@@ -17,7 +17,7 @@
 </head>
 <body>
     <!-- Header -->
-    <?php include __DIR__ . '/../components/header-nosignin.php'; ?>
+    <?php include __DIR__ . '/../components/header.php'; ?>
 
     <!-- Banner Section -->
     <section class="banner-section">

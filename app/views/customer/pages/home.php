@@ -18,7 +18,7 @@
 </head>
 <body>
     <!-- Header -->
-    <?php include __DIR__ . '/../components/header-nosignin.php'; ?>
+    <?php include __DIR__ . '/../components/header.php'; ?>
 
 <!-- Hero Slider -->
     <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
@@ -378,7 +378,7 @@
         document.querySelectorAll('a[href="#signin"]').forEach(el => {
             el.addEventListener('click', function(e) {
                 e.preventDefault();
-                window.location.href = 'signin-signup.html';
+                window.location.href = '/Ecom_website/signin';
             });
         });
     });
@@ -416,21 +416,26 @@
             dots[currentSlide].classList.add('active');
         }, 5000);
 
-        // Search functionality
-        document.querySelector('.search-btn').addEventListener('click', function() {
-            const searchTerm = document.querySelector('.search-input').value;
-            if (searchTerm.trim()) {
-                // Redirect to products page with search parameter - Clean URL
-                window.location.href = `/Ecom_website/products?search=${encodeURIComponent(searchTerm.trim())}`;
-            }
-        });
+        // Search functionality - Check if elements exist
+        const searchBtn = document.querySelector('.search-btn');
+        const searchInput = document.querySelector('.search-input');
+        
+        if (searchBtn && searchInput) {
+            searchBtn.addEventListener('click', function() {
+                const searchTerm = searchInput.value;
+                if (searchTerm.trim()) {
+                    // Redirect to products page with search parameter - Clean URL
+                    window.location.href = `/Ecom_website/products?search=${encodeURIComponent(searchTerm.trim())}`;
+                }
+            });
 
-        // Handle Enter key in search
-        document.querySelector('.search-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.querySelector('.search-btn').click();
-            }
-        });
+            // Handle Enter key in search
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchBtn.click();
+                }
+            });
+        }
 
         // Add parallax effect on scroll
         window.addEventListener('scroll', () => {
@@ -467,6 +472,9 @@
                         };
                     });
                     console.log('Processed newArrivalsData:', newArrivalsData);
+                    console.log('About to render newArrivals...');
+                    renderProducts('newArrivals');
+                    console.log('newArrivals rendered!');
                 }
 
                 // Fetch popular products - Clean URL
@@ -490,8 +498,10 @@
                 }
 
                 // Render products after data is loaded
+                console.log('About to render both sections...');
                 renderProducts('newArrivals');
                 renderProducts('popular');
+                console.log('Both sections rendered!');
             } catch (error) {
                 console.error('Error fetching product data:', error);
                 // Fallback to mock data if API fails
@@ -606,6 +616,7 @@ function moveCarousel(type, dir) {
 
 // Khởi tạo - fetch data và render
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM loaded, starting fetchProductData...');
   fetchProductData();
 });
     </script>

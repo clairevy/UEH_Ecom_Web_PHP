@@ -13,7 +13,7 @@
 </head>
 <body>
     <!-- Header -->
-    <?php include __DIR__ . '/../components/header-nosignin.php'; ?>
+    <?php include __DIR__ . '/../components/header.php'; ?>
 
     <!-- Main Content -->
     <div class="container mt-5 pt-5">
