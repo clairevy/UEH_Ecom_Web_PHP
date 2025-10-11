@@ -174,11 +174,13 @@ class Order extends BaseModel {
      */
     public function getAllOrders() {
         $sql = "SELECT o.*, u.name as customer_name, u.email as customer_email,
-                       oi.product_id, oi.quantity, p.name as product_name, p.main_image as product_image
+                       oi.product_id, oi.quantity, p.name as product_name, img.file_path as primary_image
                 FROM {$this->table} o 
                 LEFT JOIN users u ON o.user_id = u.user_id
                 LEFT JOIN order_items oi ON o.order_id = oi.order_id
                 LEFT JOIN products p ON oi.product_id = p.product_id
+                LEFT JOIN image_usages iu ON p.product_id = iu.ref_id AND iu.ref_type = 'product' AND iu.is_primary = 1
+                LEFT JOIN images img ON iu.image_id = img.image_id
                 ORDER BY o.created_at DESC";
         $this->db->query($sql);
         return $this->db->resultSet();

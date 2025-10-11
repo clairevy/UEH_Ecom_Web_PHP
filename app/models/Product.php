@@ -171,8 +171,13 @@ class Product extends BaseModel {
      * Lấy sản phẩm bán chạy nhất
      */
     public function getBestSellers($limit = 10) {
-        $sql = "SELECT p.*, COALESCE(SUM(oi.quantity), 0) as total_sold, COALESCE(COUNT(oi.order_id), 0) as order_count
+        $sql = "SELECT p.*, 
+                       img.file_path as primary_image,
+                       COALESCE(SUM(oi.quantity), 0) as total_sold, 
+                       COALESCE(COUNT(oi.order_id), 0) as order_count
                 FROM {$this->table} p 
+                LEFT JOIN image_usages iu ON p.product_id = iu.ref_id AND iu.ref_type = 'product' AND iu.is_primary = 1
+                LEFT JOIN images img ON iu.image_id = img.image_id
                 LEFT JOIN order_items oi ON p.product_id = oi.product_id 
                 LEFT JOIN orders o ON oi.order_id = o.order_id AND o.order_status IN ('paid', 'shipped', 'delivered')
                 WHERE p.is_active = 1 

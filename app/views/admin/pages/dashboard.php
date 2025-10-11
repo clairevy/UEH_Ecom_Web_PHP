@@ -103,7 +103,7 @@
                 <?php if (!empty($bestSellers)): ?>
                     <?php foreach ($bestSellers as $index => $product): ?>
                         <div class="d-flex align-items-center mb-3 pb-3 <?= $index < count($bestSellers) - 1 ? 'border-bottom border-custom' : '' ?>">
-                            <img src="<?= $product->main_image ?: 'https://images.unsplash.com/photo-1708221382764-299d9e3ad257?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' ?>" alt="Product" class="product-img me-3">
+                            <img src="<?= !empty($product->primary_image) ? $product->primary_image : 'https://images.unsplash.com/photo-1708221382764-299d9e3ad257?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' ?>" alt="Product" class="product-img me-3">
                             <div class="flex-grow-1">
                                 <div class="fw-bold"><?= htmlspecialchars($product->name) ?></div>
                                 <div class="text-muted-custom small">$<?= number_format($product->base_price, 2) ?></div>
