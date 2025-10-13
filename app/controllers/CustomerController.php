@@ -12,6 +12,7 @@ class CustomerController extends BaseController {
     private $productService;
     private $sliderService;
     
+
     public function __construct() {
         $this->productService = new ProductService();
         $this->sliderService = new SliderService();

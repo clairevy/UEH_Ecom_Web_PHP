@@ -148,6 +148,72 @@ class User extends BaseModel {
     }
     
     /**
+     * Update user profile
+     */
+    public function updateProfile($userId, $data) {
+        $fields = [];
+        $params = [':user_id' => $userId];
+        
+        foreach ($data as $key => $value) {
+            if ($value !== null && $value !== '') {
+                $fields[] = "$key = :$key";
+                $params[":$key"] = $value;
+            }
+        }
+        
+        if (empty($fields)) {
+            return false;
+        }
+        
+        $query = "UPDATE users SET " . implode(', ', $fields) . " WHERE user_id = :user_id";
+        
+        $this->db->query($query);
+        foreach ($params as $param => $value) {
+            $this->db->bind($param, $value);
+        }
+        
+        return $this->db->execute();
+    }
+    
+    /**
+     * Update user avatar
+     */
+    public function updateAvatar($userId, $avatarPath) {
+        $query = "UPDATE users SET avatar = :avatar WHERE user_id = :user_id";
+        
+        $this->db->query($query);
+        $this->db->bind(':avatar', $avatarPath);
+        $this->db->bind(':user_id', $userId);
+        
+        return $this->db->execute();
+    }
+    
+    /**
+     * Update user password
+     */
+    public function updatePassword($userId, $hashedPassword) {
+        $query = "UPDATE users SET password_hash = :password WHERE user_id = :user_id";
+        
+        $this->db->query($query);
+        $this->db->bind(':password', $hashedPassword);
+        $this->db->bind(':user_id', $userId);
+        
+        return $this->db->execute();
+    }
+    
+    /**
+     * Find user by ID
+     */
+    public function findById($userId) {
+        $query = "SELECT * FROM users WHERE user_id = :user_id";
+        
+        $this->db->query($query);
+        $this->db->bind(':user_id', $userId);
+        
+        return $this->db->single();
+    }
+    
+    /**
      * Check if token is valid
      */
     public function isTokenValid($expires) {

@@ -116,12 +116,35 @@ class SessionHelper {
     }
     
     /**
-     * Lấy avatar URL (placeholder cho tương lai)
+     * Update user data in session
+     */
+    public static function updateUserData($data) {
+        self::start();
+        if (self::isLoggedIn()) {
+            foreach ($data as $key => $value) {
+                if (isset($_SESSION['user_' . $key])) {
+                    $_SESSION['user_' . $key] = $value;
+                }
+            }
+            
+            // Update user_name specifically if name is updated
+            if (isset($data['name'])) {
+                $_SESSION['user_name'] = $data['name'];
+            }
+        }
+    }
+    
+    /**
+     * Lấy avatar URL của user
      */
     public static function getAvatarUrl() {
         $user = self::getUser();
         if ($user) {
-            // Tạm thời sử dụng avatar mặc định, sau này có thể thêm avatar từ database
+            // Kiểm tra nếu có avatar upload
+            if (!empty($user->avatar)) {
+                return $user->avatar;
+            }
+            // Sử dụng avatar mặc định
             return "https://ui-avatars.com/api/?name=" . urlencode($user->name) . "&background=667eea&color=fff&size=40";
         }
         return null;

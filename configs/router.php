@@ -163,6 +163,89 @@ class Route {
                         unset($url[1]);
                     }
                     break;
+
+                case 'profile':
+                    $this->controller = 'ProfileController';
+                    $this->method = 'index';
+                    unset($url[0]);
+                    if (isset($url[1])) {
+                        switch ($url[1]) {
+                            case 'update':
+                                $this->method = 'update';
+                                break;
+                            case 'upload-avatar':
+                                $this->method = 'uploadAvatar';
+                                break;
+                            case 'change-password':
+                                $this->method = 'changePassword';
+                                break;
+                        }
+                        unset($url[1]);
+                    }
+                    break;
+
+                case 'cart':
+                    $this->controller = 'CartController';
+                    $this->method = 'index';
+                    unset($url[0]);
+                    if (isset($url[1])) {
+                        switch ($url[1]) {
+                            case 'add':
+                                $this->method = 'add';
+                                break;
+                            case 'update':
+                                $this->method = 'update';
+                                break;
+                            case 'remove':
+                                $this->method = 'remove';
+                                break;
+                            case 'clear':
+                                $this->method = 'clear';
+                                break;
+                            case 'count':
+                                $this->method = 'count';
+                                break;
+                            case 'buynow':
+                                $this->method = 'buyNow';
+                                break;
+                        }
+                        unset($url[1]);
+                    }
+                    break;
+
+                case 'checkout':
+                    $this->controller = 'CheckoutController';
+                    $this->method = 'index';
+                    unset($url[0]);
+                    if (isset($url[1])) {
+                        switch ($url[1]) {
+                            case 'process':
+                                $this->method = 'process';
+                                break;
+                        }
+                        unset($url[1]);
+                    }
+                    break;
+
+                case 'order':
+                    $this->controller = 'OrderController';
+                    $this->method = 'index';
+                    unset($url[0]);
+                    if (isset($url[1])) {
+                        switch ($url[1]) {
+                            case 'buynow':
+                                $this->method = 'buyNow';
+                                break;
+                        }
+                        unset($url[1]);
+                    }
+                    break;
+
+                case 'order-success':
+                    $this->controller = 'CheckoutController';
+                    $this->method = 'orderSuccess';
+                    unset($url[0]);
+                    break;
                     
                 default:
                 // Chuyển đổi tên từ URL (vd: 'users') thành tên Class (vd: 'UsersController')

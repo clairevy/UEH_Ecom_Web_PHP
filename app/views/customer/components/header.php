@@ -306,5 +306,41 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => {
             document.getElementById('collectionsDropdown').innerHTML = '<li><span class="dropdown-item text-muted">Không thể tải bộ sưu tập</span></li>';
         });
+
+    // Update cart badge count
+    updateCartBadge();
 });
+
+/**
+ * Update cart badge with current cart count
+ */
+function updateCartBadge() {
+    // Get cart count from session or localStorage
+    let cartCount = 0;
+    
+    // For session-based cart, we need to make an AJAX request
+    fetch('<?= url('/cart/count') ?>', {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            cartCount = data.count || 0;
+            const cartBadge = document.getElementById('cartBadge');
+            if (cartBadge) {
+                cartBadge.textContent = cartCount;
+                cartBadge.style.display = cartCount > 0 ? 'inline' : 'none';
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error updating cart badge:', error);
+    });
+}
+
+// Global function to refresh cart badge (call from other pages)
+window.updateCartBadge = updateCartBadge;
 </script>

@@ -1,3 +1,9 @@
+<?php 
+// Include URL helper if not already included
+if (!function_exists('url')) {
+    require_once __DIR__ . '/../../../../helpers/url_helper.php';
+}
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -6,6 +12,8 @@
     <title>Nhẫn Kim Cương Vàng Trắng 18K - Chi Tiết Sản Phẩm</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>Chi tiết sản phẩm</title>
     <link href="<?= asset('css/css.css?v=' . time()) ?>" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">   
@@ -103,31 +111,44 @@
                 </p>
 
                 <div class="product-options">
+                    <?php if (isset($product->variant_options) && !empty($product->variant_options['colors'])): ?>
                     <div class="option-group">
                         <label>Loại:</label>
-                        <div class="type-options">
-                            <button class="option-btn active" onclick="selectOption(this)">Vàng Trắng</button>
-                            <button class="option-btn" onclick="selectOption(this)">Vàng Vàng</button>
+                        <div class="color-options type-options">
+                            <?php foreach ($product->variant_options['colors'] as $index => $color): ?>
+                                <button class="option-btn <?= $index === 0 ? 'active' : '' ?>" onclick="selectOption(this)">
+                                    <?= htmlspecialchars($color) ?>
+                                </button>
+                            <?php endforeach; ?>
                         </div>
                     </div>
+                    <?php endif; ?>
 
+                    <?php if (isset($product->variant_options) && !empty($product->variant_options['sizes'])): ?>
                     <div class="option-group">
                         <label>Size:</label>
-                        <div class="size-options">
-                            <button class="option-btn" onclick="selectOption(this)">5</button>
-                            <button class="option-btn" onclick="selectOption(this)">6</button>
-                            <button class="option-btn active" onclick="selectOption(this)">7</button>
-                            <button class="option-btn" onclick="selectOption(this)">8</button>
-                            <button class="option-btn" onclick="selectOption(this)">9</button>
+                        <div class="size-options type-options">
+                            <?php foreach ($product->variant_options['sizes'] as $index => $size): ?>
+                                <button class="option-btn <?= $index === 0 ? 'active' : '' ?>" onclick="selectOption(this)">
+                                    <?= htmlspecialchars($size) ?>
+                                </button>
+                            <?php endforeach; ?>
                         </div>
                     </div>
+                    <?php endif; ?>
                 </div>
 
                 <div class="quantity-selector">
-                    
                     <input type="number" class="quantity-input" value="1" min="1" id="quantityInput">
                     
-                    <button class="btn-buy ms-3">Mua Ngay</button>
+                    <div class="action-buttons mt-3">
+                        <button class="btn-add-to-cart me-3" onclick="addToCart()" id="addToCartBtn">
+                            <i class="fas fa-shopping-cart me-2"></i>Thêm vào giỏ hàng
+                        </button>
+                        <button class="btn-buy" onclick="buyNow()" id="buyNowBtn">
+                            <i class="fas fa-bolt me-2"></i>Mua Ngay
+                        </button>
+                    </div>
                 </div>
 
                 <div class="delivery-info">
@@ -472,6 +493,84 @@ console.log('🧪 Testing JS file loading...');
     background-color: #f8f9fa;
 }
 
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.btn-add-to-cart {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    border: none;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-add-to-cart:hover {
+    background: linear-gradient(45deg, #218838, #1ba085);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+    color: white;
+}
+
+.btn-add-to-cart:active {
+    transform: translateY(0);
+}
+
+.btn-add-to-cart:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-buy {
+    background: linear-gradient(45deg, #dc3545, #fd7e14);
+    border: none;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-buy:hover {
+    background: linear-gradient(45deg, #c82333, #fd6c14);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .btn-add-to-cart,
+    .btn-buy {
+        width: 100%;
+        min-width: auto;
+    }
+}
+
 /* Tab Content Visibility */
 .tab-content {
     display: none;
@@ -481,4 +580,226 @@ console.log('🧪 Testing JS file loading...');
     display: block;
 }
 </style>
+
+<script>
+/**
+ * Add product to cart
+ */
+function addToCart() {
+    const productId = <?= isset($product->product_id) ? $product->product_id : 0 ?>;
+    const quantity = parseInt(document.getElementById('quantityInput').value) || 1;
+    const addToCartBtn = document.getElementById('addToCartBtn');
+    
+    // Get selected options
+    const selectedColor = document.querySelector('.color-options .option-btn.active')?.textContent?.trim() || '';
+    const selectedSize = document.querySelector('.size-options .option-btn.active')?.textContent?.trim() || '';
+    
+    // Debug logging
+    console.log('Selected color:', selectedColor);
+    console.log('Selected size:', selectedSize);
+    console.log('Product ID:', productId);
+    console.log('Quantity:', quantity);
+    
+    // Validate product
+    if (!productId) {
+        showToast('error', 'Không tìm thấy thông tin sản phẩm');
+        return;
+    }
+    
+    if (quantity < 1) {
+        showToast('error', 'Số lượng phải lớn hơn 0');
+        return;
+    }
+
+    // Show loading state
+    const originalHtml = addToCartBtn.innerHTML;
+    addToCartBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang thêm...';
+    addToCartBtn.disabled = true;
+
+    // Prepare form data
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('quantity', quantity);
+    formData.append('color', selectedColor);
+    formData.append('size', selectedSize);
+
+    // Submit to cart
+    const cartUrl = '<?= url('cart/add') ?>';
+    console.log('Cart URL:', cartUrl);
+    
+    fetch(cartUrl, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Restore button state
+        addToCartBtn.innerHTML = originalHtml;
+        addToCartBtn.disabled = false;
+
+        if (data.success) {
+            // Update cart badge if function exists
+            if (typeof updateCartBadge === 'function') {
+                updateCartBadge();
+            }
+            
+            // Show success message with action buttons
+            Swal.fire({
+                icon: 'success',
+                title: 'Thêm vào giỏ hàng thành công!',
+                text: `Đã thêm ${quantity} sản phẩm vào giỏ hàng`,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-shopping-cart me-1"></i>Xem giỏ hàng',
+                cancelButtonText: 'Tiếp tục mua sắm',
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '<?= url('cart') ?>';
+                }
+            });
+        } else {
+            showToast('error', data.message || 'Có lỗi xảy ra khi thêm vào giỏ hàng');
+        }
+    })
+    .catch(error => {
+        // Restore button state
+        addToCartBtn.innerHTML = originalHtml;
+        addToCartBtn.disabled = false;
+        
+        console.error('Error:', error);
+        showToast('error', 'Có lỗi kết nối xảy ra. Vui lòng thử lại.');
+    });
+}
+
+/**
+ * Buy now - Add to cart and redirect to checkout
+ */
+function buyNow() {
+    const productId = <?= isset($product->product_id) ? $product->product_id : 0 ?>;
+    const quantity = parseInt(document.getElementById('quantityInput').value) || 1;
+    
+    // Get selected options
+    const selectedColor = document.querySelector('.color-options .option-btn.active')?.textContent || '';
+    const selectedSize = document.querySelector('.size-options .option-btn.active')?.textContent || '';
+    
+    console.log('BuyNow - Selected Color:', selectedColor);
+    console.log('BuyNow - Selected Size:', selectedSize);
+    
+    // Validate product
+    if (!productId) {
+        showToast('error', 'Không tìm thấy thông tin sản phẩm');
+        return;
+    }
+    
+    if (quantity < 1) {
+        showToast('error', 'Số lượng phải lớn hơn 0');
+        return;
+    }
+
+    // Show loading
+    Swal.fire({
+        title: 'Đang xử lý...',
+        text: 'Vui lòng đợi trong giây lát',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    // Prepare form data
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('quantity', quantity);
+    formData.append('color', selectedColor);
+    formData.append('size', selectedSize);
+
+    // Use buyNow endpoint
+    const buyNowUrl = '<?= url('cart/buynow') ?>';
+    
+    fetch(buyNowUrl, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        Swal.close();
+        
+        console.log('BuyNow - Server Response:', data);
+        
+        if (data.success) {
+            // Update cart badge
+            if (typeof updateCartBadge === 'function') {
+                updateCartBadge();
+            }
+            
+            // Redirect to checkout
+            console.log('BuyNow - Redirecting to checkout...');
+            window.location.href = '<?= url('checkout') ?>';
+        } else {
+            console.log('BuyNow - Error:', data.message);
+            showToast('error', data.message || 'Có lỗi xảy ra khi thêm vào giỏ hàng');
+        }
+    })
+    .catch(error => {
+        Swal.close();
+        console.error('Error:', error);
+        showToast('error', 'Có lỗi kết nối xảy ra. Vui lòng thử lại.');
+    });
+}
+
+/**
+ * Show toast notification
+ */
+function showToast(type, message) {
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+
+    Toast.fire({
+        icon: type,
+        title: message
+    });
+}
+
+/**
+ * Select product option (color/size)
+ */
+function selectOption(element) {
+    // Remove active class from siblings
+    const siblings = element.parentElement.querySelectorAll('.option-btn');
+    siblings.forEach(btn => btn.classList.remove('active'));
+    
+    // Add active class to clicked element
+    element.classList.add('active');
+}
+
+// Initialize quantity controls
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityInput = document.getElementById('quantityInput');
+    
+    if (quantityInput) {
+        quantityInput.addEventListener('change', function() {
+            const value = parseInt(this.value);
+            if (isNaN(value) || value < 1) {
+                this.value = 1;
+            }
+        });
+    }
+});
+</script>
 
