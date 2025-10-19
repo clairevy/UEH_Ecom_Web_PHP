@@ -12,6 +12,27 @@
     <html xmlns:th="http://www.thymeleaf.org">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="<?= asset('css/css.css?v=' . time()) ?>" rel="stylesheet">
+    
+    <style>
+        .category-item {
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .category-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .category-card {
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+    </style>
 
     
     
@@ -176,7 +197,7 @@
                 <div class="d-flex justify-content-center" id="categoryCarousel">
                     <?php if (isset($categories) && !empty($categories)): ?>
                         <?php foreach ($categories as $category): ?>
-                            <div class="category-item text-center mx-3">
+                            <div class="category-item text-center mx-3" onclick="goToProducts('category', '<?= $category->category_id ?>')">
                                 <div class="category-circle">
                                     <img src="<?= isset($category->banner_image) ? $category->banner_image : 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=100&h=100&fit=crop' ?>" 
                                          alt="<?= htmlspecialchars($category->category_name ?? $category->name ?? 'Category') ?>">
@@ -186,31 +207,31 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <!-- Fallback static categories if no data from DB -->
-                        <div class="category-item text-center mx-3">
+                        <div class="category-item text-center mx-3" onclick="goToProducts('category', 'necklaces')">
                             <div class="category-circle">
                                 <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=100&h=100&fit=crop" alt="Necklaces">
                             </div>
                             <p class="mt-2">Necklaces</p>
                         </div>
-                        <div class="category-item text-center mx-3">
+                        <div class="category-item text-center mx-3" onclick="goToProducts('category', 'earrings')">
                             <div class="category-circle">
                                 <img src="https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=100&h=100&fit=crop" alt="Earrings">
                             </div>
                             <p class="mt-2">Earrings</p>
                         </div>
-                        <div class="category-item text-center mx-3">
+                        <div class="category-item text-center mx-3" onclick="goToProducts('category', 'rings')">
                             <div class="category-circle">
                                 <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=100&h=100&fit=crop" alt="Rings">
                             </div>
                             <p class="mt-2">Rings</p>
                         </div>
-                        <div class="category-item text-center mx-3">
+                        <div class="category-item text-center mx-3" onclick="goToProducts('category', 'bracelets')">
                             <div class="category-circle">
                                 <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=100&h=100&fit=crop" alt="Bracelets">
                             </div>
                             <p class="mt-2">Bracelets</p>
                         </div>
-                        <div class="category-item text-center mx-3">
+                        <div class="category-item text-center mx-3" onclick="goToProducts('category', 'anklets')">
                             <div class="category-circle">
                                 <img src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=100&h=100&fit=crop" alt="Anklets">
                             </div>
@@ -228,14 +249,14 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6 mb-4">
-                    <div class="category-card gold-card">
+                    <div class="category-card gold-card" onclick="goToProducts('material', 'gold')">
                         <div class="category-overlay">
                             <h3 class="category-title">GOLD</h3>                            
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6 mb-4">
-                    <div class="category-card silver-card">
+                    <div class="category-card silver-card" onclick="goToProducts('material', 'silver')">
                         <div class="category-overlay">
                             <h3 class="category-title">SILVER</h3>                            
                         </div>
@@ -619,6 +640,24 @@ document.addEventListener('DOMContentLoaded', function() {
   console.log('DOM loaded, starting fetchProductData...');
   fetchProductData();
 });
+
+// Function to navigate to products page with filters
+function goToProducts(filterType, filterValue) {
+    let url = '/Ecom_website/products';
+    let params = new URLSearchParams();
+    
+    if (filterType === 'category') {
+        params.append('category', filterValue);
+    } else if (filterType === 'material') {
+        params.append('material', filterValue);
+    }
+    
+    if (params.toString()) {
+        url += '?' + params.toString();
+    }
+    
+    window.location.href = url;
+}
     </script>
 </body>
 </html>

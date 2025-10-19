@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../core/BaseController.php';
 require_once __DIR__ . '/../models/Product.php';
 require_once __DIR__ . '/../models/Order.php';
 require_once __DIR__ . '/../../helpers/session_helper.php';
@@ -77,6 +78,7 @@ class CheckoutController extends BaseController {
                 'email' => trim($_POST['email']),
                 'phone' => trim($_POST['phone']),
                 'address' => trim($_POST['address']),
+                'province' => trim($_POST['province']),
                 'notes' => trim($_POST['notes'] ?? '')
             ];
 
@@ -153,43 +155,47 @@ class CheckoutController extends BaseController {
             // Generate order ID
             $orderId = 'ORD' . date('Ymd') . rand(1000, 9999);
 
-            // Prepare order data
+            // Prepare order data to match database structure
             $orderData = [
-                'order_id' => $orderId,
                 'user_id' => SessionHelper::isLoggedIn() ? SessionHelper::getUserId() : null,
-                'customer_name' => $customerInfo['name'],
-                'customer_email' => $customerInfo['email'],
-                'customer_phone' => $customerInfo['phone'],
-                'shipping_address' => $customerInfo['address'],
-                'payment_method' => $paymentMethod,
+                'full_name' => $customerInfo['name'],
+                'email' => $customerInfo['email'],
+                'phone' => $customerInfo['phone'],
+                'street' => $customerInfo['address'], // For now, put full address in street
+                'ward' => '', // Would need separate fields in form
+                'province' => $customerInfo['province'],
+                'country' => 'Vietnam',
                 'order_status' => 'pending',
-                'subtotal' => $cartSummary['subtotal'],
                 'shipping_fee' => $cartSummary['shipping'],
-                'tax_amount' => $cartSummary['tax'],
                 'total_amount' => $cartSummary['total'],
-                'notes' => $customerInfo['notes'],
-                'created_at' => date('Y-m-d H:i:s')
+                'discount_code' => null,
+                'discount_amount' => 0
             ];
 
-            // Create order (simplified - in real app would use proper database methods)
-            $created = $this->orderModel->create($orderData);
+            // Create order using proper database method
+            error_log("Creating order with data: " . json_encode($orderData));
+            $created = $this->orderModel->createOrder($orderData);
+            error_log("Order creation result: " . ($created ? 'SUCCESS' : 'FAILED'));
 
             if ($created) {
-                // Create order items (simplified)
+                // Get the actual order ID from database (auto-increment primary key)
+                $actualOrderId = $this->orderModel->getLastInsertId();
+                error_log("Actual order ID: " . $actualOrderId);
+                
+                // Create order items
                 foreach ($cartItems as $item) {
                     $itemData = [
-                        'order_id' => $orderId,
+                        'order_id' => $actualOrderId,
                         'product_id' => $item['product']->product_id,
+                        'variant_id' => null, // Set if using variants
                         'quantity' => $item['quantity'],
                         'unit_price' => $item['product']->base_price,
-                        'total_price' => $item['subtotal'],
-                        'product_options' => json_encode([
-                            'size' => $item['size'],
-                            'color' => $item['color']
-                        ])
+                        'total_price' => $item['subtotal'] ?? ($item['quantity'] * $item['product']->base_price)
                     ];
                     
-                    // In real app: $this->orderModel->createOrderItem($itemData);
+                    error_log("Creating order item: " . json_encode($itemData));
+                    $itemCreated = $this->orderModel->addOrderItem($itemData);
+                    error_log("Order item creation result: " . ($itemCreated ? 'SUCCESS' : 'FAILED'));
                 }
 
                 // Update product stock (simplified)
@@ -198,7 +204,7 @@ class CheckoutController extends BaseController {
                     // In real app: $this->productModel->updateStock($item['product']->product_id, $newStock);
                 }
 
-                return $orderId;
+                return $actualOrderId;
             }
 
             return false;
@@ -233,6 +239,10 @@ class CheckoutController extends BaseController {
 
         if (empty($data['address'])) {
             $errors['address'] = 'Địa chỉ giao hàng là bắt buộc';
+        }
+
+        if (empty($data['province'])) {
+            $errors['province'] = 'Tỉnh/Thành phố là bắt buộc';
         }
 
         $allowedPaymentMethods = ['cod', 'bank_transfer', 'qr_code'];
@@ -333,19 +343,19 @@ class CheckoutController extends BaseController {
     /**
      * Send JSON response
      */
-    private function jsonResponse($success, $message, $data = null) {
-        header('Content-Type: application/json');
-        $response = [
-            'success' => $success,
-            'message' => $message
-        ];
+    // private function jsonResponse($success, $message, $data = null) {
+    //     header('Content-Type: application/json');
+    //     $response = [
+    //         'success' => $success,
+    //         'message' => $message
+    //     ];
         
-        if ($data !== null) {
-            $response['data'] = $data;
-        }
+    //     if ($data !== null) {
+    //         $response['data'] = $data;
+    //     }
         
-        echo json_encode($response, JSON_UNESCAPED_UNICODE);
-        exit;
-    }
+    //     echo json_encode($response, JSON_UNESCAPED_UNICODE);
+    //     exit;
+    // }
 }
 ?>

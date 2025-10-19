@@ -205,6 +205,9 @@ class Route {
                             case 'count':
                                 $this->method = 'count';
                                 break;
+                            case 'summary':
+                                $this->method = 'summary';
+                                break;
                             case 'buynow':
                                 $this->method = 'buyNow';
                                 break;

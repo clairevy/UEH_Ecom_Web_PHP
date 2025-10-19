@@ -275,17 +275,18 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('<?= url('/api/categories') ?>')
         .then(response => response.json())
         .then(data => {
-            if (data.success && data.categories) {
+            if (data.success && data.data) {
                 const categoriesDiv = document.getElementById('categoriesDropdown');
                 categoriesDiv.innerHTML = '';
-                data.categories.forEach(category => {
+                data.data.forEach(category => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<a class="dropdown-item" href="<?= url('/products') ?>?category=${category.id}">${category.name}</a>`;
+                    li.innerHTML = `<a class="dropdown-item" href="<?= url('/products') ?>?category=${category.category_id}">${category.name}</a>`;
                     categoriesDiv.appendChild(li);
                 });
             }
         })
         .catch(error => {
+            console.error('Categories loading error:', error);
             document.getElementById('categoriesDropdown').innerHTML = '<li><span class="dropdown-item text-muted">Không thể tải danh mục</span></li>';
         });
     
@@ -293,17 +294,18 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('<?= url('/api/collections') ?>')
         .then(response => response.json())
         .then(data => {
-            if (data.success && data.collections) {
+            if (data.success && data.data) {
                 const collectionsDiv = document.getElementById('collectionsDropdown');
                 collectionsDiv.innerHTML = '';
-                data.collections.forEach(collection => {
+                data.data.forEach(collection => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<a class="dropdown-item" href="<?= url('/products') ?>?collection=${collection.id}">${collection.name}</a>`;
+                    li.innerHTML = `<a class="dropdown-item" href="<?= url('/products') ?>?collection=${collection.collection_id}">${collection.name}</a>`;
                     collectionsDiv.appendChild(li);
                 });
             }
         })
         .catch(error => {
+            console.error('Collections loading error:', error);
             document.getElementById('collectionsDropdown').innerHTML = '<li><span class="dropdown-item text-muted">Không thể tải bộ sưu tập</span></li>';
         });
 

@@ -236,22 +236,6 @@ class ProfileController extends BaseController {
         }
     }
 
-    /**
-     * Send JSON response
-     */
-    private function jsonResponse($success, $message, $data = null) {
-        header('Content-Type: application/json');
-        $response = [
-            'success' => $success,
-            'message' => $message
-        ];
-        
-        if ($data !== null) {
-            $response['data'] = $data;
-        }
-        
-        echo json_encode($response, JSON_UNESCAPED_UNICODE);
-        exit;
-    }
+  
 }
 ?>

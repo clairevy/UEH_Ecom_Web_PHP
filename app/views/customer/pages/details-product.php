@@ -22,19 +22,21 @@ if (!function_exists('url')) {
 <body>
     <!-- Header -->
     <?php include __DIR__ . '/../components/header.php'; ?>
-    <!-- Breadcrumb -->
-    <div class="container mt-5 pt-4">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="<?= url('') ?>" class="text-decoration-none">Trang chủ</a></li>
-                <li class="breadcrumb-item"><a href="<?= route('products') ?>" class="text-decoration-none">Trang sức</a></li>
-                <?php if (isset($product->categories) && !empty($product->categories)): ?>
-                    <li class="breadcrumb-item"><a href="<?= route('products', ['category' => $product->categories[0]->category_id]) ?>" class="text-decoration-none"><?= htmlspecialchars($product->categories[0]->name) ?></a></li>
-                <?php endif; ?>
-                <li class="breadcrumb-item active"><?= isset($product) ? htmlspecialchars($product->name) : 'Chi tiết sản phẩm' ?></li>
-            </ol>
-        </nav>
-    </div>
+    
+    <div class="main-content">
+        <!-- Breadcrumb -->
+        <div class="container" style="padding-top: 1rem;">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="<?= url('') ?>" class="text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a href="<?= route('products') ?>" class="text-decoration-none">Trang sức</a></li>
+                    <?php if (isset($product->categories) && !empty($product->categories)): ?>
+                        <li class="breadcrumb-item"><a href="<?= route('products', ['category' => $product->categories[0]->category_id]) ?>" class="text-decoration-none"><?= htmlspecialchars($product->categories[0]->name) ?></a></li>
+                    <?php endif; ?>
+                    <li class="breadcrumb-item active"><?= isset($product) ? htmlspecialchars($product->name) : 'Chi tiết sản phẩm' ?></li>
+                </ol>
+            </nav>
+        </div>
 
     <!-- Product Detail Section -->
     <?php
@@ -393,6 +395,8 @@ if (!function_exists('url')) {
     <?php endif; ?>
 
 
+    </div> <!-- End main-content -->
+
 <!-- Footer -->
 <footer class="bg-dark text-white py-5">
 <div class="container">
@@ -453,6 +457,22 @@ console.log('🧪 Testing JS file loading...');
 <script src="<?= asset('js/product-detail.js') ?>" defer></script>
 
 <style>
+/* Navigation Spacing Fix */
+body {
+    padding-top: 0; /* Reset any default padding */
+}
+
+.main-content {
+    margin-top: 100px; /* Space for fixed navigation */
+}
+
+/* Responsive navigation spacing */
+@media (max-width: 991px) {
+    .main-content {
+        margin-top: 80px; /* Less space on mobile */
+    }
+}
+
 /* Rating Input Styles */
 .rating-input {
     display: flex;

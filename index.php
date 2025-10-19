@@ -3,11 +3,6 @@ date_default_timezone_set("Asia/Ho_Chi_Minh");
 session_start();
 ob_start(); //tránh lỗi khi dùng hàm liên quan header, côkie (kiểm soát việc xuất dữ liệu ra trình duyệt)
 
-// Enable error logging for debugging, but don't display errors
-error_reporting(E_ALL);
-ini_set('display_errors', 0);  // Don't show errors in output
-ini_set('log_errors', 1);
-ini_set('error_log', __DIR__ . '/logs/error.log');
 
 // Create logs directory if it doesn't exist
 if (!is_dir(__DIR__ . '/logs')) {

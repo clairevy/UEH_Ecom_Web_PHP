@@ -70,26 +70,26 @@ class OrderController extends BaseController {
     /**
      * Send JSON response
      */
-    private function jsonResponse($success, $message, $data = null) {
-        // Clear any previous output
-        if (ob_get_level()) {
-            ob_clean();
-        }
+//     private function jsonResponse($success, $message, $data = null) {
+//         // Clear any previous output
+//         if (ob_get_level()) {
+//             ob_clean();
+//         }
         
-        // Set JSON header
-        header('Content-Type: application/json; charset=utf-8');
+//         // Set JSON header
+//         header('Content-Type: application/json; charset=utf-8');
         
-        $response = [
-            'success' => $success,
-            'message' => $message
-        ];
+//         $response = [
+//             'success' => $success,
+//             'message' => $message
+//         ];
         
-        if ($data !== null) {
-            $response['data'] = $data;
-        }
+//         if ($data !== null) {
+//             $response['data'] = $data;
+//         }
         
-        echo json_encode($response, JSON_UNESCAPED_UNICODE);
-        exit;
-    }
+//         echo json_encode($response, JSON_UNESCAPED_UNICODE);
+//         exit;
+//     }
 }
 ?>

@@ -114,12 +114,12 @@ class CartController extends BaseController {
             // Get updated cart info
             $cartItems = $this->getCartItems();
             $cartSummary = $this->calculateCartSummary($cartItems);
-
+            
+  
             $this->jsonResponse(true, 'Cập nhật giỏ hàng thành công!', [
                 'cartCount' => count($cartItems),
                 'cartTotal' => $cartSummary['total'],
                 'cartSubtotal' => $cartSummary['subtotal'],
-                'itemTotal' => $quantity > 0 ? $quantity * $product->base_price : 0
             ]);
 
         } catch (Exception $e) {
@@ -381,28 +381,41 @@ class CartController extends BaseController {
     }
 
     /**
-     * Send JSON response
+     * Get cart summary for AJAX updates
      */
-    private function jsonResponse($success, $message, $data = null) {
-        // Clear any previous output
-        if (ob_get_level()) {
-            ob_clean();
+    public function summary() {
+        try {
+            $cartItems = $this->getCartItems();
+            $cartSummary = $this->calculateCartSummary($cartItems);
+            
+            $this->jsonResponse(true, 'Cart summary retrieved', [
+                'summary' => $cartSummary,
+                'totalItems' => count($cartItems)
+            ]);
+        } catch (Exception $e) {
+            $this->jsonResponse(false, 'Lỗi khi lấy thông tin giỏ hàng: ' . $e->getMessage());
         }
-        
-        // Set JSON header
-        header('Content-Type: application/json; charset=utf-8');
-        
-        $response = [
-            'success' => $success,
-            'message' => $message
-        ];
-        
-        if ($data !== null) {
-            $response['data'] = $data;
+    }
+
+    /**
+     * Get cart summary for AJAX updates
+     */
+    public function getSummary() {
+        try {
+            $cartItems = $this->getCartItems();
+            $summary = $this->calculateCartSummary($cartItems);
+            
+            $this->jsonResponse(true, 'Cart summary retrieved', [
+                'subtotal' => $summary['subtotal'],
+                'shipping' => $summary['shipping'],
+                'tax' => $summary['tax'],
+                'total' => $summary['total'],
+                'count' => count($cartItems)
+            ]);
+            
+        } catch (Exception $e) {
+            $this->jsonResponse(false, 'Lỗi khi lấy thông tin giỏ hàng: ' . $e->getMessage());
         }
-        
-        echo json_encode($response, JSON_UNESCAPED_UNICODE);
-        exit;
     }
 }
 ?>
