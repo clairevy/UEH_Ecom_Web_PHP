@@ -78,17 +78,7 @@
                                 <span class="d-md-none">Thêm</span>
                             </button>
                             
-                            <!-- More Actions -->
-                            <div class="dropdown">
-                                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown">
-                                    <img src="https://cdn-icons-png.flaticon.com/512/2311/2311524.png" alt="More" width="16" height="16">
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#">Xuất Excel</a></li>
-                                    <li><a class="dropdown-item" href="#">Xuất PDF</a></li>
-                                    <li><a class="dropdown-item" href="#">In danh sách</a></li>
-                                </ul>
-                            </div>
+                          
                         </div>
                     </div>
                     
@@ -158,18 +148,10 @@
                                             </td>
                                             <td>
                                                 <div class="btn-group btn-group-sm" role="group">
-                                                    <button type="button" class="btn btn-outline-primary" 
-                                                            onclick="viewProduct(<?= $product->product_id ?>)" title="Xem chi tiết">
-                                                        <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="View" width="14" height="14">
-                                                    </button>
+                                                    
                                                     <button type="button" class="btn btn-outline-success" 
                                                             onclick="editProduct(<?= $product->product_id ?>)" title="Chỉnh sửa">
                                                         <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Edit" width="14" height="14">
-                                                    </button>
-                                                    <button type="button" class="btn btn-outline-warning" 
-                                                            onclick="toggleProduct(<?= $product->product_id ?>, <?= $product->is_active ? 'false' : 'true' ?>)" 
-                                                            title="<?= $product->is_active ? 'Ngừng bán' : 'Kích hoạt' ?>">
-                                                        <img src="https://cdn-icons-png.flaticon.com/512/<?= $product->is_active ? 'pause' : 'play' ?>.png" alt="Toggle" width="14" height="14">
                                                     </button>
                                                     <button type="button" class="btn btn-outline-danger" 
                                                             onclick="deleteProduct(<?= $product->product_id ?>)" title="Xóa">
@@ -258,24 +240,6 @@
 
         function editProduct(productId) {
             window.location.href = 'index.php?url=edit-product&id=' + productId;
-        }
-
-        function toggleProduct(productId, newStatus) {
-            const action = newStatus === 'true' ? 'kích hoạt' : 'ngừng bán';
-            if (confirm(`Bạn có chắc chắn muốn ${action} sản phẩm này?`)) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = 'index.php?url=products&action=toggle&id=' + productId;
-                
-                const statusInput = document.createElement('input');
-                statusInput.type = 'hidden';
-                statusInput.name = 'is_active';
-                statusInput.value = newStatus;
-                
-                form.appendChild(statusInput);
-                document.body.appendChild(form);
-                form.submit();
-            }
         }
 
         function deleteProduct(productId) {

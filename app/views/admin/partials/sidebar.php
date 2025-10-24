@@ -3,5 +3,6 @@
  * Sidebar Partial for Admin Panel
  * Tuân thủ nguyên tắc MVC/OOP
  */
+// echo ROOT; exit;
 ?>
-<?php include __DIR__ . '/../components/sidebar.html'; ?>
+<?php include ROOT . 'components/sidebar.html'; ?>

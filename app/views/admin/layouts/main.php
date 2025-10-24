@@ -43,7 +43,7 @@
             <?php include __DIR__ . '/../partials/header.php'; ?>
 
             <!-- Content -->
-            <main class="content">
+            <main class="content" style="margin-left: -250px;">
                 <?= $content ?>
             </main>
         </div>

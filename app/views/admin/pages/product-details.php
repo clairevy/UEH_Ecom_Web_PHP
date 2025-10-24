@@ -110,19 +110,34 @@
 
                               
 
+                                <!-- Product Status -->
+                                <div class="form-group">
+                                    <label for="productStatus" class="form-label">Trạng Thái Sản Phẩm</label>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span id="statusBadge" class="badge badge-delivered badge-custom">Đang bán</span>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="productStatusToggle" checked style="cursor: pointer;">
+                                            <label class="form-check-label" for="productStatusToggle" style="cursor: pointer;">
+                                                Kích hoạt sản phẩm
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">Tắt để ngừng bán sản phẩm này trên website</small>
+                                </div>
+
                                 <!-- Action Buttons -->
                                 <div class="d-flex gap-2 mt-4">
-                                    <button class="btn btn-primary-custom btn-custom px-4">
+                                    <button class="btn btn-primary-custom btn-custom px-4" onclick="updateProduct()">
                                         <img src="https://cdn-icons-png.flaticon.com/512/5610/5610944.png" alt="Update" width="16" height="16" class="me-1">
-                                        UPDATE
+                                        CẬP NHẬT
                                     </button>
-                                    <button class="btn btn-danger-custom btn-custom px-4">
+                                    <button class="btn btn-danger-custom btn-custom px-4" onclick="deleteProduct()">
                                         <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png" alt="Delete" width="16" height="16" class="me-1">
-                                        DELETE
+                                        XÓA
                                     </button>
-                                    <button class="btn btn-outline-secondary btn-custom px-4">
+                                    <button class="btn btn-outline-secondary btn-custom px-4" onclick="cancelEdit()">
                                         <img src="https://cdn-icons-png.flaticon.com/512/189/189665.png" alt="Cancel" width="16" height="16" class="me-1">
-                                        CANCEL
+                                        HỦY
                                     </button>
                                 </div>
                             </div>
@@ -249,6 +264,70 @@
     
     <!-- Product Details Page Script -->
     <script src="../assets/js/product-details.js"></script>
+    
+    <!-- Product Status Toggle Script -->
+    <script>
+        // Product status toggle functionality
+        const statusToggle = document.getElementById('productStatusToggle');
+        const statusBadge = document.getElementById('statusBadge');
+        
+        statusToggle.addEventListener('change', function() {
+            if (this.checked) {
+                statusBadge.className = 'badge badge-delivered badge-custom';
+                statusBadge.textContent = 'Đang bán';
+            } else {
+                statusBadge.className = 'badge badge-canceled badge-custom';
+                statusBadge.textContent = 'Ngừng bán';
+            }
+        });
+
+        // Update product function
+        function updateProduct() {
+            const isActive = statusToggle.checked;
+            const productData = {
+                name: document.getElementById('productName').value,
+                description: document.getElementById('description').value,
+                category: document.getElementById('category').value,
+                collection: document.getElementById('collection').value,
+                brandName: document.getElementById('brandName').value,
+                sku: document.getElementById('sku').value,
+                stock: document.getElementById('stock').value,
+                regularPrice: document.getElementById('regularPrice').value,
+                salePrice: document.getElementById('salePrice').value,
+                isActive: isActive
+            };
+            
+            console.log('Updating product:', productData);
+            
+            // Here you would send the data to backend
+            // For now, show confirmation
+            alert(`Sản phẩm đã được cập nhật!\nTrạng thái: ${isActive ? 'Đang bán' : 'Ngừng bán'}`);
+        }
+
+        // Delete product function
+        function deleteProduct() {
+            if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này? Hành động này không thể hoàn tác!')) {
+                console.log('Deleting product...');
+                // Here you would send delete request to backend
+                alert('Sản phẩm đã được xóa!');
+                window.location.href = 'products.html';
+            }
+        }
+
+        // Cancel edit function
+        function cancelEdit() {
+            if (confirm('Bạn có muốn hủy các thay đổi? Dữ liệu chưa lưu sẽ bị mất.')) {
+                window.location.href = 'products.html';
+            }
+        }
+
+        // Remove gallery image function
+        function removeGalleryImage(button) {
+            if (confirm('Bạn có chắc chắn muốn xóa ảnh này?')) {
+                button.closest('.d-flex').remove();
+            }
+        }
+    </script>
     
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
