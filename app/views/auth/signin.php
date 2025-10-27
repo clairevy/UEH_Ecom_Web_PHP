@@ -169,6 +169,24 @@
             border-color: var(--gold);
             color: var(--dark-brown);
         }
+
+        .btn-outline-gold {
+            border: 1px solid var(--gold);
+            color: var(--dark-brown);
+            padding: 12px 30px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+
+        .btn-outline-gold:hover {
+            background: var(--gold);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(184, 148, 31, 0.15);
+        }
         
         .auth-link {
             color: var(--gold);
@@ -223,7 +241,7 @@
         
         @media (max-width: 768px) {
             .auth-left {
-                padding: 30px 20px;
+                display: none; /* Hide left panel on mobile */
             }
             
             .auth-right {
@@ -237,6 +255,18 @@
             .auth-subtitle {
                 font-size: 0.95rem;
             }
+
+            /* Show signup prompt on mobile */
+            .signup-prompt-mobile {
+                display: block !important;
+                margin-top: 2rem;
+                text-align: center;
+            }
+        }
+
+        /* Hide mobile signup prompt on desktop */
+        .signup-prompt-mobile {
+            display: none;
         }
     </style>
 </head>
@@ -297,6 +327,14 @@
                                 <span class="spinner-border spinner-border-sm ms-2 d-none" id="loadingSpinner"></span>
                             </button>
                         </form>
+
+                        <!-- Mobile signup prompt - only shows on small screens -->
+                        <div class="signup-prompt-mobile">
+                            <p class="mb-2">Chưa có tài khoản?</p>
+                            <a href="/Ecom_website/signup" class="btn btn-outline-gold">
+                                <i class="fas fa-user-plus me-2"></i>Đăng ký ngay
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
