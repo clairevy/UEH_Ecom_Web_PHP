@@ -37,6 +37,11 @@ body {
   font-family: "Inter", sans-serif;
   color: #333;
   overflow-x: hidden;
+  background-image:  linear-gradient(rgba(255, 255, 255, 0.509), rgba(255, 255, 255, 0.755)),  /* lớp phủ mờ 50% */
+    url("https://images.unsplash.com/photo-1608042314453-ae338d80c427?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjR8fGpld2Vscnl8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600");
+  background-size: cover;
+  background-attachment: fixed;
+  
 }
 
 /* Navigation */
@@ -132,6 +137,24 @@ nav .container {
 .search-btn:hover {
   color: var(--dark-gold) !important;
   cursor: pointer;
+}
+
+.btn.btn-primary {
+  background: var(--gold) !important;
+  color: white !important;
+  border: none;
+  padding: 8px 20px;
+  font-size: 13px !important;
+  
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+.btn.btn-primary:hover {
+  background: var(--dark-gold) !important;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
 }
 
 /* Navigation Icons */

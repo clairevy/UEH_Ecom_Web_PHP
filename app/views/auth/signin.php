@@ -6,11 +6,21 @@
     <title>Đăng nhập - JEWELRY</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --gold: #d4af37;
+            --dark-gold: #b8941f;
+            --light-gold: #f0e68c;
+            --cream: #f8f6f0;
+            --dark-brown: #3a2f28;
+        }
+
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--cream);
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: "Inter", "Playfair Display", serif;
+            color: var(--dark-brown);
         }
         
         .auth-container {
@@ -22,58 +32,87 @@
         }
         
         .auth-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            background: white;
+            border-radius: 0;
+            box-shadow: 0 20px 40px rgba(58, 47, 40, 0.08);
             overflow: hidden;
-            max-width: 900px;
+            max-width: 1000px;
             width: 100%;
         }
         
         .auth-left {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--dark-brown);
             color: white;
             padding: 60px 40px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .auth-left::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--dark-brown) 0%, var(--dark-gold) 100%);
+            opacity: 0.9;
+            z-index: 1;
+            height: 100%;
+        }
+
+        .auth-left > div {
+            position: relative;
+            z-index: 2;
         }
         
         .auth-right {
             padding: 60px 40px;
+            background: white;
         }
         
         .auth-title {
-            font-size: 2.5rem;
-            font-weight: bold;
+            font-family: "Playfair Display", serif;
+            font-size: 2.8rem;
+            font-weight: 400;
             margin-bottom: 1rem;
+            color: var(--gold);
+            letter-spacing: 1px;
         }
         
         .auth-subtitle {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            margin-bottom: 2rem;
+            font-size: 1rem;
+            opacity: 0.95;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
         }
         
         .form-label {
-            font-weight: 600;
-            color: #333;
+            font-weight: 500;
+            color: var(--dark-brown);
             margin-bottom: 8px;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
         }
         
         .form-control {
-            border-radius: 10px;
-            border: 2px solid #e1e5e9;
+            border-radius: 0;
+            border: 1px solid #e1e5e9;
             padding: 12px 16px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             transition: all 0.3s ease;
+            background: var(--cream);
         }
         
         .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            border-color: var(--gold);
+            box-shadow: none;
+            background: white;
         }
         
         .password-field {
@@ -86,69 +125,117 @@
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
-            color: #666;
+            color: var(--dark-brown);
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+        }
+
+        .password-toggle:hover {
+            opacity: 1;
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gold);
             border: none;
-            border-radius: 10px;
-            padding: 12px 30px;
-            font-weight: 600;
-            font-size: 1rem;
+            border-radius: 0;
+            padding: 14px 30px;
+            font-weight: 500;
+            font-size: 0.95rem;
             width: 100%;
-            margin-top: 1rem;
-            transition: transform 0.2s ease;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
         
         .btn-primary:hover {
+            background: var(--dark-gold);
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 20px rgba(184, 148, 31, 0.15);
+        }
+
+        .btn-outline-light {
+            border-radius: 0;
+            border-width: 1px;
+            padding: 12px 30px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-light:hover {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: var(--dark-brown);
         }
         
         .auth-link {
-            color: #667eea;
+            color: var(--gold);
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
         
         .auth-link:hover {
-            color: #764ba2;
+            color: var(--dark-gold);
         }
         
         .forgot-password {
             text-align: right;
-            margin-top: 5px;
+            margin-top: 8px;
         }
         
         .forgot-password a {
-            color: #667eea;
+            color: var(--dark-brown);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .forgot-password a:hover {
+            color: var(--gold);
+            opacity: 1;
         }
         
         .alert {
-            border-radius: 10px;
+            border-radius: 0;
             border: none;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
         }
         
-        .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: bold;
+        .fa-gem {
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 992px) {
+            .auth-card {
+                margin: 20px;
+            }
+            
+            .auth-left, .auth-right {
+                padding: 40px 30px;
+            }
         }
         
         @media (max-width: 768px) {
             .auth-left {
-                padding: 40px 20px;
+                padding: 30px 20px;
             }
             
             .auth-right {
-                padding: 40px 20px;
+                padding: 30px 20px;
             }
             
             .auth-title {
-                font-size: 2rem;
+                font-size: 2.2rem;
+            }
+
+            .auth-subtitle {
+                font-size: 0.95rem;
             }
         }
     </style>
