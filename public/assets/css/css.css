@@ -37,7 +37,7 @@ body {
   font-family: "Inter", sans-serif;
   color: #333;
   overflow-x: hidden;
-  background-image:  linear-gradient(rgba(255, 255, 255, 0.509), rgba(255, 255, 255, 0.755)),  /* lớp phủ mờ 50% */
+  background-image:  linear-gradient(rgb(255, 255, 255), rgba(255, 255, 255, 0.755)),  /* lớp phủ mờ 50% */
     url("https://images.unsplash.com/photo-1608042314453-ae338d80c427?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjR8fGpld2Vscnl8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600");
   background-size: cover;
   background-attachment: fixed;
@@ -52,6 +52,11 @@ body {
   padding: 15px 0;
   min-height: 80px;
   display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
 }
 
 nav .container {
@@ -64,6 +69,14 @@ nav .container {
   font-weight: 700;
   color: var(--gold) !important;
   text-decoration: none;
+}
+
+/* Add padding to body to account for fixed navbar */
+body {
+  padding-top: 80px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .navbar-nav .nav-link {
@@ -478,8 +491,14 @@ nav .container {
   max-height: 48px;
   overflow: hidden;
   display: -webkit-box;
+  display: -moz-box;
+  display: box;
   -webkit-line-clamp: 2;
+  -moz-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  box-orient: vertical;
   text-overflow: ellipsis;
   white-space: normal;
 }
@@ -1146,7 +1165,7 @@ footer a:hover {
 }
 
 .tab-content {
-  display: none;
+  /* display: none; */
   animation: fadeIn 0.3s ease;
 }
 
@@ -1526,8 +1545,9 @@ footer a:hover {
 /* Product Section */
 .product-header {
   background: white;
-  border-radius: 10px;
+  
   padding: 20px;
+  margin: -3.5px; 
 }
 
 .product-header h3 {

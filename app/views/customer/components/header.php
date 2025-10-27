@@ -5,7 +5,7 @@ $user = SessionHelper::getUser();
 ?>
 
 <!-- Navigation -->
-<nav th:fragment="header" class="navbar navbar-expand-lg fixed-top">
+<nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
         <!-- Logo - Link về trang chủ -->
         <a class="navbar-brand" href="<?= url('/') ?>">

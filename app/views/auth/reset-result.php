@@ -4,161 +4,109 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $success ? 'Thành công' : 'Lỗi'; ?> - Jewelry Store</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --gold: #B8860B;
-            --dark-gold: #8B6508;
-            --light-gold: #FFD700;
-            --cream: #FFFDD0;
-            --dark-brown: #8B4513;
-        }
-        
         body {
-            background-color: var(--cream);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
         
         .result-container {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
-            background: url('/public/assets/images/auth-bg.jpg') center/cover no-repeat;
         }
         
         .result-card {
             background: rgba(255, 255, 255, 0.95);
-            border-radius: 1rem;
-            box-shadow: 0 20px 40px rgba(184, 134, 11, 0.15);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
             width: 100%;
             max-width: 500px;
             margin: 20px;
             text-align: center;
-            border: 1px solid var(--gold);
         }
         
         .result-header {
-            background: <?php echo $success ? 'var(--gold)' : 'var(--dark-brown)'; ?>;
-            color: var(--cream);
-            padding: 3rem 2rem;
+            background: <?php echo $success ? 'linear-gradient(135deg, #28a745 0%, #20c997 100%)' : 'linear-gradient(135deg, #dc3545 0%, #e74c3c 100%)'; ?>;
+            color: white;
+            padding: 50px 30px;
         }
         
         .result-icon {
-            font-size: 4.5rem;
-            margin-bottom: 1.5rem;
-            color: var(--cream);
+            font-size: 4rem;
+            margin-bottom: 20px;
         }
         
         .result-header h1 {
             margin: 0;
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             font-weight: 600;
-            font-family: 'Playfair Display', serif;
-            color: var(--cream);
         }
         
         .result-body {
-            padding: 3rem 2rem;
-            background: white;
+            padding: 40px 30px;
         }
         
         .result-message {
             font-size: 1.1rem;
             line-height: 1.6;
-            color: var(--dark-brown);
-            margin-bottom: 2rem;
-            font-family: 'Inter', sans-serif;
+            color: #495057;
+            margin-bottom: 30px;
         }
         
         .btn-primary {
-            background: var(--gold);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
-            border-radius: 0.5rem;
-            padding: 1rem 2rem;
-            font-weight: 500;
+            border-radius: 10px;
+            padding: 15px 30px;
+            font-weight: 600;
             font-size: 1rem;
             transition: all 0.3s ease;
             text-decoration: none;
             color: white;
             display: inline-block;
             margin: 0 10px;
-            font-family: 'Inter', sans-serif;
+        }
         
         .btn-primary:hover {
-            background: var(--dark-gold);
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(184, 134, 11, 0.2);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
             color: white;
         }
         
         .btn-secondary {
-            background: var(--dark-brown);
+            background: #6c757d;
             border: none;
-            border-radius: 0.5rem;
-            padding: 1rem 2rem;
-            font-weight: 500;
+            border-radius: 10px;
+            padding: 15px 30px;
+            font-weight: 600;
             font-size: 1rem;
             transition: all 0.3s ease;
             text-decoration: none;
             color: white;
             display: inline-block;
             margin: 0 10px;
-            font-family: 'Inter', sans-serif;
         }
         
         .btn-secondary:hover {
-            background: #723710;
+            background: #5a6268;
             transform: translateY(-2px);
             color: white;
         }
         
         .action-buttons {
-            margin-top: 2rem;
-        }
-
-        .home-link {
-            color: var(--dark-brown);
-            text-decoration: none;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .home-link:hover {
-            color: var(--gold);
+            margin-top: 20px;
         }
         
         @media (max-width: 576px) {
             .btn-primary, .btn-secondary {
                 width: 100%;
-                margin: 0.5rem 0;
-            }
-            
-            .result-card {
-                margin: 1rem;
-            }
-            
-            .result-header {
-                padding: 2rem 1.5rem;
-            }
-            
-            .result-body {
-                padding: 2rem 1.5rem;
-            }
-            
-            .result-header h1 {
-                font-size: 2rem;
-            }
-            
-            .result-icon {
-                font-size: 3.5rem;
+                margin: 5px 0;
             }
         }
     </style>
@@ -194,15 +142,14 @@
                 </div>
                 
                 <div class="mt-4">
-                    <a href="<?php echo url(''); ?>" class="home-link">
-                        <i class="fas fa-home"></i>
-                        <span>Về trang chủ</span>
+                    <a href="<?php echo url(''); ?>" style="color: #6c757d; text-decoration: none;">
+                        <i class="fas fa-home me-2"></i>Về trang chủ
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
