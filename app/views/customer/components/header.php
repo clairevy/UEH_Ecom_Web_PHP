@@ -65,6 +65,7 @@ $user = SessionHelper::getUser();
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
+                
             </form>
             
             <!-- Right Side Actions -->
@@ -132,42 +133,44 @@ $user = SessionHelper::getUser();
 
 <!-- Additional Styles for User Navigation -->
 <style>
-.navbar {
+/* .navbar {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     box-shadow: 0 2px 20px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
-}
+} */
 
-.navbar-brand {
+/* .navbar-brand {
     font-weight: bold;
     font-size: 1.5rem;
-    color: #667eea !important;
-}
+   
+} */
 
-.navbar-nav .nav-link {
+/* .navbar-nav .nav-link {
     font-weight: 500;
     margin: 0 5px;
     transition: color 0.3s ease;
-}
+} */
 
-.navbar-nav .nav-link:hover {
+/* .navbar-nav .nav-link:hover {
     color: #667eea !important;
-}
+} */
 
-.search-input {
+/* .search-input {
     border-radius: 20px 0 0 20px;
     border-right: none;
-}
+} */
 
-.search-input:focus {
+/* .search-input:focus {
     box-shadow: none;
     border-color: #667eea;
-}
+} */
 
 .btn-outline-secondary {
-    border-radius: 0 20px 20px 0;
-    border-left: none;
+    border-radius: 0 20px 20px 0;    
+    background-color: #F6F7EB;
+    border: 1px solid #ddd;
+    
 }
 
 .dropdown-menu {
@@ -183,14 +186,14 @@ $user = SessionHelper::getUser();
 
 .dropdown-item:hover {
     background-color: #f8f9fa;
-    color: #667eea;
+    color: #d4af37;
 }
 
 .dropdown-header {
     padding: 15px 20px 10px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    margin: -8px -16px 0;
+    /* background: linear-gradient(72deg,rgba(184, 148, 31, 1) 50%, rgba(237, 221, 83, 1) 100%); */
+    color: #d4af37 ;
+    /* margin: -8px -16px 0; */
     border-radius: 10px 10px 0 0;
 }
 
