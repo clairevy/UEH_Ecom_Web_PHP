@@ -65,6 +65,7 @@ $user = SessionHelper::getUser();
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
+                
             </form>
             
             <!-- Right Side Actions -->
@@ -132,89 +133,40 @@ $user = SessionHelper::getUser();
 
 <!-- Additional Styles for User Navigation -->
 <style>
-.navbar {
+/* .navbar {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     box-shadow: 0 2px 20px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
-}
+} */
 
-.navbar-brand {
+/* .navbar-brand {
     font-weight: bold;
     font-size: 1.5rem;
-    color: #667eea !important;
-}
+   
+} */
 
-.navbar-nav .nav-link {
+/* .navbar-nav .nav-link {
     font-weight: 500;
     margin: 0 5px;
     transition: color 0.3s ease;
-}
+} */
 
-.navbar-nav .nav-link:hover {
+/* .navbar-nav .nav-link:hover {
     color: #667eea !important;
-}
+} */
 
-.search-input {
+/* .search-input {
     border-radius: 20px 0 0 20px;
     border-right: none;
-}
+} */
 
-.search-input:focus {
+/* .search-input:focus {
     box-shadow: none;
     border-color: #667eea;
-}
+} */
 
-.btn-outline-secondary {
-    border-radius: 0 20px 20px 0;
-    border-left: none;
-}
 
-.dropdown-menu {
-    border: none;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    border-radius: 10px;
-}
-
-.dropdown-item {
-    padding: 10px 20px;
-    transition: background-color 0.3s ease;
-}
-
-.dropdown-item:hover {
-    background-color: #f8f9fa;
-    color: #667eea;
-}
-
-.dropdown-header {
-    padding: 15px 20px 10px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    margin: -8px -16px 0;
-    border-radius: 10px 10px 0 0;
-}
-
-.badge {
-    font-size: 0.6em;
-}
-
-@media (max-width: 991px) {
-    .navbar-nav .nav-item {
-        text-align: center;
-        margin: 5px 0;
-    }
-    
-    .search-input {
-        border-radius: 20px;
-        border: 1px solid #ced4da;
-    }
-    
-    .btn-outline-secondary {
-        border-radius: 20px;
-        border: 1px solid #ced4da;
-        margin-left: 10px;
-    }
-}
 </style>
 
 <!-- JavaScript for User Actions -->
