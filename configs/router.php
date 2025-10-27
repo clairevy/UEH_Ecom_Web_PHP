@@ -61,49 +61,49 @@ class Route {
                     }
                     break;
                     
-                case 'customer':
-                    // Legacy support for old URLs
-                    $this->controller = 'CustomerController';
-                    unset($url[0]);
+                // case 'customer':
+                //     // Legacy support for old URLs
+                //     $this->controller = 'CustomerController';
+                //     unset($url[0]);
                     
-                    // Check for specific customer actions
-                    if (isset($url[1])) {
-                        switch ($url[1]) {
-                            case 'products':
-                                $this->method = 'products';
-                                unset($url[1]);
-                                break;
-                            case 'product-detail':
-                            case 'product':
-                            case 'productDetail':
-                                $this->method = 'productDetail';
-                                unset($url[1]);
-                                break;
-                            case 'search':
-                                $this->method = 'searchApi';
-                                unset($url[1]);
-                                break;
-                            case 'api':
-                                unset($url[1]);
-                                if (isset($url[2])) {
-                                    switch ($url[2]) {
-                                        case 'new-arrivals':
-                                            $this->method = 'getNewArrivals';
-                                            break;
-                                        case 'popular':
-                                        case 'popular-products':
-                                            $this->method = 'getPopularProducts';
-                                            break;
-                                        case 'category':
-                                            $this->method = 'getProductsByCategory';
-                                            break;
-                                    }
-                                    unset($url[2]);
-                                }
-                                break;
-                        }
-                    }
-                    break;
+                //     // Check for specific customer actions
+                //     if (isset($url[1])) {
+                //         switch ($url[1]) {
+                //             case 'products':
+                //                 $this->method = 'products';
+                //                 unset($url[1]);
+                //                 break;
+                //             case 'product-detail':
+                //             case 'product':
+                //             case 'productDetail':
+                //                 $this->method = 'productDetail';
+                //                 unset($url[1]);
+                //                 break;
+                //             case 'search':
+                //                 $this->method = 'searchApi';
+                //                 unset($url[1]);
+                //                 break;
+                //             case 'api':
+                //                 unset($url[1]);
+                //                 if (isset($url[2])) {
+                //                     switch ($url[2]) {
+                //                         case 'new-arrivals':
+                //                             $this->method = 'getNewArrivals';
+                //                             break;
+                //                         case 'popular':
+                //                         case 'popular-products':
+                //                             $this->method = 'getPopularProducts';
+                //                             break;
+                //                         case 'category':
+                //                             $this->method = 'getProductsByCategory';
+                //                             break;
+                //                     }
+                //                     unset($url[2]);
+                //                 }
+                //                 break;
+                //         }
+                //     }
+                //     break;
                     
                 case 'signin':
                 case 'login':

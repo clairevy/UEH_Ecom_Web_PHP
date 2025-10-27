@@ -4,10 +4,7 @@
 require_once __DIR__ . '/../services/ProductService.php';
 require_once __DIR__ . '/../services/SliderService.php';
 
-/**
- * CustomerControllerRefactored - Thin Controller with Clean Architecture
- * Chỉ xử lý HTTP requests và responses, logic nghiệp vụ được chuyển sang Service Layer
- */
+
 class CustomerController extends BaseController {
     private $productService;
     private $sliderService;
@@ -15,7 +12,7 @@ class CustomerController extends BaseController {
 
     public function __construct() {
         $this->productService = new ProductService();
-        $this->sliderService = new SliderService();
+        // $this->sliderService = new SliderService();
     }
     
     /**
@@ -24,7 +21,7 @@ class CustomerController extends BaseController {
     public function index() {
         try {
             // Get data from Service Layer
-            $sliders = $this->sliderService->getHeroSliders(); // Thêm dòng này
+            // $sliders = $this->sliderService->getHeroSliders(); // Thêm dòng này
             $newArrivals = $this->productService->getNewArrivals(8);
             $popularProducts = $this->productService->getPopularProducts(8);
             $categories = $this->productService->getActiveCategories();
@@ -32,7 +29,7 @@ class CustomerController extends BaseController {
             // Pass data to view
             $data = [
                 'title' => 'Trang chủ',
-                'sliders' => $sliders, // Thêm dòng này
+                // 'sliders' => $sliders, // Thêm dòng này
                 'newArrivals' => $newArrivals,
                 'popularProducts' => $popularProducts,
                 'categories' => $categories
