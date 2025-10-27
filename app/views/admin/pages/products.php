@@ -108,8 +108,24 @@
                                             </td>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <img src="<?= $product->main_image ?? 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=50&h=50&fit=crop' ?>" 
-                                                         alt="Product" width="40" height="40" class="rounded me-2">
+                                                    <?php 
+                                                    // Load ảnh từ database (images + image_usages)
+                                                    $imageSrc = 'https://via.placeholder.com/40x40?text=No+Image';
+                                                    
+                                                    if (!empty($product->primary_image) && isset($product->primary_image->file_path)) {
+                                                        // Ưu tiên: primary_image từ image_usages
+                                                        $imageSrc = htmlspecialchars($product->primary_image->file_path);
+                                                    } elseif (!empty($product->main_image)) {
+                                                        // Fallback: main_image column
+                                                        $imageSrc = htmlspecialchars($product->main_image);
+                                                    }
+                                                    ?>
+                                                    <img src="<?= $imageSrc ?>" 
+                                                         alt="Product" 
+                                                         width="40" 
+                                                         height="40" 
+                                                         class="rounded me-2"
+                                                         onerror="this.src='https://via.placeholder.com/40x40?text=No+Image'">
                                                     <div>
                                                         <div class="fw-bold"><?= htmlspecialchars($product->name) ?></div>
                                                         <div class="small text-muted">SKU: #<?= htmlspecialchars($product->sku ?? 'N/A') ?></div>

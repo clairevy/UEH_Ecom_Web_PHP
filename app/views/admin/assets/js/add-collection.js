@@ -1,166 +1,183 @@
-// JS extracted from add-collection.html
-window.pageConfig = {
-    sidebar: {
-        brandName: 'JEWELLERY',
-        activePage: 'collections',
-        links: {
-            dashboard: '../index.html',
-            products: 'products.html',
-            categories: 'categories.html',
-            collections: 'collections.html',
-            orders: 'orders.html',
-            customers: 'customers.html'
+/**
+ * Add Collection JavaScript - Client-side functionality
+ * Tuân thủ nguyên tắc Separation of Concerns và OOP
+ * - Chỉ xử lý UI/UX và client-side validation
+ * - Business logic ở Server-side (Controller/Model)
+ */
+
+// Class để quản lý Collection Form
+class CollectionFormManager {
+    constructor() {
+        this.form = document.getElementById('addCollectionForm');
+        this.nameInput = document.getElementById('name');
+        this.slugInput = document.getElementById('slug');
+        this.coverImageInput = document.getElementById('cover_image');
+        
+        this.init();
+    }
+
+    init() {
+        if (this.form) {
+            // Form submit validation (client-side only)
+            this.form.addEventListener('submit', (e) => this.handleFormSubmit(e));
+        }
+
+        // Auto-generate slug from name
+        if (this.nameInput && this.slugInput) {
+            this.nameInput.addEventListener('input', () => this.updateSlug());
         }
     }
-};
 
-if (window.ComponentManager) {
-    window.ComponentManager.init().then(() => {
-        console.log('Add collection page initialized');
-        initializeAddCollectionPage();
-    });
-}
+    /**
+     * Xử lý form submit - Client-side validation only
+     */
+    handleFormSubmit(e) {
+        const name = this.nameInput ? this.nameInput.value.trim() : '';
 
-function initializeAddCollectionPage() {
-    const collectionNameInput = document.getElementById('collectionName');
-    const collectionSlugInput = document.getElementById('collectionSlug');
+        let errors = [];
 
-    if (collectionNameInput) {
-        collectionNameInput.addEventListener('input', function() {
-            const slug = this.value
-                .toLowerCase()
-                .replace(/[^a-z0-9\s-]/g, '')
-                .replace(/\s+/g, '-')
-                .replace(/-+/g, '-')
-                .trim();
-            collectionSlugInput.value = slug;
-        });
-    }
+        if (name.length < 3) {
+            errors.push('Tên bộ sưu tập phải có ít nhất 3 ký tự');
+        }
 
-    const coverImageInput = document.getElementById('coverImageInput');
-    if (coverImageInput) {
-        coverImageInput.addEventListener('change', function(e) {
-            handleImageUpload(e, 'cover', 5);
-        });
-    }
-
-    const thumbnailImageInput = document.getElementById('thumbnailImageInput');
-    if (thumbnailImageInput) {
-        thumbnailImageInput.addEventListener('change', function(e) {
-            handleImageUpload(e, 'thumbnail', 2);
-        });
-    }
-
-    const bannerImageInput = document.getElementById('bannerImageInput');
-    if (bannerImageInput) {
-        bannerImageInput.addEventListener('change', function(e) {
-            handleImageUpload(e, 'banner', 5);
-        });
-    }
-
-    const form = document.getElementById('addCollectionForm');
-    if (form) {
-        form.addEventListener('submit', function(e) {
+        if (errors.length > 0) {
             e.preventDefault();
-            submitCollection();
-        });
+            alert('Vui lòng kiểm tra lại:\n' + errors.join('\n'));
+            return false;
+        }
+
+        // Hiển thị loading indicator
+        const submitBtn = this.form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang tạo...';
+        }
+
+        // Let form submit naturally to server
+        return true;
+    }
+
+    /**
+     * Auto-generate slug from collection name
+     */
+    updateSlug() {
+        const name = this.nameInput.value;
+        const slug = this.generateSlug(name);
+        if (this.slugInput) {
+            this.slugInput.value = slug;
+        }
+    }
+
+    /**
+     * Generate slug from text
+     */
+    generateSlug(text) {
+        return text
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
     }
 }
 
-function handleImageUpload(event, type, maxSizeMB) {
-    const file = event.target.files[0];
-    if (!file) return;
+// =================== COVER IMAGE UPLOAD HANDLING ===================
 
-    if (file.size > maxSizeMB * 1024 * 1024) {
-        alert(`Ảnh ${type} vượt quá ${maxSizeMB}MB!`);
-        event.target.value = '';
+/**
+ * Handle cover image selection
+ */
+function handleCollectionCoverSelect(input) {
+    const file = input.files[0];
+    const previewContainer = document.getElementById('coverPreview');
+    const placeholder = document.getElementById('coverUploadPlaceholder');
+    const previewImg = document.getElementById('coverPreviewImg');
+    
+    if (!file) {
+        if (previewContainer) previewContainer.style.display = 'none';
+        if (placeholder) placeholder.style.display = 'block';
         return;
     }
 
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+        alert('Chỉ chấp nhận file ảnh: JPG, PNG, GIF, WEBP');
+        input.value = '';
+        return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5242880) {
+        alert('Kích thước file không được vượt quá 5MB');
+        input.value = '';
+        return;
+    }
+
+    // Show preview
     const reader = new FileReader();
     reader.onload = function(e) {
-        const img = document.getElementById(`${type}PreviewImg`);
-        if (img) img.src = e.target.result;
-        const placeholder = document.getElementById(`${type}UploadPlaceholder`);
+        if (previewImg) previewImg.src = e.target.result;
+        if (previewContainer) previewContainer.style.display = 'block';
         if (placeholder) placeholder.style.display = 'none';
-        const preview = document.getElementById(`${type}Preview`);
-        if (preview) preview.style.display = 'block';
     };
     reader.readAsDataURL(file);
 }
 
-function removeCoverImage() {
-    const input = document.getElementById('coverImageInput');
-    if (input) input.value = '';
+/**
+ * Remove cover image
+ */
+function removeCollectionCover() {
+    const fileInput = document.getElementById('cover_image');
+    const previewContainer = document.getElementById('coverPreview');
     const placeholder = document.getElementById('coverUploadPlaceholder');
+    
+    if (fileInput) fileInput.value = '';
+    if (previewContainer) previewContainer.style.display = 'none';
     if (placeholder) placeholder.style.display = 'block';
-    const preview = document.getElementById('coverPreview');
-    if (preview) preview.style.display = 'none';
 }
 
-function removeThumbnailImage() {
-    const input = document.getElementById('thumbnailImageInput');
-    if (input) input.value = '';
-    const placeholder = document.getElementById('thumbnailUploadPlaceholder');
-    if (placeholder) placeholder.style.display = 'block';
-    const preview = document.getElementById('thumbnailPreview');
-    if (preview) preview.style.display = 'none';
+// =================== DRAG & DROP HANDLING ===================
+
+/**
+ * Handle drag over
+ */
+function handleCollectionDragOver(event) {
+    event.preventDefault();
+    event.currentTarget.style.borderColor = 'var(--accent-color, #28a745)';
+    event.currentTarget.style.backgroundColor = 'rgba(40, 167, 69, 0.1)';
 }
 
-function removeBannerImage() {
-    const input = document.getElementById('bannerImageInput');
-    if (input) input.value = '';
-    const placeholder = document.getElementById('bannerUploadPlaceholder');
-    if (placeholder) placeholder.style.display = 'block';
-    const preview = document.getElementById('bannerPreview');
-    if (preview) preview.style.display = 'none';
+/**
+ * Handle drag leave
+ */
+function handleCollectionDragLeave(event) {
+    event.currentTarget.style.borderColor = 'var(--border-color, #ddd)';
+    event.currentTarget.style.backgroundColor = 'transparent';
 }
 
-function saveDraft() {
-    const collectionName = (document.getElementById('collectionName') || {}).value || '';
-    if (!collectionName.trim()) {
-        alert('Vui lòng nhập tên collection!');
-        return;
+/**
+ * Handle drop
+ */
+function handleCollectionDrop(event) {
+    event.preventDefault();
+    event.currentTarget.style.borderColor = 'var(--border-color, #ddd)';
+    event.currentTarget.style.backgroundColor = 'transparent';
+    
+    const files = event.dataTransfer.files;
+    const fileInput = document.getElementById('cover_image');
+    
+    if (files.length > 0) {
+        fileInput.files = files;
+        handleCollectionCoverSelect(fileInput);
     }
-    console.log('Saving draft...');
-    alert(`Đã lưu nháp collection "${collectionName}" thành công!`);
 }
 
-function submitCollection() {
-    const collectionName = (document.getElementById('collectionName') || {}).value || '';
-    const collectionSlug = (document.getElementById('collectionSlug') || {}).value || '';
-    const collectionDescription = (document.getElementById('collectionDescription') || {}).value || '';
-    const collectionContent = (document.getElementById('collectionContent') || {}).value || '';
-    const collectionType = (document.getElementById('collectionType') || {}).value || '';
-    const collectionStatus = (document.getElementById('collectionStatus') || {}).value || '';
-    const coverImage = (document.getElementById('coverImageInput') || {}).files ? document.getElementById('coverImageInput').files[0] : null;
+// =================== INITIALIZE ===================
 
-    if (!collectionName.trim()) {
-        alert('Vui lòng nhập tên collection!');
-        return;
-    }
-
-    if (!coverImage) {
-        alert('Vui lòng upload ảnh bìa!');
-        return;
-    }
-
-    const collectionData = {
-        name: collectionName,
-        slug: collectionSlug,
-        description: collectionDescription,
-        content: collectionContent,
-        type: collectionType,
-        status: collectionStatus,
-        startDate: (document.getElementById('startDate') || {}).value || '',
-        endDate: (document.getElementById('endDate') || {}).value || '',
-        tags: (document.getElementById('collectionTags') || {}).value || '',
-        coverImage: coverImage.name
-    };
-
-    console.log('Creating collection:', collectionData);
-    alert(`Đã tạo collection "${collectionName}" thành công!`);
-    setTimeout(() => {
-        window.location.href = 'collections.html';
-    }, 1000);
-}
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Collection Form Manager
+    const collectionFormManager = new CollectionFormManager();
+    
+    console.log('Add Collection page initialized - MVC/OOP compliant');
+});

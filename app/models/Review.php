@@ -150,7 +150,11 @@ class Review extends BaseModel
     public function getUserReviews($userId, $limit = 10, $offset = 0)
     {
         try {
-            $sql = "SELECT r.*, p.name as product_name, p.slug, p.base_price
+            $sql = "SELECT r.*, p.name as product_name, p.slug, p.base_price,
+                           (SELECT image_path FROM images img 
+                            JOIN image_usages iu ON img.image_id = iu.image_id 
+                            WHERE iu.entity_id = p.product_id AND iu.entity_type = 'product' 
+                            AND iu.is_primary = 1 LIMIT 1) as primary_image
                     FROM {$this->table} r
                     JOIN products p ON r.product_id = p.product_id
                     WHERE r.user_id = :user_id
@@ -338,7 +342,11 @@ class Review extends BaseModel
     public function getLatestReviews($limit = 5)
     {
         try {
-            $sql = "SELECT r.*, u.name as user_name, p.name as product_name, p.slug
+            $sql = "SELECT r.*, u.name as user_name, p.name as product_name, p.slug,
+                           (SELECT image_path FROM images img 
+                            JOIN image_usages iu ON img.image_id = iu.image_id 
+                            WHERE iu.entity_id = p.product_id AND iu.entity_type = 'product' 
+                            AND iu.is_primary = 1 LIMIT 1) as primary_image
                     FROM {$this->table} r
                     JOIN users u ON r.user_id = u.user_id
                     JOIN products p ON r.product_id = p.product_id
@@ -360,7 +368,11 @@ class Review extends BaseModel
     public function getTopRatedProducts($limit = 10, $minReviews = 3)
     {
         try {
-            $sql = "SELECT p.*, AVG(r.rating) as average_rating, COUNT(r.review_id) as review_count
+            $sql = "SELECT p.*, AVG(r.rating) as average_rating, COUNT(r.review_id) as review_count,
+                           (SELECT image_path FROM images img 
+                            JOIN image_usages iu ON img.image_id = iu.image_id 
+                            WHERE iu.entity_id = p.product_id AND iu.entity_type = 'product' 
+                            AND iu.is_primary = 1 LIMIT 1) as primary_image
                     FROM products p
                     JOIN {$this->table} r ON p.product_id = r.product_id
                     WHERE r.status = 'approved' AND p.is_active = 1
@@ -422,7 +434,11 @@ class Review extends BaseModel
     public function getProductsUserCanReview($userId, $limit = 10, $offset = 0)
     {
         try {
-            $sql = "SELECT DISTINCT p.*, o.created_at as purchase_date
+            $sql = "SELECT DISTINCT p.*, o.created_at as purchase_date,
+                           (SELECT image_path FROM images img 
+                            JOIN image_usages iu ON img.image_id = iu.image_id 
+                            WHERE iu.entity_id = p.product_id AND iu.entity_type = 'product' 
+                            AND iu.is_primary = 1 LIMIT 1) as primary_image
                     FROM products p
                     JOIN order_items oi ON p.product_id = oi.product_id
                     JOIN orders o ON oi.order_id = o.order_id
@@ -471,13 +487,13 @@ class Review extends BaseModel
         return $result ? (int)$result->total : 0;
     }
 
-
     /**
      * Xóa đánh giá
      */
     public function delete($id) {
         $sql = "DELETE FROM {$this->table} WHERE review_id = :id";
         $this->db->query($sql);
+        $this->db->bind(':status', $status);
         $this->db->bind(':id', $id);
         return $this->db->execute();
     }

@@ -27,21 +27,123 @@ class AdminRouter {
                     unset($url[0]);
                     break;
                     
+                case 'add-product':
+                    $this->controller = 'ProductsController';
+                    $this->method = 'showAddForm';
+                    unset($url[0]);
+                    break;
+                    
+                case 'edit-product':
+                    $this->controller = 'ProductsController';
+                    $this->method = 'showEditForm';
+                    unset($url[0]);
+                    break;
+                    
+                case 'product-details':
+                    $this->controller = 'ProductsController';
+                    $this->method = 'showDetails';
+                    unset($url[0]);
+                    break;
+                    
                 case 'categories':
                     $this->controller = 'CategoriesController';
-                    $this->method = 'index';
+                    // Check for action parameter
+                    if (isset($_GET['action'])) {
+                        switch ($_GET['action']) {
+                            case 'create':
+                                $this->method = 'create';
+                                break;
+                            case 'update':
+                                $this->method = 'update';
+                                break;
+                            case 'delete':
+                                $this->method = 'delete';
+                                break;
+                            default:
+                                $this->method = 'index';
+                        }
+                    } else {
+                        $this->method = 'index';
+                    }
+                    unset($url[0]);
+                    break;
+                    
+                case 'add-category':
+                    $this->controller = 'CategoriesController';
+                    $this->method = 'showAddForm';
+                    unset($url[0]);
+                    break;
+                    
+                case 'edit-category':
+                    $this->controller = 'CategoriesController';
+                    $this->method = 'showEditForm';
                     unset($url[0]);
                     break;
                     
                 case 'collections':
                     $this->controller = 'CollectionsController';
-                    $this->method = 'index';
+                    // Check for action parameter
+                    if (isset($_GET['action'])) {
+                        switch ($_GET['action']) {
+                            case 'create':
+                                $this->method = 'create';
+                                break;
+                            case 'update':
+                                $this->method = 'update';
+                                break;
+                            case 'delete':
+                                $this->method = 'delete';
+                                break;
+                            case 'toggle':
+                                $this->method = 'toggle';
+                                break;
+                            default:
+                                $this->method = 'index';
+                        }
+                    } else {
+                        $this->method = 'index';
+                    }
+                    unset($url[0]);
+                    break;
+                    
+                case 'add-collection':
+                    $this->controller = 'CollectionsController';
+                    $this->method = 'showAddForm';
+                    unset($url[0]);
+                    break;
+                    
+                case 'edit-collection':
+                    $this->controller = 'CollectionsController';
+                    $this->method = 'showEditForm';
                     unset($url[0]);
                     break;
                     
                 case 'orders':
                     $this->controller = 'OrdersController';
-                    $this->method = 'index';
+                    // Check for action parameter
+                    if (isset($_GET['action'])) {
+                        switch ($_GET['action']) {
+                            case 'updatePayment':
+                                $this->method = 'updatePayment';
+                                break;
+                            case 'updateOrder':
+                                $this->method = 'updateOrder';
+                                break;
+                            case 'delete':
+                                $this->method = 'delete';
+                                break;
+                            default:
+                                $this->method = 'index';
+                        }
+                    } else {
+                        $this->method = 'index';
+                    }
+                    unset($url[0]);
+                    break;
+                    
+                case 'order-details':
+                    $this->controller = 'OrdersController';
+                    $this->method = 'showDetails';
                     unset($url[0]);
                     break;
                     

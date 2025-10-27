@@ -127,6 +127,10 @@
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-primary" 
+                                            onclick="viewOrderDetails(<?= $order->order_id ?>)" title="Xem chi tiết">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" alt="View" width="14" height="14">
+                                    </button>
                                     <button type="button" class="btn btn-outline-success" 
                                             onclick="editOrder(<?= $order->order_id ?>)" title="Chỉnh sửa">
                                         <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Edit" width="14" height="14">
@@ -154,6 +158,9 @@
     </div>
 </div>
 
+<!-- Orders JavaScript được load từ file riêng (MVC Best Practice) -->
+<!-- File: app/views/admin/assets/js/orders.js -->
+
 <style>
 /* Custom styling for select dropdown */
 .badge-select {
@@ -176,80 +183,5 @@
 }
 </style>
 
-<script>
-// Chỉnh sửa đơn hàng - điều hướng đến trang chi tiết
-function editOrder(orderId) {
-    window.location.href = 'index.php?url=order-details&id=' + orderId;
-}
-
-// Xóa đơn hàng
-function deleteOrder(orderId) {
-    if (confirm('Bạn có chắc chắn muốn xóa đơn hàng này? Hành động này không thể hoàn tác!')) {
-        window.location.href = 'index.php?url=orders&action=delete&id=' + orderId;
-    }
-}
-
-// Cập nhật trạng thái thanh toán
-function updatePaymentStatus(orderId, newStatus) {
-    const statusText = newStatus === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán';
-    
-    if (confirm(`Bạn có chắc chắn muốn thay đổi trạng thái thanh toán thành "${statusText}"?`)) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = 'index.php?url=orders&action=updatePayment&id=' + orderId;
-        
-        const statusInput = document.createElement('input');
-        statusInput.type = 'hidden';
-        statusInput.name = 'payment_status';
-        statusInput.value = newStatus;
-        
-        form.appendChild(statusInput);
-        document.body.appendChild(form);
-        form.submit();
-    } else {
-        // Revert selection if cancelled
-        event.target.value = event.target.getAttribute('data-original');
-    }
-}
-
-// Cập nhật trạng thái đơn hàng
-function updateOrderStatus(orderId, newStatus) {
-    const statusTexts = {
-        'pending': 'Chờ xác nhận',
-        'confirmed': 'Đã xác nhận',
-        'shipping': 'Đang giao hàng',
-        'delivered': 'Đã giao hàng',
-        'cancelled': 'Đã hủy'
-    };
-    
-    const statusText = statusTexts[newStatus] || newStatus;
-    
-    if (confirm(`Bạn có chắc chắn muốn thay đổi trạng thái đơn hàng thành "${statusText}"?`)) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = 'index.php?url=orders&action=updateOrder&id=' + orderId;
-        
-        const statusInput = document.createElement('input');
-        statusInput.type = 'hidden';
-        statusInput.name = 'order_status';
-        statusInput.value = newStatus;
-        
-        form.appendChild(statusInput);
-        document.body.appendChild(form);
-        form.submit();
-    } else {
-        // Revert selection if cancelled
-        event.target.value = event.target.getAttribute('data-original');
-    }
-}
-
-// Store original values for revert if needed
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.badge-select').forEach(select => {
-        select.setAttribute('data-original', select.value);
-        select.addEventListener('focus', function() {
-            this.setAttribute('data-original', this.value);
-        });
-    });
-});
-</script>
+<!-- Load Orders JavaScript -->
+<script src="app/views/admin/assets/js/orders.js"></script>

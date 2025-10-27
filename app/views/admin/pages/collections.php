@@ -116,9 +116,10 @@
                             </div>
                             
                             <!-- Add Collection -->
-                            <button class="btn btn-success-custom btn-sm" onclick="addNewCollection()">
+                            <button class="btn btn-success-custom btn-sm" onclick="window.location.href='index.php?url=add-collection'">
                                 <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Add" width="16" height="16" class="me-1">
-                                Thêm Bộ Sưu Tập
+                                <span class="d-none d-md-inline">Thêm Bộ Sưu Tập</span>
+                                <span class="d-md-none">Thêm</span>
                             </button>
                             
                             <!-- More Actions -->
@@ -261,41 +262,60 @@
     
     <!-- Collection Management Functions -->
     <script>
-        function addNewCollection() {
-            window.location.href = '/admin/index.php?url=collections&action=create';
-        }
-        
         function viewCollection(collectionId) {
-            window.location.href = '/admin/index.php?url=collections&action=show&id=' + collectionId;
+            window.location.href = 'index.php?url=collection-details&id=' + collectionId;
         }
         
         function editCollection(collectionId) {
-            window.location.href = '/admin/index.php?url=collections&action=edit&id=' + collectionId;
+            window.location.href = 'index.php?url=edit-collection&id=' + collectionId;
         }
         
         function viewProducts(collectionId) {
-            window.location.href = '/admin/index.php?url=products&collection=' + collectionId;
+            window.location.href = 'index.php?url=products&collection=' + collectionId;
         }
         
         function toggleCollection(collectionId) {
-            if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái của bộ sưu tập này không?')) {
+            if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái của bộ sưu tập này?')) {
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '/admin/index.php?url=collections&action=toggle&id=' + collectionId;
+                form.action = 'index.php?url=collections&action=toggle&id=' + collectionId;
                 document.body.appendChild(form);
                 form.submit();
             }
         }
         
         function deleteCollection(collectionId) {
-            if (confirm('Bạn có chắc chắn muốn xóa bộ sưu tập này không?')) {
+            if (confirm('Bạn có chắc chắn muốn xóa bộ sưu tập này? Hành động này không thể hoàn tác!')) {
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '/admin/index.php?url=collections&action=delete&id=' + collectionId;
+                form.action = 'index.php?url=collections&action=delete&id=' + collectionId;
                 document.body.appendChild(form);
                 form.submit();
             }
         }
+
+        // Search functionality
+        document.getElementById('collectionSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#collectionsTable tbody tr');
+            
+            rows.forEach(row => {
+                const collectionName = row.querySelector('.fw-bold')?.textContent.toLowerCase() || '';
+                if (collectionName.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Select all checkbox
+        document.getElementById('selectAll').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
     </script>
 
     <!-- Bootstrap JavaScript -->

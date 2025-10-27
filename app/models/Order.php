@@ -218,6 +218,42 @@ class Order extends BaseModel {
     }
 
     /**
+     * Cập nhật trạng thái thanh toán
+     * @param int $id Order ID
+     * @param string $status Payment status (paid, unpaid)
+     * @return bool
+     */
+    public function updatePaymentStatus($id, $status) {
+        $validStatuses = ['paid', 'unpaid'];
+        if (!in_array($status, $validStatuses)) {
+            return false;
+        }
+        
+        $this->db->query("UPDATE " . $this->table . " 
+                         SET payment_status = :status, updated_at = NOW() 
+                         WHERE order_id = :id");
+        $this->db->bind(':status', $status);
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
+
+    /**
+     * Lấy thông tin đơn hàng với email khách hàng
+     * Dùng để gửi email confirmation
+     * @param int $id Order ID
+     * @return object|null
+     */
+    public function getOrderWithCustomerEmail($id) {
+        $sql = "SELECT o.*, u.email as customer_email, u.name as customer_name
+                FROM {$this->table} o 
+                LEFT JOIN users u ON o.user_id = u.user_id
+                WHERE o.order_id = :id";
+        $this->db->query($sql);
+        $this->db->bind(':id', $id);
+        return $this->db->single();
+    }
+
+    /**
      * Lấy tổng doanh thu
      */
     public function getTotalRevenue() {
