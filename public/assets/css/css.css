@@ -146,7 +146,6 @@ nav .container {
   color: #333;
   cursor: pointer;
   transition: color 0.3s ease;
-  margin-top: 10px;
 }
 
 .nav-icons i:hover {
@@ -175,6 +174,59 @@ nav .container {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+.btn-outline-secondary {
+    border-radius: 0 20px 20px 0;    
+    background-color: #F6F7EB;
+    border: 1px solid #ddd;
+    
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border-radius: 10px;
+}
+
+.dropdown-item {
+    padding: 10px 20px;
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: #d4af37;
+}
+
+.dropdown-header {
+    padding: 15px 20px 10px;
+    /* background: linear-gradient(72deg,rgba(184, 148, 31, 1) 50%, rgba(237, 221, 83, 1) 100%); */
+    color: #d4af37 ;
+    /* margin: -8px -16px 0; */
+    border-radius: 10px 10px 0 0;
+}
+
+.badge {
+    font-size: 0.6em;
+}
+
+@media (max-width: 991px) {
+    .navbar-nav .nav-item {
+        text-align: center;
+        margin: 5px 0;
+    }
+    
+    .search-input {
+        border-radius: 20px;
+        border: 1px solid #ced4da;
+    }
+    
+    .btn-outline-secondary {
+        border-radius: 20px;
+        border: 1px solid #ced4da;
+        margin-left: 10px;
+    }
 }
 
 /* Background images for each slide */
@@ -731,6 +783,80 @@ footer a:hover {
 
   .hero-subtitle {
     font-size: 1.5rem;
+  }
+}
+
+/* Additional responsive fixes to prevent horizontal overflow and balance spacing on small screens */
+@media (max-width: 992px) {
+  /* make main containers fluid */
+  .container {
+    padding-left: 12px;
+    padding-right: 12px;
+    max-width: 100% !important;
+  }
+
+  /* make hero content fluid and show hero image stacked */
+  .hero-content {
+    width: auto !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 18px;
+    padding-bottom: 18px;
+    box-sizing: border-box;
+  }
+
+  .hero-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 320px;
+    object-fit: cover;
+    margin: 0 auto;
+  }
+
+  /* reduce hero/carousel fixed heights so they don't force overflow */
+  .carousel,
+  .carousel-item,
+  .hero-slide {
+    height: auto;
+    min-height: 200px;
+    padding: 0;
+  }
+
+  /* hide large outside carousel arrows on smaller screens to avoid overflow */
+  .carousel-btn {
+    display: none;
+  }
+
+  /* allow product cards to auto height and smaller images on mobile */
+  .product-card {
+    height: auto !important;
+  }
+
+  .product-card img {
+    height: 220px !important;
+  }
+
+  /* ensure no element causes horizontal scroll */
+  html, body {
+    overflow-x: hidden;
+  }
+}
+
+@media (max-width: 576px) {
+  /* further tighten spacing on very small devices */
+  .product-card img {
+    height: 180px !important;
+  }
+
+  .product-card .card-title {
+    min-height: 48px !important;
+    font-size: 1.05rem;
+  }
+
+  .product-card .card-text {
+    min-height: 36px !important;
+    -webkit-line-clamp: 2;
   }
 }
 

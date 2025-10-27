@@ -166,58 +166,7 @@ $user = SessionHelper::getUser();
     border-color: #667eea;
 } */
 
-.btn-outline-secondary {
-    border-radius: 0 20px 20px 0;    
-    background-color: #F6F7EB;
-    border: 1px solid #ddd;
-    
-}
 
-.dropdown-menu {
-    border: none;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    border-radius: 10px;
-}
-
-.dropdown-item {
-    padding: 10px 20px;
-    transition: background-color 0.3s ease;
-}
-
-.dropdown-item:hover {
-    background-color: #f8f9fa;
-    color: #d4af37;
-}
-
-.dropdown-header {
-    padding: 15px 20px 10px;
-    /* background: linear-gradient(72deg,rgba(184, 148, 31, 1) 50%, rgba(237, 221, 83, 1) 100%); */
-    color: #d4af37 ;
-    /* margin: -8px -16px 0; */
-    border-radius: 10px 10px 0 0;
-}
-
-.badge {
-    font-size: 0.6em;
-}
-
-@media (max-width: 991px) {
-    .navbar-nav .nav-item {
-        text-align: center;
-        margin: 5px 0;
-    }
-    
-    .search-input {
-        border-radius: 20px;
-        border: 1px solid #ced4da;
-    }
-    
-    .btn-outline-secondary {
-        border-radius: 20px;
-        border: 1px solid #ced4da;
-        margin-left: 10px;
-    }
-}
 </style>
 
 <!-- JavaScript for User Actions -->
