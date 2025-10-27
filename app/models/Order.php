@@ -28,6 +28,65 @@ class Order extends BaseModel {
         return $this->db->execute();
     }
 
+    /**
+     * Get last inserted order ID
+     */
+    public function getLastInsertId() {
+        return $this->db->lastInsertId();
+    }
+
+    /**
+     * Create new order (simplified version for checkout)
+     */
+    public function create($data) {
+        try {
+            $this->db->query("INSERT INTO " . $this->table . " 
+                             (order_id, user_id, customer_name, customer_email, customer_phone,
+                              shipping_address, payment_method, order_status, subtotal,
+                              shipping_fee, tax_amount, total_amount, notes, created_at) 
+                             VALUES (:order_id, :user_id, :customer_name, :customer_email, :customer_phone,
+                                     :shipping_address, :payment_method, :order_status, :subtotal,
+                                     :shipping_fee, :tax_amount, :total_amount, :notes, :created_at)");
+
+            $this->db->bind(':order_id', $data['order_id']);
+            $this->db->bind(':user_id', $data['user_id']);
+            $this->db->bind(':customer_name', $data['customer_name']);
+            $this->db->bind(':customer_email', $data['customer_email']);
+            $this->db->bind(':customer_phone', $data['customer_phone']);
+            $this->db->bind(':shipping_address', $data['shipping_address']);
+            $this->db->bind(':payment_method', $data['payment_method']);
+            $this->db->bind(':order_status', $data['order_status']);
+            $this->db->bind(':subtotal', $data['subtotal']);
+            $this->db->bind(':shipping_fee', $data['shipping_fee']);
+            $this->db->bind(':tax_amount', $data['tax_amount']);
+            $this->db->bind(':total_amount', $data['total_amount']);
+            $this->db->bind(':notes', $data['notes']);
+            $this->db->bind(':created_at', $data['created_at']);
+
+            return $this->db->execute();
+
+        } catch (Exception $e) {
+            error_log("Create Order Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Find order by order ID
+     */
+    public function findByOrderId($orderId) {
+        try {
+            $this->db->query("SELECT * FROM " . $this->table . " WHERE order_id = :order_id");
+            $this->db->bind(':order_id', $orderId);
+            
+            return $this->db->single();
+
+        } catch (Exception $e) {
+            error_log("Find Order Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
     public function updateOrderStatus($id, $status) {
         $validStatuses = ['pending', 'paid', 'shipped', 'delivered', 'cancelled'];
         if (!in_array($status, $validStatuses)) {
@@ -106,7 +165,10 @@ class Order extends BaseModel {
         $this->db->bind(':product_id', $orderData['product_id']);
         $this->db->bind(':variant_id', $orderData['variant_id'] ?? null);
         $this->db->bind(':quantity', $orderData['quantity']);
-        $this->db->bind(':unit_price_snapshot', $orderData['unit_price'] ?? $orderData['price'] ?? 0);
+
+
+        $this->db->bind(':unit_price_snapshot', $orderData['unit_price']);
+
         $this->db->bind(':total_price', $orderData['total_price']);
         
         return $this->db->execute();

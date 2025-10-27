@@ -1,3 +1,9 @@
+<?php 
+// Include URL helper if not already included
+if (!function_exists('url')) {
+    require_once __DIR__ . '/../../../../helpers/url_helper.php';
+}
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -10,6 +16,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Custom CSS --> 
         <title>Danh sách sản phẩm</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">   
@@ -17,7 +25,7 @@
 </head>
 <body>
     <!-- Header -->
-    <?php include __DIR__ . '/../components/header-nosignin.php'; ?>
+    <?php include __DIR__ . '/../components/header.php'; ?>
 
     <!-- Banner Section -->
     <section class="banner-section">
@@ -205,8 +213,14 @@
                                                 <span class="text-muted ms-1">(<?= rand(10, 200) ?>)</span>
                                             </div>
                                             <div class="product-actions">
-                                                <button class="btn btn-icon btn-sm me-2" title="Yêu thích" onclick="event.preventDefault(); event.stopPropagation();"><i class="fa-regular fa-heart"></i></button>
-                                                <button class="btn btn-icon btn-sm" title="Thêm vào giỏ" onclick="event.preventDefault(); event.stopPropagation();"><i class="fa-solid fa-cart-plus"></i></button>
+                                                <button class="btn btn-icon btn-sm me-2" title="Yêu thích" 
+                                                        onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist(<?= $product->product_id ?>)">
+                                                    <i class="fa-regular fa-heart"></i>
+                                                </button>
+                                                <button class="btn btn-icon btn-sm" title="Thêm vào giỏ" 
+                                                        onclick="event.preventDefault(); event.stopPropagation(); addToCartFromList(<?= $product->product_id ?>, '<?= htmlspecialchars($product->name) ?>')">
+                                                    <i class="fa-solid fa-cart-plus"></i>
+                                                </button>
                                             </div>
                                         </div>
                                     </a>
@@ -322,6 +336,118 @@
                     const checkbox = document.querySelector(`input[value="${material}"]`);
                     if (checkbox) checkbox.checked = true;
                 });
+            }
+        }
+
+        /**
+         * Add product to cart from product list
+         */
+        function addToCartFromList(productId, productName) {
+            // Show loading state
+            const button = event.target.closest('button');
+            const originalHtml = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+
+            // Prepare cart data (default values for quick add)
+            const cartData = new FormData();
+            cartData.append('product_id', productId);
+            cartData.append('quantity', 1);
+            cartData.append('size', '');
+            cartData.append('color', '');
+
+            const cartUrl = '<?= url('cart/add') ?>';
+            console.log('Cart URL:', cartUrl);
+            console.log('Product ID:', productId);
+            
+            fetch(cartUrl, {
+                method: 'POST',
+                body: cartData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                // Restore button state
+                button.innerHTML = originalHtml;
+                button.disabled = false;
+
+                if (data.success) {
+                    // Update cart badge
+                    if (typeof updateCartBadge === 'function') {
+                        updateCartBadge();
+                    }
+                    
+                    // Show success message
+                    showToast('success', `Đã thêm "${productName}" vào giỏ hàng!`);
+                } else {
+                    showToast('error', data.message || 'Có lỗi xảy ra khi thêm vào giỏ hàng');
+                }
+            })
+            .catch(error => {
+                // Restore button state
+                button.innerHTML = originalHtml;
+                button.disabled = false;
+                
+                console.error('Full error details:', error);
+                console.error('Error message:', error.message);
+                console.error('Error stack:', error.stack);
+                showToast('error', 'Có lỗi kết nối xảy ra: ' + error.message);
+            });
+        }
+
+        /**
+         * Toggle wishlist
+         */
+        function toggleWishlist(productId) {
+            const button = event.target.closest('button');
+            const icon = button.querySelector('i');
+            
+            // Toggle heart icon
+            if (icon.classList.contains('fa-regular')) {
+                icon.classList.remove('fa-regular');
+                icon.classList.add('fa-solid');
+                button.style.color = '#dc3545';
+                showToast('success', 'Đã thêm vào danh sách yêu thích!');
+            } else {
+                icon.classList.remove('fa-solid');
+                icon.classList.add('fa-regular');
+                button.style.color = '';
+                showToast('info', 'Đã xóa khỏi danh sách yêu thích!');
+            }
+        }
+
+        /**
+         * Show toast notification
+         */
+        function showToast(type, message) {
+            // Check if SweetAlert is available
+            if (typeof Swal !== 'undefined') {
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+
+                Toast.fire({
+                    icon: type,
+                    title: message
+                });
+            } else {
+                // Fallback to alert
+                alert(message);
             }
         }
 

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../configs/database.php';
 
 require_once __DIR__ . '/../../core/BaseModel.php';
 
@@ -6,166 +7,89 @@ class User extends BaseModel {
     protected $table = 'users';
     protected $primaryKey = 'user_id';
 
-    //Customer registration
-    public function signup($userData){
-        $errors = [];
-        
-        // Validate name
-        if(empty($userData['name'])) {
-            $errors['name'] = 'Vui lòng nhập họ tên';
-        } elseif(strlen($userData['name']) < 2) {
-            $errors['name'] = 'Họ tên phải có ít nhất 2 ký tự';
-        }
-
-        // Validate email
-        if(empty($userData['email'])) {
-            $errors['email'] = 'Vui lòng nhập địa chỉ email';
-        } elseif(!preg_match("/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/", $userData['email'])) {
-            $errors['email'] = 'Vui lòng nhập địa chỉ email hợp lệ';
-        } elseif($this->findByEmail($userData['email'])) {
-            $errors['email'] = 'Email này đã được đăng ký';
-        }
-
-        // Validate password
-        if(empty($userData['password'])) {
-            $errors['password'] = 'Vui lòng nhập mật khẩu';
-        } elseif(strlen($userData['password']) < 6) {
-            $errors['password'] = 'Mật khẩu phải có ít nhất 6 ký tự';
-        }
-
-        // Validate confirm password
-        if(empty($userData['confirm_password'])) {
-            $errors['confirm_password'] = 'Vui lòng xác nhận mật khẩu';
-        } elseif($userData['password'] !== $userData['confirm_password']) {
-            $errors['confirm_password'] = 'Mật khẩu xác nhận không khớp';
-        }
-
-        // If no errors, create user
-        if(empty($errors)) {
-            if($this->createNewUser($userData)) {
-                return ['success' => true, 'message' => 'Đăng ký thành công'];
-            } else {
-                return ['success' => false, 'message' => 'Có lỗi xảy ra khi tạo tài khoản'];
-            }
-        }
-
-        return ['success' => false, 'errors' => $errors];
+    public function __construct() {
+        parent::__construct();
     }
 
-    //Customer login
-    public function login($email, $password) {
-        // Validate input
-        if(empty($email)) {
-            return ['success' => false, 'message' => 'Vui lòng nhập email'];
-        }
+    /**
+     * Create a new user
+     */
+    public function create($data) {
+        $query = "INSERT INTO " . $this->table . " 
+                  SET email = :email,
+                      password_hash = :password_hash,
+                      name = :name,
+                      phone = :phone,
+                      verification_token = :verification_token,
+                      token_expires_at = :token_expires_at,
+                      created_at = NOW()";
         
-        if(empty($password)) {
-            return ['success' => false, 'message' => 'Vui lòng nhập mật khẩu'];
-        }
-
-        // Find user by email
-        $user = $this->findByEmail($email);
+        $this->db->query($query);
+        $this->db->bind(':email', $data['email']);
+        $this->db->bind(':password_hash', $data['password_hash']);
+        $this->db->bind(':name', $data['name'] ?? null);
+        $this->db->bind(':phone', $data['phone'] ?? null);
+        $this->db->bind(':verification_token', $data['verification_token'] ?? null);
+        $this->db->bind(':token_expires_at', $data['token_expires_at'] ?? null);
         
-        if(!$user) {
-            return ['success' => false, 'message' => 'Email không tồn tại'];
-        }
-
-        // Check if user is active
-        if(!$user->is_active) {
-            return ['success' => false, 'message' => 'Tài khoản đã bị khóa'];
-        }
-
-        // Verify password
-        if(password_verify($password, $user->password_hash)) {
-            // Remove password from user data for security
-            unset($user->password_hash);
-            
-            return [
-                'success' => true, 
-                'message' => 'Đăng nhập thành công',
-                'user' => $user
-            ];
-        } else {
-            return ['success' => false, 'message' => 'Mật khẩu không chính xác'];
-        }
+        return $this->db->execute();
     }
-
-    // Create a new user
-    public function createNewUser($data) {
-        try {
-            // Debug: Kiểm tra dữ liệu đầu vào
-            error_log("Creating user with data: " . print_r($data, true));
-            
-            // Kiểm tra xem có role customer (ID = 2) không
-            $this->db->query("SELECT role_id FROM roles WHERE role_id = 2");
-            $this->db->execute();
-            $customerRole = $this->db->single();
-            
-            if (!$customerRole) {
-                // Nếu chưa có roles, tạo cả admin và customer theo đúng ID
-                error_log("No customer role found, creating default roles...");
-                
-                // Tạo role admin (ID = 1)
-                $this->db->query("INSERT INTO roles (role_id, role_name, description) VALUES (1, 'admin', 'Quản trị viên')");
-                $this->db->execute();
-                
-                // Tạo role customer (ID = 2) 
-                $this->db->query("INSERT INTO roles (role_id, role_name, description) VALUES (2, 'customer', 'Khách hàng')");
-                $this->db->execute();
-                
-                error_log("Created default roles: admin (ID=1) and customer (ID=2)");
-            }
-            
-            // Tạo user với role_id = 2 (customer)
-            $this->db->query("INSERT INTO " . $this->table . " (email, password_hash, name, phone, is_active, role_id, created_at, updated_at) VALUES (:email, :password_hash, :name, :phone, 1, 2, NOW(), NOW())");
-            $this->db->bind(':email', $data['email']);
-            $this->db->bind(':password_hash', password_hash($data['password'], PASSWORD_BCRYPT));
-            $this->db->bind(':name', $data['name']);
-            $this->db->bind(':phone', $data['phone'] ?? null);
-            
-            $result = $this->db->execute();
-            
-            // Debug: Kiểm tra kết quả
-            error_log("Database execute result: " . ($result ? 'SUCCESS' : 'FAILED'));
-            if ($result) {
-                error_log("User created with role_id = 2 (customer)");
-            }
-            
-            return $result;
-        } catch (Exception $e) {
-            error_log("Error creating user: " . $e->getMessage());
-            return false;
-        }
-    }
-
+    
+    /**
+     * Find user by email
+     */
     public function findByEmail($email) {
-        $this->db->query("SELECT * FROM " . $this->table . " WHERE email = :email");
+        $query = "SELECT * FROM " . $this->table . " WHERE email = :email LIMIT 1";
+        $this->db->query($query);
         $this->db->bind(':email', $email);
         return $this->db->single();
     }
     
-    public function findById($id) {
-        $this->db->query("SELECT * FROM " . $this->table . " WHERE user_id = :id");
-        $this->db->bind(':id', $id);
+    /**
+     * Find user by verification token
+     */
+    public function findByVerificationToken($token) {
+        $query = "SELECT * FROM " . $this->table . " 
+                  WHERE verification_token = :token 
+                  AND token_expires_at > NOW()
+                  LIMIT 1";
+        
+        $this->db->query($query);
+        $this->db->bind(':token', $token);
         return $this->db->single();
     }
     
-     public function findByPhoneNumber($phone) {
-        $this->db->query("SELECT * FROM " . $this->table . " WHERE phone = :phone");
-        $this->db->bind(':phone', $phone);
-        return $this->db->single();
+    /**
+     * Verify user email
+     */
+    public function verifyEmail($userId) {
+        $query = "UPDATE " . $this->table . " 
+                  SET is_active = 1, 
+                      verification_token = NULL, 
+                      token_expires_at = NULL 
+                  WHERE user_id = :user_id";
+        
+        $this->db->query($query);
+        $this->db->bind(':user_id', $userId);
+        return $this->db->execute();
     }
     
-     public function deleteById($id) {
-        $this->db->query("DELETE FROM " . $this->table . " WHERE user_id = :id");
-        $this->db->bind(':id', $id);
+    /**
+     * Update verification token
+     */
+    public function updateVerificationToken($email, $token, $expires) {
+        $query = "UPDATE " . $this->table . " 
+                  SET verification_token = :token, 
+                      token_expires_at = :expires 
+                  WHERE email = :email";
+        
+        $this->db->query($query);
+        $this->db->bind(':token', $token);
+        $this->db->bind(':expires', $expires);
+        $this->db->bind(':email', $email);
         return $this->db->execute();
     }
 
-    public function getAllUsers() {
-        $this->db->query("SELECT user_id, email, name, phone, is_active, created_at FROM " . $this->table . " ORDER BY created_at DESC");
-        return $this->db->resultSet();
-    }
 
     /**
      * Lấy tất cả users với thống kê đơn hàng
@@ -237,32 +161,138 @@ class User extends BaseModel {
     }
 
     // Update user profile
+
+    /**
+     * Clean expired tokens
+     */
+    public function cleanExpiredTokens() {
+        $query = "UPDATE " . $this->table . " 
+                  SET verification_token = NULL, 
+                      token_expires_at = NULL 
+                  WHERE token_expires_at < NOW() 
+                  AND token_expires_at IS NOT NULL";
+        
+        $this->db->query($query);
+        return $this->db->execute();
+    }
+    
+    /**
+     * Update reset token for user
+     */
+    public function updateResetToken($email, $token, $expires) {
+        $query = "UPDATE users SET reset_token = :token, reset_expires_at = :expires WHERE email = :email";
+        
+        $this->db->query($query);
+        $this->db->bind(':token', $token);
+        $this->db->bind(':expires', $expires);
+        $this->db->bind(':email', $email);
+        
+        return $this->db->execute();
+    }
+    
+    /**
+     * Find user by reset token
+     */
+    public function findByResetToken($token) {
+        $query = "SELECT * FROM users WHERE reset_token = :token AND reset_expires_at > NOW()";
+        
+        error_log("DEBUG findByResetToken - Token: " . $token);
+        error_log("DEBUG findByResetToken - Query: " . $query);
+        
+        $this->db->query($query);
+        $this->db->bind(':token', $token);
+        
+        $result = $this->db->single();
+        error_log("DEBUG findByResetToken - Result: " . ($result ? 'FOUND' : 'NOT_FOUND'));
+        
+        return $result;
+    }
+    
+    /**
+     * Reset user password and clear reset token
+     */
+    public function resetPassword($userId, $hashedPassword) {
+        $query = "UPDATE users SET password_hash = :password, verification_token = NULL, token_expires_at = NULL WHERE user_id = :user_id";
+        
+        $this->db->query($query);
+        $this->db->bind(':password', $hashedPassword);
+        $this->db->bind(':user_id', $userId);
+        
+        return $this->db->execute();
+    }
+    
+    /**
+     * Update user profile
+     */
+
     public function updateProfile($userId, $data) {
-        $this->db->query("UPDATE " . $this->table . " SET name = :name, phone = :phone, updated_at = NOW() WHERE user_id = :id");
-        $this->db->bind(':name', $data['name']);
-        $this->db->bind(':phone', $data['phone']);
-        $this->db->bind(':id', $userId);
+        $fields = [];
+        $params = [':user_id' => $userId];
+        
+        foreach ($data as $key => $value) {
+            if ($value !== null && $value !== '') {
+                $fields[] = "$key = :$key";
+                $params[":$key"] = $value;
+            }
+        }
+        
+        if (empty($fields)) {
+            return false;
+        }
+        
+        $query = "UPDATE users SET " . implode(', ', $fields) . " WHERE user_id = :user_id";
+        
+        $this->db->query($query);
+        foreach ($params as $param => $value) {
+            $this->db->bind($param, $value);
+        }
+        
         return $this->db->execute();
     }
-
-    // Change password
-    public function changePassword($userId, $newPassword) {
-        $this->db->query("UPDATE " . $this->table . " SET password_hash = :password_hash, updated_at = NOW() WHERE user_id = :id");
-        $this->db->bind(':password_hash', password_hash($newPassword, PASSWORD_BCRYPT));
-        $this->db->bind(':id', $userId);
+    
+    /**
+     * Update user avatar
+     */
+    public function updateAvatar($userId, $avatarPath) {
+        $query = "UPDATE users SET avatar = :avatar WHERE user_id = :user_id";
+        
+        $this->db->query($query);
+        $this->db->bind(':avatar', $avatarPath);
+        $this->db->bind(':user_id', $userId);
+        
         return $this->db->execute();
     }
-
-    // Toggle user active status
-    public function toggleActive($userId) {
-        $this->db->query("UPDATE " . $this->table . " SET is_active = NOT is_active, updated_at = NOW() WHERE user_id = :id");
-        $this->db->bind(':id', $userId);
+    
+    /**
+     * Update user password
+     */
+    public function updatePassword($userId, $hashedPassword) {
+        $query = "UPDATE users SET password_hash = :password WHERE user_id = :user_id";
+        
+        $this->db->query($query);
+        $this->db->bind(':password', $hashedPassword);
+        $this->db->bind(':user_id', $userId);
+        
         return $this->db->execute();
     }
-
-    // Check if email exists (for forgot password feature)
-    public function emailExists($email) {
-        return $this->findByEmail($email) !== false;
+    
+    /**
+     * Find user by ID
+     */
+    public function findById($userId) {
+        $query = "SELECT * FROM users WHERE user_id = :user_id";
+        
+        $this->db->query($query);
+        $this->db->bind(':user_id', $userId);
+        
+        return $this->db->single();
+    }
+    
+    /**
+     * Check if token is valid
+     */
+    public function isTokenValid($expires) {
+        return strtotime($expires) >= time();
     }
 
     /**

@@ -7,6 +7,7 @@ class BaseController {
         require_once __DIR__ . "/../app/models/{$model}.php";
         return new $model;
     }
+    
     protected function view($view, $data = []) {
         extract($data);
         
@@ -34,5 +35,21 @@ class BaseController {
         
         // Render main layout
         $this->view('admin/layouts/main', $data);
+    }
+    
+    protected function jsonResponse($success = true, $message = '', $data = null) {
+        header('Content-Type: application/json; charset=utf-8');
+        
+        $response = [
+            'success' => $success,
+            'message' => $message
+        ];
+        
+        if ($data !== null) {
+            $response['data'] = $data;
+        }
+        
+        echo json_encode($response, JSON_UNESCAPED_UNICODE);
+        exit;
     }
 }

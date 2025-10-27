@@ -90,7 +90,7 @@ class Cart extends BaseModel
     }
 
     // Thêm sản phẩm vào giỏ hàng
-    public function addToCart($cartId, $productId, $variantId = null, $quantity = 1, $price)
+    public function addToCart($cartId, $productId, $price, $variantId = null, $quantity = 1)
     {
         try {
             // Kiểm tra sản phẩm đã có trong giỏ chưa

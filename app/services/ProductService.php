@@ -290,6 +290,10 @@ class ProductService extends BaseModel {
         $product->primary_image = $this->getProductPrimaryImage($product->product_id);
         $product->categories = $this->getProductCategories($product->product_id);
         
+        // Attach variant data
+        $product->variants = $this->productModel->getAvailableVariants($product->product_id);
+        $product->variant_options = $this->getVariantOptions($product->product_id);
+        
         // Attach review data
         $product->reviews = $this->reviewService->getProductReviews($product->product_id, 10);
         $product->review_stats = $this->reviewService->getProductReviewStats($product->product_id);
@@ -477,5 +481,33 @@ class ProductService extends BaseModel {
                 ORDER BY product_count DESC";
         $this->db->query($sql);
         return $this->db->resultSet();
+    }
+    
+    /**
+     * Lấy các tùy chọn biến thể cho sản phẩm (color, size)
+     */
+    public function getVariantOptions($productId) {
+        $sql = "SELECT DISTINCT color, size FROM product_variants 
+                WHERE product_id = :product_id AND stock > 0 
+                ORDER BY color ASC, size ASC";
+        $this->db->query($sql);
+        $this->db->bind(':product_id', $productId);
+        $variants = $this->db->resultSet();
+        
+        $options = [
+            'colors' => [],
+            'sizes' => []
+        ];
+        
+        foreach ($variants as $variant) {
+            if ($variant->color && !in_array($variant->color, $options['colors'])) {
+                $options['colors'][] = $variant->color;
+            }
+            if ($variant->size && !in_array($variant->size, $options['sizes'])) {
+                $options['sizes'][] = $variant->size;
+            }
+        }
+        
+        return $options;
     }
 }
