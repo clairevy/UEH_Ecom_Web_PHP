@@ -501,7 +501,5 @@ class AuthController extends BaseController {
     private function createUserSession($user) {
         SessionHelper::createUserSession($user);
     }
-
-
 }
 ?>

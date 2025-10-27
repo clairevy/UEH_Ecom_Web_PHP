@@ -114,6 +114,55 @@
             font-weight: bold;
             margin-bottom: 5px;
         }
+        
+        .wishlist-card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .wishlist-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .wishlist-card img {
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .wishlist-card .card-body {
+            padding: 20px;
+        }
+        
+        .price {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .btn-remove-wishlist {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #dc3545;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-remove-wishlist:hover {
+            background: #dc3545;
+            color: white;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -159,8 +208,18 @@
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
+                            <button class="nav-link w-100 text-start" id="wishlist-tab" data-bs-toggle="pill" data-bs-target="#wishlist" type="button" role="tab">
+                                <i class="fas fa-heart me-2"></i>Danh sách yêu thích
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
                             <button class="nav-link w-100 text-start" id="orders-tab" data-bs-toggle="pill" data-bs-target="#orders" type="button" role="tab">
                                 <i class="fas fa-shopping-bag me-2"></i>Đơn hàng của tôi
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link w-100 text-start" id="settings-tab" data-bs-toggle="pill" data-bs-target="#settings" type="button" role="tab">
+                                <i class="fas fa-cog me-2"></i>Cài đặt
                             </button>
                         </li>
                     </ul>
@@ -261,6 +320,23 @@
                             </form>
                         </div>
                         
+                        <!-- Wishlist Tab -->
+                        <div class="tab-pane fade" id="wishlist" role="tabpanel">
+                            <h5 class="fw-bold mb-4">
+                                <i class="fas fa-heart text-primary me-2"></i>
+                                Danh sách yêu thích
+                            </h5>
+                            
+                            <div id="wishlistContainer">
+                                <!-- Wishlist items sẽ được load bằng JavaScript -->
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Đang tải...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- Orders Tab -->
                         <div class="tab-pane fade" id="orders" role="tabpanel">
                             <h5 class="fw-bold mb-4">
@@ -276,6 +352,87 @@
                                     <i class="fas fa-shopping-cart me-2"></i>
                                     Mua sắm ngay
                                 </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Settings Tab -->
+                        <div class="tab-pane fade" id="settings" role="tabpanel">
+                            <h5 class="fw-bold mb-4">
+                                <i class="fas fa-cog text-primary me-2"></i>
+                                Cài đặt
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-bell me-2"></i>
+                                                Thông báo
+                                            </h6>
+                                            <div class="form-check form-switch mb-2">
+                                                <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                                <label class="form-check-label" for="emailNotifications">
+                                                    Nhận thông báo qua email
+                                                </label>
+                                            </div>
+                                            <div class="form-check form-switch mb-2">
+                                                <input class="form-check-input" type="checkbox" id="orderUpdates" checked>
+                                                <label class="form-check-label" for="orderUpdates">
+                                                    Cập nhật đơn hàng
+                                                </label>
+                                            </div>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="promotions">
+                                                <label class="form-check-label" for="promotions">
+                                                    Khuyến mãi và ưu đãi
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-shield-alt me-2"></i>
+                                                Bảo mật
+                                            </h6>
+                                            <div class="mb-3">
+                                                <label class="form-label">Xác thực 2 bước</label>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="badge bg-success me-2">Đã bật</span>
+                                                    <button class="btn btn-sm btn-outline-secondary">Cấu hình</button>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Phiên đăng nhập</label>
+                                                <div>
+                                                    <small class="text-muted">Thiết bị: Chrome trên Windows</small><br>
+                                                    <small class="text-muted">Lần cuối: Hôm nay lúc 14:30</small>
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-sm btn-outline-danger">Đăng xuất tất cả thiết bị</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title text-danger">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                                Vùng nguy hiểm
+                                            </h6>
+                                            <p class="text-muted">Các hành động này không thể hoàn tác. Hãy cân nhắc kỹ trước khi thực hiện.</p>
+                                            <button class="btn btn-outline-danger">
+                                                <i class="fas fa-trash me-2"></i>
+                                                Xóa tài khoản
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -390,6 +547,120 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             `;
+        }
+        
+        // Load wishlist when tab is shown
+        document.getElementById('wishlist-tab').addEventListener('shown.bs.tab', function () {
+            loadWishlist();
+        });
+        
+        // Load wishlist function
+        async function loadWishlist() {
+            const container = document.getElementById('wishlistContainer');
+            
+            try {
+                const response = await fetch('/Ecom_website/wishlist');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                // Get the HTML content
+                const html = await response.text();
+                
+                // Parse the HTML to extract wishlist items
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Find wishlist items in the response
+                const wishlistItemsContainer = doc.querySelector('#wishlistItemsContainer');
+                
+                if (wishlistItemsContainer && wishlistItemsContainer.children.length > 0) {
+                    // Convert wishlist items to profile format
+                    const items = Array.from(wishlistItemsContainer.children);
+                    let wishlistHTML = '<div class="row">';
+                    
+                    items.forEach(item => {
+                        const name = item.querySelector('.product-name')?.textContent?.trim() || 'Sản phẩm';
+                        const price = item.querySelector('.price')?.textContent?.trim() || '0₫';
+                        const img = item.querySelector('img')?.src || '/public/assets/images/placeholder.svg';
+                        const productId = item.dataset.productId || '';
+                        const href = item.querySelector('a')?.href || '#';
+                        
+                        wishlistHTML += `
+                            <div class="col-md-4 col-sm-6 mb-4">
+                                <div class="card wishlist-card position-relative">
+                                    <button class="btn-remove-wishlist" onclick="removeFromWishlist(${productId})">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    <a href="${href}" style="text-decoration: none; color: inherit;">
+                                        <img src="${img}" class="card-img-top" alt="${name}">
+                                        <div class="card-body">
+                                            <h6 class="card-title">${name}</h6>
+                                            <p class="price mb-0">${price}</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    wishlistHTML += '</div>';
+                    container.innerHTML = wishlistHTML;
+                } else {
+                    // Empty wishlist
+                    container.innerHTML = `
+                        <div class="text-center py-5">
+                            <i class="fas fa-heart fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">Danh sách yêu thích trống</h6>
+                            <p class="text-muted">Hãy thêm những sản phẩm bạn yêu thích để xem chúng tại đây</p>
+                            <a href="/Ecom_website/products" class="btn btn-primary">
+                                <i class="fas fa-shopping-cart me-2"></i>
+                                Khám phá sản phẩm
+                            </a>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Error loading wishlist:', error);
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                        <h6 class="text-muted">Có lỗi xảy ra khi tải danh sách yêu thích</h6>
+                        <button class="btn btn-outline-primary" onclick="loadWishlist()">
+                            <i class="fas fa-redo me-2"></i>
+                            Thử lại
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        // Remove from wishlist function
+        async function removeFromWishlist(productId) {
+            try {
+                const response = await fetch('/Ecom_website/wishlist/remove', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `product_id=${productId}`
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Reload wishlist to reflect changes
+                    loadWishlist();
+                    showAlert(document.getElementById('alertContainer'), true, result.message);
+                } else {
+                    showAlert(document.getElementById('alertContainer'), false, result.message);
+                }
+                
+            } catch (error) {
+                console.error('Error removing from wishlist:', error);
+                showAlert(document.getElementById('alertContainer'), false, 'Có lỗi xảy ra khi xóa sản phẩm!');
+            }
         }
     </script>
 </body>

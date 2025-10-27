@@ -164,7 +164,7 @@
       <i class="fas fa-chevron-right"></i>
   </button>
   <div class="text-center mt-4">
-    <button class="btn btn-outline-dark">View more</button>
+    <button class="btn btn-outline-dark" onclick="viewMoreNewArrivals()">View more</button>
   </div>
 </section>
 
@@ -182,7 +182,7 @@
       <i class="fas fa-chevron-right"></i>
   </button>
   <div class="text-center mt-4">
-    <button class="btn btn-outline-dark">View more</button>
+    <button class="btn btn-outline-dark" onclick="viewMorePopular()">View more</button>
   </div>
 </section>
 
@@ -367,14 +367,6 @@
             </div>
         </div>
     </footer>
-
-        
-        
-        
-        
-        
-    
-
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     
@@ -518,11 +510,15 @@
                     console.log('Processed popularProductsData:', popularProductsData);
                 }
 
-                // Render products after data is loaded
-                console.log('About to render both sections...');
+        
                 renderProducts('newArrivals');
                 renderProducts('popular');
                 console.log('Both sections rendered!');
+                
+                // Load wishlist status after products are rendered
+                setTimeout(() => {
+                    loadWishlistStatus();
+                }, 500);
             } catch (error) {
                 console.error('Error fetching product data:', error);
                 // Fallback to mock data if API fails
@@ -530,6 +526,11 @@
                 popularProductsData = getMockProducts();
                 renderProducts('newArrivals');
                 renderProducts('popular');
+                
+                // Load wishlist status for fallback data too
+                setTimeout(() => {
+                    loadWishlistStatus();
+                }, 500);
             }
         }
 
@@ -603,8 +604,8 @@ function renderProducts(type, direction = null) {
               <p class="card-text">${p.desc}</p>
               <p class="price">${p.price.toLocaleString('vi-VN')}₫</p>
               <div class="product-actions">
-                <i class="bi bi-heart"></i>
-                <i class="bi bi-cart"></i>
+              <i class="bi bi-heart" onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist(${p.id}, this)" style="cursor: pointer;"></i> 
+              <i class="bi bi-cart" onclick="event.preventDefault(); event.stopPropagation(); addToCartFromHome(${p.id}, '${p.name}')" style="cursor: pointer;"></i> </div>
               </div>
             </div>
           </a>
@@ -624,6 +625,11 @@ function renderProducts(type, direction = null) {
       container.classList.add('product-carousel-slide-right');
     }
   }
+  
+  // Load wishlist status after rendering products
+  setTimeout(() => {
+    loadWishlistStatus();
+  }, 50);
 }
 
 function moveCarousel(type, dir) {
@@ -649,7 +655,7 @@ function goToProducts(filterType, filterValue) {
     if (filterType === 'category') {
         params.append('category', filterValue);
     } else if (filterType === 'material') {
-        params.append('material', filterValue);
+        params.append('materials', filterValue);
     }
     
     if (params.toString()) {
@@ -658,6 +664,216 @@ function goToProducts(filterType, filterValue) {
     
     window.location.href = url;
 }
+
+// Wishlist functions
+async function toggleWishlist(productId, element) {
+    const icon = element || event.target;
+    
+    try {
+        // Call API first to get accurate state
+        const response = await fetch('/Ecom_website/wishlist/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: `product_id=${productId}`
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Update UI based on server response
+            if (data.data.action === 'added') {
+                icon.classList.remove('bi-heart');
+                icon.classList.add('bi-heart-fill');
+                icon.style.color = '#dc3545';
+                showToast('success', 'Đã thêm vào danh sách yêu thích!');
+            } else if (data.data.action === 'removed') {
+                icon.classList.remove('bi-heart-fill');
+                icon.classList.add('bi-heart');
+                icon.style.color = '';
+                showToast('info', 'Đã xóa khỏi danh sách yêu thích!');
+            }
+            
+            // Update wishlist count if provided
+            if (data.data.wishlist_count !== undefined) {
+                updateWishlistCount(data.data.wishlist_count);
+            }
+        } else {
+            if (data.message && data.message.includes('đăng nhập')) {
+                showToast('warning', data.message);
+                setTimeout(() => {
+                    window.location.href = '/Ecom_website/signin';
+                }, 2000);
+            } else {
+                showToast('error', data.message || 'Có lỗi xảy ra!');
+            }
+        }
+    } catch (error) {
+        console.error('Wishlist toggle error:', error);
+        showToast('error', 'Lỗi kết nối!');
+    }
+}
+
+async function addToCartFromHome(productId, productName) {
+    const icon = event.target;
+    
+    try {
+        // Temporarily change icon for feedback
+        const originalClass = icon.className;
+        icon.className = 'bi bi-check-circle-fill';
+        icon.style.color = '#28a745';
+        
+        const response = await fetch('/Ecom_website/cart/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: `product_id=${productId}&quantity=1`
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast('success', 'Đã thêm vào giỏ hàng!');
+            // Update cart count if available
+            if (data.data && data.data.cartTotal !== undefined) {
+                updateCartCount(data.data.cartTotal);
+            }
+            
+            // Revert icon after 1 second
+            setTimeout(() => {
+                icon.className = originalClass;
+                icon.style.color = '';
+            }, 1000);
+        } else {
+            // Revert icon immediately on error
+            icon.className = originalClass;
+            icon.style.color = '';
+            showToast('error', data.message || 'Có lỗi xảy ra!');
+        }
+    } catch (error) {
+        console.error('Add to cart error:', error);
+        // Revert icon on error
+        icon.className = 'bi bi-cart';
+        icon.style.color = '';
+        showToast('error', 'Lỗi kết nối!');
+    }
+}
+
+function updateCartCount(count) {
+    const cartBadge = document.querySelector('#cartBadge');
+    if (cartBadge) {
+        cartBadge.textContent = count;
+    }
+}
+
+function updateWishlistCount(count) {
+    const wishlistBadge = document.querySelector('#wishlistBadge');
+    if (wishlistBadge) {
+        wishlistBadge.textContent = count;
+    }
+}
+
+// Load wishlist status for products when page loads
+async function loadWishlistStatus() {
+    try {
+        console.log('Loading wishlist status...');
+        const response = await fetch('/Ecom_website/wishlist/status', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Wishlist status response:', data);
+            
+            if (data.success && data.data.wishlist_items && data.data.wishlist_items.length > 0) {
+                console.log('Wishlist items found:', data.data.wishlist_items);
+                
+                // Update UI for products in wishlist
+                data.data.wishlist_items.forEach(productId => {
+                    console.log('Looking for icons for product ID:', productId);
+                    
+                    // Try different selectors
+                    const selector1 = `i[onclick*="toggleWishlist(${productId},"]`;
+                    const selector2 = `i[onclick*="toggleWishlist(${productId}"]`;
+                    const selector3 = `.bi-heart[onclick*="${productId}"]`;
+                    
+                    console.log('Trying selector1:', selector1);
+                    let icons = document.querySelectorAll(selector1);
+                    console.log('Found icons with selector1:', icons.length);
+                    
+                    if (icons.length === 0) {
+                        console.log('Trying selector2:', selector2);
+                        icons = document.querySelectorAll(selector2);
+                        console.log('Found icons with selector2:', icons.length);
+                    }
+                    
+                    if (icons.length === 0) {
+                        console.log('Trying selector3:', selector3);
+                        icons = document.querySelectorAll(selector3);
+                        console.log('Found icons with selector3:', icons.length);
+                    }
+                    
+                    // Also check what's actually in the DOM
+                    const allHeartIcons = document.querySelectorAll('.bi-heart');
+                    console.log('Total heart icons found:', allHeartIcons.length);
+                    allHeartIcons.forEach((icon, index) => {
+                        console.log(`Heart icon ${index} onclick:`, icon.getAttribute('onclick'));
+                    });
+                    
+                    icons.forEach(icon => {
+                        console.log('Updating icon for product', productId);
+                        icon.classList.remove('bi-heart');
+                        icon.classList.add('bi-heart-fill');
+                        icon.style.color = '#dc3545';
+                    });
+                });
+            } else {
+                console.log('No wishlist items or empty wishlist');
+            }
+        } else {
+            console.log('Response not ok:', response.status);
+        }
+    } catch (error) {
+        console.log('Could not load wishlist status:', error);
+    }
+}
+
+function showToast(type, message) {
+    if (typeof Swal !== 'undefined') {
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true
+        });
+        Toast.fire({
+            icon: type,
+            title: message
+        });
+    } else {
+        alert(message);
+    }
+}
+
+// View more functions
+function viewMoreNewArrivals() {
+    // Redirect to products page with new arrivals filter
+    window.location.href = '/Ecom_website/products?sort=newest&limit=10';
+}
+
+function viewMorePopular() {
+    // Redirect to products page with most popular filter  
+    window.location.href = '/Ecom_website/products?sort=popular&limit=10';
+}
+
     </script>
 </body>
 </html>

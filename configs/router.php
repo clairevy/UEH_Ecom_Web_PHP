@@ -1,283 +1,169 @@
 <?php
 class Route {
-    protected $controller = 'HomeController'; // Đặt controller mặc định
+    protected $controller = 'HomeController'; // Controller mặc định
     protected $method = 'index';
     protected $params = [];
 
+    /**
+     * @var array Bảng điều hướng (Routing Table)
+     * Ánh xạ (maps) URL tới [Controller, Method]
+     */
+    protected $routes = [
+        // Trang chủ (key rỗng)
+        '' => ['CustomerController', 'index'],
+
+        // Các route cấp 1 của CustomerController
+        'products' => ['CustomerController', 'products'],
+        'product' => ['CustomerController', 'productDetail'],
+        'about' => ['CustomerController', 'about'],
+        'search' => ['CustomerController', 'searchApi'],
+
+        // Các route API (cấp 2)
+        'api/new-arrivals' => ['CustomerController', 'getNewArrivals'],
+        'api/popular' => ['CustomerController', 'getPopularProducts'],
+        'api/popular-products' => ['CustomerController', 'getPopularProducts'],
+        'api/category' => ['CustomerController', 'getProductsByCategory'],
+        'api/categories' => ['CustomerController', 'getCategories'],
+        'api/collections' => ['CustomerController', 'getCollections'],
+        
+        // Review routes (cấp 2)
+        'api/reviews/add' => ['ReviewController', 'add'],
+        'api/reviews/get' => ['ReviewController', 'getProductReviews'],
+
+        // Wishlist routes
+        'wishlist' => ['WishlistController', 'index'],
+        'wishlist/add' => ['WishlistController', 'add'],
+        'wishlist/remove' => ['WishlistController', 'remove'],
+        'wishlist/toggle' => ['WishlistController', 'toggle'],
+        'wishlist/count' => ['WishlistController', 'count'],
+        'wishlist/clear' => ['WishlistController', 'clear'],
+        'wishlist/status' => ['WishlistController', 'status'],
+
+        // Các route hiển thị form Auth (cấp 1)
+        'signin' => ['AuthController', 'showSignIn'],
+        'login' => ['AuthController', 'showSignIn'],
+        'signup' => ['AuthController', 'showSignUp'],
+        'register' => ['AuthController', 'showSignUp'],
+        'forgot-password' => ['AuthController', 'showForgotPassword'],
+        'reset-password' => ['AuthController', 'showResetPassword'],
+
+        // Các route xử lý Auth (cấp 2)
+        'auth/signin' => ['AuthController', 'signIn'],
+        'auth/login' => ['AuthController', 'signIn'],
+        'auth/signup' => ['AuthController', 'signUp'],
+        'auth/register' => ['AuthController', 'signUp'],
+        'auth/verify' => ['AuthController', 'verifyEmail'],
+        'auth/logout' => ['AuthController', 'logout'],
+        'auth/resend-verification' => ['AuthController', 'resendVerification'],
+        'auth/forgot-password' => ['AuthController', 'forgotPassword'],
+        'auth/reset-password' => ['AuthController', 'resetPassword'],
+
+        // Profile (cấp 1 & 2)
+        'profile' => ['ProfileController', 'index'],
+        'profile/update' => ['ProfileController', 'update'],
+        'profile/upload-avatar' => ['ProfileController', 'uploadAvatar'],
+        'profile/change-password' => ['ProfileController', 'changePassword'],
+
+        // Cart (cấp 1 & 2)
+        'cart' => ['CartController', 'index'],
+        'cart/add' => ['CartController', 'add'],
+        'cart/update' => ['CartController', 'update'],
+        'cart/remove' => ['CartController', 'remove'],
+        'cart/clear' => ['CartController', 'clear'],
+        'cart/count' => ['CartController', 'count'],
+        'cart/summary' => ['CartController', 'summary'],
+        'cart/buynow' => ['CartController', 'buyNow'],
+
+        // Checkout (cấp 1 & 2)
+        'checkout' => ['CheckoutController', 'index'],
+        'checkout/process' => ['CheckoutController', 'process'],
+
+        // Order (cấp 1 & 2)
+        'order' => ['OrderController', 'index'],
+        'order/buynow' => ['OrderController', 'buyNow'],
+        'order-success' => ['CheckoutController', 'orderSuccess'],
+    ];
+
     public function __construct() {
         $url = $this->getUrl();
-       
-        // Xử lý Controller với Clean URLs
-        if (isset($url[0])) {
-            // Clean URL routing - direct to CustomerController for main routes
-            switch ($url[0]) {
-                case 'products':
-                    $this->controller = 'CustomerController';
-                    $this->method = 'products';
-                    unset($url[0]);
-                    break;
-                    
-                case 'product':
-                    $this->controller = 'CustomerController';
-                    $this->method = 'productDetail';
-                    unset($url[0]);
-                    break;
-                    
-                case 'about':
-                    $this->controller = 'CustomerController';
-                    $this->method = 'about';
-                    unset($url[0]);
-                    break;
-                    
-                case 'search':
-                    $this->controller = 'CustomerController';
-                    $this->method = 'searchApi';
-                    unset($url[0]);
-                    break;
-                    
-                case 'api':
-                    $this->controller = 'CustomerController';
-                    unset($url[0]);
-                    if (isset($url[1])) {
-                        switch ($url[1]) {
-                            case 'new-arrivals':
-                                $this->method = 'getNewArrivals';
-                                break;
-                            case 'popular':
-                            case 'popular-products':
-                                $this->method = 'getPopularProducts';
-                                break;
-                            case 'category':
-                                $this->method = 'getProductsByCategory';
-                                break;
-                            case 'categories':
-                                $this->method = 'getCategories';
-                                break;
-                            case 'collections':
-                                $this->method = 'getCollections';
-                                break;
-                        }
-                        unset($url[1]);
-                    }
-                    break;
-                    
-                case 'customer':
-                    // Legacy support for old URLs
-                    $this->controller = 'CustomerController';
-                    unset($url[0]);
-                    
-                    // Check for specific customer actions
-                    if (isset($url[1])) {
-                        switch ($url[1]) {
-                            case 'products':
-                                $this->method = 'products';
-                                unset($url[1]);
-                                break;
-                            case 'product-detail':
-                            case 'product':
-                            case 'productDetail':
-                                $this->method = 'productDetail';
-                                unset($url[1]);
-                                break;
-                            case 'search':
-                                $this->method = 'searchApi';
-                                unset($url[1]);
-                                break;
-                            case 'api':
-                                unset($url[1]);
-                                if (isset($url[2])) {
-                                    switch ($url[2]) {
-                                        case 'new-arrivals':
-                                            $this->method = 'getNewArrivals';
-                                            break;
-                                        case 'popular':
-                                        case 'popular-products':
-                                            $this->method = 'getPopularProducts';
-                                            break;
-                                        case 'category':
-                                            $this->method = 'getProductsByCategory';
-                                            break;
-                                    }
-                                    unset($url[2]);
-                                }
-                                break;
-                        }
-                    }
-                    break;
-                    
-                case 'signin':
-                case 'login':
-                    $this->controller = 'AuthController';
-                    $this->method = 'showSignIn';
-                    unset($url[0]);
-                    break;
-                    
-                case 'signup':
-                case 'register':
-                    $this->controller = 'AuthController';
-                    $this->method = 'showSignUp';
-                    unset($url[0]);
-                    break;
-                    
-                case 'forgot-password':
-                    $this->controller = 'AuthController';
-                    $this->method = 'showForgotPassword';
-                    unset($url[0]);
-                    break;
-                    
-                case 'reset-password':
-                    $this->controller = 'AuthController';
-                    $this->method = 'showResetPassword';
-                    unset($url[0]);
-                    break;
-                    
-                case 'auth':
-                    $this->controller = 'AuthController';
-                    unset($url[0]);
-                    if (isset($url[1])) {
-                        switch ($url[1]) {
-                            case 'signin':
-                            case 'login':
-                                $this->method = 'signIn';
-                                break;
-                            case 'signup':
-                            case 'register':
-                                $this->method = 'signUp';
-                                break;
-                            case 'verify':
-                                $this->method = 'verifyEmail';
-                                break;
-                            case 'logout':
-                                $this->method = 'logout';
-                                break;
-                            case 'resend-verification':
-                                $this->method = 'resendVerification';
-                                break;
-                            case 'forgot-password':
-                                $this->method = 'forgotPassword';
-                                break;
-                            case 'reset-password':
-                                $this->method = 'resetPassword';
-                                break;
-                        }
-                        unset($url[1]);
-                    }
-                    break;
+        $routeFound = false;
 
-                case 'profile':
-                    $this->controller = 'ProfileController';
-                    $this->method = 'index';
-                    unset($url[0]);
-                    if (isset($url[1])) {
-                        switch ($url[1]) {
-                            case 'update':
-                                $this->method = 'update';
-                                break;
-                            case 'upload-avatar':
-                                $this->method = 'uploadAvatar';
-                                break;
-                            case 'change-password':
-                                $this->method = 'changePassword';
-                                break;
-                        }
-                        unset($url[1]);
-                    }
-                    break;
-
-                case 'cart':
-                    $this->controller = 'CartController';
-                    $this->method = 'index';
-                    unset($url[0]);
-                    if (isset($url[1])) {
-                        switch ($url[1]) {
-                            case 'add':
-                                $this->method = 'add';
-                                break;
-                            case 'update':
-                                $this->method = 'update';
-                                break;
-                            case 'remove':
-                                $this->method = 'remove';
-                                break;
-                            case 'clear':
-                                $this->method = 'clear';
-                                break;
-                            case 'count':
-                                $this->method = 'count';
-                                break;
-                            case 'summary':
-                                $this->method = 'summary';
-                                break;
-                            case 'buynow':
-                                $this->method = 'buyNow';
-                                break;
-                        }
-                        unset($url[1]);
-                    }
-                    break;
-
-                case 'checkout':
-                    $this->controller = 'CheckoutController';
-                    $this->method = 'index';
-                    unset($url[0]);
-                    if (isset($url[1])) {
-                        switch ($url[1]) {
-                            case 'process':
-                                $this->method = 'process';
-                                break;
-                        }
-                        unset($url[1]);
-                    }
-                    break;
-
-                case 'order':
-                    $this->controller = 'OrderController';
-                    $this->method = 'index';
-                    unset($url[0]);
-                    if (isset($url[1])) {
-                        switch ($url[1]) {
-                            case 'buynow':
-                                $this->method = 'buyNow';
-                                break;
-                        }
-                        unset($url[1]);
-                    }
-                    break;
-
-                case 'order-success':
-                    $this->controller = 'CheckoutController';
-                    $this->method = 'orderSuccess';
-                    unset($url[0]);
-                    break;
-                    
-                default:
-                // Chuyển đổi tên từ URL (vd: 'users') thành tên Class (vd: 'UsersController')
-                $controllerName = ucfirst($url[0]) . 'Controller';
-                // Tạo đường dẫn tuyệt đối đến file controller
-                $controllerFile = __DIR__ . '/../app/controllers/' . $controllerName . '.php';
-
-                if (file_exists($controllerFile)) {
-                    $this->controller = $controllerName;
-                    unset($url[0]);
-                }
+        // Xử lý Controller với Bảng điều hướng
+        
+        // 1. Kiểm tra route 3 phần (VD: 'api/reviews/add')
+        if (isset($url[0]) && isset($url[1]) && isset($url[2])) {
+            $key = $url[0] . '/' . $url[1] . '/' . $url[2];
+            if (array_key_exists($key, $this->routes)) {
+                $this->controller = $this->routes[$key][0];
+                $this->method = $this->routes[$key][1];
+                unset($url[0], $url[1], $url[2]);
+                $routeFound = true;
             }
-        } else {
-            // Default to customer home page instead of HomeController
-            $this->controller = 'CustomerController';
-            $this->method = 'index';
         }
+        
+        // 2. Kiểm tra route 2 phần (VD: 'api/new-arrivals')
+        if (!$routeFound && isset($url[0]) && isset($url[1])) {
+            $key = $url[0] . '/' . $url[1];
+            if (array_key_exists($key, $this->routes)) {
+                $this->controller = $this->routes[$key][0];
+                $this->method = $this->routes[$key][1];
+                unset($url[0], $url[1]);
+                $routeFound = true;
+            }
+        }
+        
+        // 3. Nếu không khớp, kiểm tra route 1 phần (VD: 'products')
+        if (!$routeFound && isset($url[0])) {
+            $key = $url[0];
+            if (array_key_exists($key, $this->routes)) {
+                $this->controller = $this->routes[$key][0];
+                $this->method = $this->routes[$key][1];
+                unset($url[0]);
+                $routeFound = true;
+            }
+        }
+        
+        // 3. Xử lý trang chủ (không có $url[0])
+        if (!$routeFound && !isset($url[0])) {
+             if (array_key_exists('', $this->routes)) {
+                $this->controller = $this->routes[''][0];
+                $this->method = $this->routes[''][1];
+                $routeFound = true;
+             }
+        }
+
+        // 4. (Giữ nguyên) Xử lý controller động (fallback từ 'default' case)
+        if (!$routeFound && isset($url[0])) {
+            $controllerName = ucfirst($url[0]) . 'Controller';
+            $controllerFile = __DIR__ . '/../app/controllers/' . $controllerName . '.php';
+
+            if (file_exists($controllerFile)) {
+                $this->controller = $controllerName;
+                unset($url[0]);
+                // $routeFound = true; // Không cần gán, vì logic bên dưới sẽ xử lý
+            }
+            // Nếu file không tồn tại, nó sẽ dùng $this->controller mặc định ('HomeController')
+        }
+
+        // --- Bắt đầu phần logic giữ nguyên từ code gốc của bạn ---
 
         // Nạp controller
         $controllerFilePath = __DIR__ . '/../app/controllers/' . $this->controller . '.php';
         if (file_exists($controllerFilePath)) {
             require_once $controllerFilePath;
-            $this->controller = new $this->controller;
+            // Kiểm tra xem class có tồn tại không trước khi khởi tạo
+            if (class_exists($this->controller)) {
+                 $this->controller = new $this->controller;
+            } else {
+                 die("Controller class '{$this->controller}' not found in file.");
+            }
         } else {
             // Xử lý lỗi nếu không tìm thấy file controller
-            die("Controller '{$this->controller}' not found.");
+            die("Controller file '{$this->controller}.php' not found.");
         }
 
-        // Xử lý Method
+        // Xử lý Method (phần này rất quan trọng, giữ lại để xử lý method động)
+        // Ví dụ: /users/edit/1 -> controller 'UsersController', method 'edit'
         if (isset($url[1])) {
             if (method_exists($this->controller, $url[1])) {
                 $this->method = $url[1];
@@ -292,8 +178,7 @@ class Route {
         call_user_func_array([$this->controller, $this->method], $this->params);
     }
 
-
-      public function getUrl() {
+    public function getUrl() {
         if (isset($_GET['url'])) {
             $url = rtrim($_GET['url'], '/');
             $url = filter_var($url, FILTER_SANITIZE_URL);

@@ -1,4 +1,9 @@
 <?php
+// Turn off error display for production - errors will still be logged
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+
 date_default_timezone_set("Asia/Ho_Chi_Minh");
 session_start();
 ob_start(); //tránh lỗi khi dùng hàm liên quan header, côkie (kiểm soát việc xuất dữ liệu ra trình duyệt)

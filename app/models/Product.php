@@ -3,6 +3,8 @@
 /**
  * Product Model - Clean CRUD Operations Only
  * Following Single Responsibility Principle
+ *
+ * MODIFIED TO USE STORED PROCEDURES
  */
 class Product extends BaseModel {
     protected $table = 'products';
@@ -11,12 +13,10 @@ class Product extends BaseModel {
     // ============= CORE CRUD OPERATIONS =============
     
     /**
-     * CREATE - Tạo sản phẩm mới
+     * CREATE - Tạo sản phẩm mới (sử dụng SP)
      */
     public function create($data) {
-        $sql = "INSERT INTO {$this->table} 
-                (name, description, base_price, sku, slug, collection_id, is_active, created_at, updated_at) 
-                VALUES (:name, :description, :base_price, :sku, :slug, :collection_id, :is_active, NOW(), NOW())";
+        $sql = "CALL sp_product_create(:name, :description, :base_price, :sku, :slug, :collection_id, :is_active)";
         
         $this->db->query($sql);
         $this->db->bind(':name', $data['name']);
@@ -27,45 +27,36 @@ class Product extends BaseModel {
         $this->db->bind(':collection_id', $data['collection_id'] ?? null);
         $this->db->bind(':is_active', $data['is_active'] ?? 1);
         
+        // Giả định db->execute() chạy sp và db->lastInsertId() vẫn hoạt động trên cùng connection
         return $this->db->execute() ? $this->db->lastInsertId() : false;
     }
 
     
     /**
-     * READ - Lấy sản phẩm theo ID với stock từ variants
+     * READ - Lấy sản phẩm theo ID với stock từ variants (sử dụng SP)
      */
     public function findById($id) {
-        $sql = "SELECT p.*, 
-                       COALESCE(SUM(pv.stock), 0) as stock_quantity,
-                       COUNT(pv.variant_id) as variant_count
-                FROM {$this->table} p 
-                LEFT JOIN product_variants pv ON p.product_id = pv.product_id
-                WHERE p.product_id = :id AND p.is_active = 1
-                GROUP BY p.product_id";
+        $sql = "CALL sp_product_findById(:id)";
         $this->db->query($sql);
         $this->db->bind(':id', $id);
         return $this->db->single();
     }
     
     /**
-     * READ - Lấy sản phẩm theo slug
+     * READ - Lấy sản phẩm theo slug (sử dụng SP)
      */
     public function findBySlug($slug) {
-        $sql = "SELECT * FROM {$this->table} WHERE slug = :slug AND is_active = 1";
+        $sql = "CALL sp_product_findBySlug(:slug)";
         $this->db->query($sql);
         $this->db->bind(':slug', $slug);
         return $this->db->single();
     }
     
     /**
-     * UPDATE - Cập nhật sản phẩm
+     * UPDATE - Cập nhật sản phẩm (sử dụng SP)
      */
     public function update($id, $data) {
-        $sql = "UPDATE {$this->table} 
-                SET name = :name, description = :description, base_price = :base_price, 
-                    sku = :sku, slug = :slug, collection_id = :collection_id,
-                    is_active = :is_active, updated_at = NOW() 
-                WHERE product_id = :id";
+        $sql = "CALL sp_product_update(:id, :name, :description, :base_price, :sku, :slug, :collection_id, :is_active)";
         
         $this->db->query($sql);
         $this->db->bind(':id', $id);
@@ -81,10 +72,10 @@ class Product extends BaseModel {
     }
     
     /**
-     * DELETE - Xóa sản phẩm (soft delete)
+     * DELETE - Xóa sản phẩm (soft delete) (sử dụng SP)
      */
     public function delete($id) {
-        $sql = "UPDATE {$this->table} SET is_active = 0, updated_at = NOW() WHERE product_id = :id";
+        $sql = "CALL sp_product_delete(:id)";
         $this->db->query($sql);
         $this->db->bind(':id', $id);
         return $this->db->execute();
@@ -93,11 +84,10 @@ class Product extends BaseModel {
     // ============= BASIC UTILITY METHODS =============
     
     /**
-     * Lấy tất cả sản phẩm với pagination
+     * Lấy tất cả sản phẩm với pagination (sử dụng SP)
      */
     public function getAll($limit = 10, $offset = 0) {
-        $sql = "SELECT * FROM {$this->table} WHERE is_active = 1 
-                ORDER BY created_at DESC LIMIT :limit OFFSET :offset";
+        $sql = "CALL sp_product_getAll(:limit, :offset)";
         
         $this->db->query($sql);
         $this->db->bind(':limit', $limit);
@@ -106,33 +96,25 @@ class Product extends BaseModel {
     }
     
     /**
-     * Đếm tổng số sản phẩm
+     * Đếm tổng số sản phẩm (sử dụng SP)
      */
     public function count($conditions = []) {
-        $sql = "SELECT COUNT(*) as total FROM {$this->table} WHERE is_active = 1";
-        
-        if (!empty($conditions['category_id'])) {
-            $sql .= " AND EXISTS (SELECT 1 FROM product_categories pc WHERE pc.product_id = {$this->table}.product_id AND pc.category_id = :category_id)";
-        }
-        
+        $sql = "CALL sp_product_count(:category_id)";
         $this->db->query($sql);
         
-        if (!empty($conditions['category_id'])) {
-            $this->db->bind(':category_id', $conditions['category_id']);
-        }
+        $categoryId = $conditions['category_id'] ?? null;
+        $this->db->bind(':category_id', $categoryId);
         
         $result = $this->db->single();
         return $result ? (int)$result->total : 0;
     }
     
     /**
-     * UPDATE - Cập nhật stock từ variant
+     * UPDATE - Cập nhật stock từ variant (sử dụng SP)
      */
     public function updateStock($productId, $size, $color, $quantity) {
         try {
-            $sql = "UPDATE product_variants 
-                    SET stock = stock - :quantity 
-                    WHERE product_id = :product_id AND size = :size AND color = :color AND stock >= :quantity";
+            $sql = "CALL sp_product_updateStock(:product_id, :size, :color, :quantity)";
             $this->db->query($sql);
             $this->db->bind(':product_id', $productId);
             $this->db->bind(':size', $size);
@@ -148,53 +130,36 @@ class Product extends BaseModel {
     }
     
     /**
-     * READ - Kiểm tra stock từ variant
+     * READ - Kiểm tra stock từ variant (sử dụng SP)
+     * (Loại bỏ logic debug)
      */
     public function checkStock($productId, $size, $color, $quantity) {
-        // Debug: First check all variants for this product
-        $debugSql = "SELECT variant_id, size, color, stock, HEX(size) as size_hex, HEX(color) as color_hex FROM product_variants WHERE product_id = :product_id";
-        $this->db->query($debugSql);
-        $this->db->bind(':product_id', $productId);
-        $allVariants = $this->db->resultSet();
-        
-        error_log("CheckStock Debug - All variants for product $productId:");
-        foreach ($allVariants as $variant) {
-            error_log("  ID: {$variant->variant_id}, Size: '{$variant->size}' (hex: {$variant->size_hex}), Color: '{$variant->color}' (hex: {$variant->color_hex}), Stock: {$variant->stock}");
-        }
-        
-        error_log("CheckStock Debug - Looking for Size: '$size' (hex: " . bin2hex($size) . "), Color: '$color' (hex: " . bin2hex($color) . ")");
-        
-        $sql = "SELECT stock FROM product_variants 
-                WHERE product_id = :product_id 
-                AND BINARY size = BINARY :size  
-                AND BINARY color = BINARY :color";
+        $sql = "CALL sp_product_checkStock(:product_id, :size, :color)";
         $this->db->query($sql);
         $this->db->bind(':product_id', $productId);
         $this->db->bind(':size', $size);
         $this->db->bind(':color', $color);
         $result = $this->db->single();
         
-        // Debug logging
-        error_log("CheckStock Debug - Found stock: " . ($result ? $result->stock : 'NULL'));
-        
+        // Logic kiểm tra số lượng vẫn nằm ở PHP
         return $result && $result->stock >= $quantity;
     }
     
     /**
-     * READ - Lấy tất cả variants của sản phẩm
+     * READ - Lấy tất cả variants của sản phẩm (sử dụng SP)
      */
     public function getVariants($productId) {
-        $sql = "SELECT * FROM product_variants WHERE product_id = :product_id AND stock > 0 ORDER BY size, color";
+        $sql = "CALL sp_product_getVariants(:product_id)";
         $this->db->query($sql);
         $this->db->bind(':product_id', $productId);
         return $this->db->resultSet();
     }
     
     /**
-     * READ - Lấy total stock của sản phẩm
+     * READ - Lấy total stock của sản phẩm (sử dụng SP)
      */
     public function getTotalStock($productId) {
-        $sql = "SELECT SUM(stock) as total_stock FROM product_variants WHERE product_id = :product_id";
+        $sql = "CALL sp_product_getTotalStock(:product_id)";
         $this->db->query($sql);
         $this->db->bind(':product_id', $productId);
         $result = $this->db->single();
@@ -202,12 +167,10 @@ class Product extends BaseModel {
     }
 
     /**
-     * Lấy tất cả variants có sẵn cho sản phẩm
+     * Lấy tất cả variants có sẵn cho sản phẩm (sử dụng SP)
      */
     public function getAvailableVariants($productId) {
-        $sql = "SELECT * FROM product_variants 
-                WHERE product_id = :product_id AND stock > 0 
-                ORDER BY color ASC, size ASC";
+        $sql = "CALL sp_product_getAvailableVariants(:product_id)";
         $this->db->query($sql);
         $this->db->bind(':product_id', $productId);
         return $this->db->resultSet();
@@ -217,6 +180,7 @@ class Product extends BaseModel {
     
     /**
      * Generate slug từ tên sản phẩm
+     * (Phương thức này là logic PHP, không liên quan đến DB nên giữ nguyên)
      */
     private function generateSlug($name) {
         $slug = strtolower(trim($name));
@@ -224,5 +188,4 @@ class Product extends BaseModel {
         $slug = preg_replace('/-+/', '-', $slug);
         return trim($slug, '-');
     }
-
 }

@@ -95,16 +95,7 @@ $user = SessionHelper::getUser();
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="<?= url('/profile') ?>">
-                                <i class="fas fa-user me-2"></i>Thông tin cá nhân
-                            </a></li>
-                            <li><a class="dropdown-item" href="<?= url('/orders') ?>">
-                                <i class="fas fa-shopping-bag me-2"></i>Đơn hàng của tôi
-                            </a></li>
-                            <li><a class="dropdown-item" href="<?= url('/wishlist') ?>">
-                                <i class="fas fa-heart me-2"></i>Danh sách yêu thích
-                            </a></li>
-                            <li><a class="dropdown-item" href="<?= url('/settings') ?>">
-                                <i class="fas fa-cog me-2"></i>Cài đặt
+                                <i class="fas fa-user me-2"></i>Hồ sơ cá nhân
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item text-danger" href="#" onclick="logout()">

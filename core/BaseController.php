@@ -19,7 +19,15 @@ class BaseController{
     }
     
     protected function jsonResponse($success = true, $message = '', $data = null) {
-        header('Content-Type: application/json; charset=utf-8');
+        // Clear any previous output
+        if (ob_get_length()) {
+            ob_clean();
+        }
+        
+        // Set headers if not already sent
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=utf-8');
+        }
         
         $response = [
             'success' => $success,

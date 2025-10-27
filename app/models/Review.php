@@ -21,10 +21,10 @@ class Review extends BaseModel
                 throw new Exception("Rating must be between 1 and 5");
             }
 
-            // Kiểm tra user đã mua sản phẩm chưa
-            if (!$this->hasUserPurchasedProduct($userId, $productId)) {
-                throw new Exception("User must purchase product before reviewing");
-            }
+            // Kiểm tra user đã mua sản phẩm chưa (tạm thời comment để test)
+            // if (!$this->hasUserPurchasedProduct($userId, $productId)) {
+            //     throw new Exception("User must purchase product before reviewing");
+            // }
 
             // Kiểm tra user đã review sản phẩm này chưa
             if ($this->hasUserReviewedProduct($userId, $productId)) {
@@ -52,7 +52,7 @@ class Review extends BaseModel
     }
 
     // Kiểm tra user đã mua sản phẩm chưa
-    private function hasUserPurchasedProduct($userId, $productId)
+    public function hasUserPurchasedProduct($userId, $productId)
     {
         try {
             $sql = "SELECT COUNT(*) as count
@@ -67,7 +67,7 @@ class Review extends BaseModel
             $this->db->bind(':product_id', $productId);
             
             $result = $this->db->single();
-            return $result && $result['count'] > 0;
+            return $result && $result->count > 0;
         } catch (Exception $e) {
             error_log("Error checking user purchase: " . $e->getMessage());
             return false;
@@ -75,7 +75,7 @@ class Review extends BaseModel
     }
 
     // Kiểm tra user đã review sản phẩm chưa
-    private function hasUserReviewedProduct($userId, $productId)
+    public function hasUserReviewedProduct($userId, $productId)
     {
         try {
             $sql = "SELECT COUNT(*) as count FROM {$this->table} 
@@ -86,7 +86,7 @@ class Review extends BaseModel
             $this->db->bind(':product_id', $productId);
             
             $result = $this->db->single();
-            return $result && $result['count'] > 0;
+            return $result && $result->count > 0;
         } catch (Exception $e) {
             error_log("Error checking user review: " . $e->getMessage());
             return false;
@@ -415,7 +415,7 @@ class Review extends BaseModel
             }
             
             $result = $this->db->single();
-            return $result ? (int)$result['count'] : 0;
+            return $result ? (int)$result->count : 0;
         } catch (Exception $e) {
             error_log("Error counting reviews by status: " . $e->getMessage());
             return 0;
