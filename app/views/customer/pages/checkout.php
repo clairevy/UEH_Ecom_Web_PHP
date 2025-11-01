@@ -156,6 +156,10 @@ $userInfo = $data['userInfo'] ?? null;
             border-color: var(--gold);
         }
         
+        #bank_info, #store_info, #addressFields {
+            transition: all 0.3s ease;
+        }
+        
         .summary-card {
             position: sticky;
             top: 100px;
@@ -352,6 +356,104 @@ $userInfo = $data['userInfo'] ?? null;
             <!-- Checkout Form -->
             <div class="col-lg-8">
                 <form id="checkoutForm" class="needs-validation" novalidate>
+                    <!-- Payment and Delivery Method -->
+                    <div class="checkout-card mb-4">
+                        <div class="card-header">
+                            <h5 class="section-title">
+                                <i class="fas fa-credit-card"></i>
+                                Thanh toán và nhận hàng
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="payment-option p-3 rounded border mb-3">
+                                        <input class="form-check-input" type="radio" name="payment_delivery_method" 
+                                               id="bank_transfer_home" value="bank_transfer_home" checked>
+                                        <label class="form-check-label w-100" for="bank_transfer_home">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-money-check-alt text-success me-3 fs-4"></i>
+                                                <div>
+                                                    <strong>Chuyển khoản ngân hàng</strong>
+                                                    <small class="text-muted d-block">Nhận hàng tại nhà</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="payment-option p-3 rounded border mb-3">
+                                        <input class="form-check-input" type="radio" name="payment_delivery_method" 
+                                               id="cash_store" value="cash_store">
+                                        <label class="form-check-label w-100" for="cash_store">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-store text-warning me-3 fs-4"></i>
+                                                <div>
+                                                    <strong>Thanh toán tại cửa hàng</strong>
+                                                    <small class="text-muted d-block">Nhận hàng tại cửa hàng</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bank Information -->
+                            <div id="bank_info" class="mt-4">
+                                <div class="alert alert-info">
+                                    <h6 class="mb-3"><i class="fas fa-university me-2"></i>Thông tin chuyển khoản:</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="mb-1"><strong>Ngân hàng:</strong> Vietcombank</p>
+                                            <p class="mb-1"><strong>Số tài khoản:</strong> 1234567890</p>
+                                            <p class="mb-1"><strong>Chủ tài khoản:</strong> JEWELRY STORE</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-1"><strong>Nội dung chuyển khoản:</strong></p>
+                                            <code id="transfer_content">DH[MÃ ĐƠN HÀNG] [SỐ ĐIỆN THOẠI]</code>
+                                            <br><small class="text-muted">Ví dụ: DH001 0987654321</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Store Information -->
+                            <div id="store_info" class="mt-4" style="display: none;">
+                                <div class="alert alert-warning">
+                                    <h6 class="mb-3"><i class="fas fa-store me-2"></i>Thông tin cửa hàng:</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <p class="mb-1"><strong><i class="fas fa-map-marker-alt me-2"></i>Địa chỉ:</strong></p>
+                                                <p class="mb-1">123 Nguyễn Huệ, Phường Bến Nghé</p>
+                                                <p class="mb-1">Quận 1, TP. Hồ Chí Minh</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <p class="mb-1"><strong><i class="fas fa-phone me-2"></i>Hotline:</strong> 1900 1234</p>
+                                                <p class="mb-1"><strong><i class="fas fa-clock me-2"></i>Giờ mở cửa:</strong> 8:00 - 22:00 (T2-CN)</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="bg-light p-3 rounded">
+                                                <h6 class="text-success mb-2"><i class="fas fa-info-circle me-2"></i>Hướng dẫn nhận hàng:</h6>
+                                                <ul class="list-unstyled mb-0">
+                                                    <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Mang theo CMND/CCCD</li>
+                                                    <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Cung cấp <strong>số điện thoại</strong> hoặc <strong>email</strong> đã đặt hàng</li>
+                                                    <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Xuất trình mã đơn hàng (nếu có)</li>
+                                                    <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Kiểm tra sản phẩm trước khi thanh toán</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-info mt-3 mb-0">
+                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                        <strong>Lưu ý:</strong> Đơn hàng sẽ được giữ trong <strong>3 ngày</strong>. Vui lòng đến nhận hàng trong thời gian này.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Customer Information -->
                     <div class="checkout-card">
                         <div class="card-header">
@@ -383,24 +485,28 @@ $userInfo = $data['userInfo'] ?? null;
                                            placeholder="0123456789" required>
                                     <div class="invalid-feedback">Vui lòng nhập số điện thoại</div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold">Tỉnh/Thành phố <span class="text-danger">*</span></label>
-                                    <select class="form-select" name="province" required>
-                                        <option value="">Chọn tỉnh/thành phố</option>
-                                        <option value="hanoi">Hà Nội</option>
-                                        <option value="hcm">TP. Hồ Chí Minh</option>
-                                        <option value="danang">Đà Nẵng</option>
-                                        <option value="haiphong">Hải Phòng</option>
-                                        <option value="cantho">Cần Thơ</option>
-                                    </select>
-                                    <div class="invalid-feedback">Vui lòng chọn tỉnh/thành phố</div>
-                                </div>
-                                <div class="col-12 mb-3">
-                                    <label class="form-label fw-semibold">Địa chỉ giao hàng <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" name="address" rows="3" 
-                                              placeholder="Số nhà, tên đường, phường/xã, quận/huyện" 
-                                              required><?= $userInfo ? htmlspecialchars($userInfo->address ?? '') : '' ?></textarea>
-                                    <div class="invalid-feedback">Vui lòng nhập địa chỉ giao hàng</div>
+                                <!-- Address Fields - Will be shown/hidden based on delivery method -->
+                                <div id="addressFields">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-semibold">Tỉnh/Thành phố <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="province" name="province" required>
+                                            <option value="">Chọn tỉnh/thành phố...</option>
+                                        </select>
+                                        <div class="invalid-feedback">Vui lòng chọn tỉnh/thành phố</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-semibold">Phường/Xã <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="ward" name="ward" required>
+                                            <option value="">Chọn phường/xã...</option>
+                                        </select>
+                                        <div class="invalid-feedback">Vui lòng chọn phường/xã</div>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label fw-semibold">Số nhà, tên đường <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="street" 
+                                               placeholder="Ví dụ: 123 Nguyễn Du" required>
+                                        <div class="invalid-feedback">Vui lòng nhập số nhà và tên đường</div>
+                                    </div>
                                 </div>
                                 <div class="col-12 mb-3">
                                     <label class="form-label fw-semibold">Ghi chú đơn hàng</label>
@@ -411,52 +517,7 @@ $userInfo = $data['userInfo'] ?? null;
                         </div>
                     </div>
 
-                    <!-- Payment Method -->
-                    <div class="checkout-card">
-                        <div class="card-header">
-                            <h5 class="section-title">
-                                <i class="fas fa-credit-card"></i>
-                                Phương thức thanh toán
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <div class="form-check payment-method">
-                                        <input class="form-check-input" type="radio" name="payment_method" id="cod" value="cod" checked>
-                                        <label class="form-check-label w-100" for="cod">
-                                            <div class="payment-option p-3 border rounded-3">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="fas fa-truck text-success fs-4 me-3"></i>
-                                                    <div>
-                                                        <div class="fw-bold">Thanh toán khi nhận hàng</div>
-                                                        <small class="text-muted">Trả tiền mặt khi nhận hàng</small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <div class="form-check payment-method">
-                                        <input class="form-check-input" type="radio" name="payment_method" id="bank_transfer" value="bank_transfer">
-                                        <label class="form-check-label w-100" for="bank_transfer">
-                                            <div class="payment-option p-3 border rounded-3">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="fas fa-university text-primary fs-4 me-3"></i>
-                                                    <div>
-                                                        <div class="fw-bold">Chuyển khoản ngân hàng</div>
-                                                        <small class="text-muted">Chuyển khoản trước khi giao hàng</small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
 
                     <!-- Order Notes -->
                     <div class="checkout-card">
@@ -511,7 +572,7 @@ $userInfo = $data['userInfo'] ?? null;
                                         ?>
                                              <img src="<?php echo $imageUrl; ?>" 
                                               alt="<?php echo htmlspecialchars($item['product']->name); ?>" 
-                                              class="product-image">
+                                             class="product-image">
                                         <div class="flex-grow-1">
                                             <div class="fw-semibold mb-1"><?= htmlspecialchars($item['product']->name) ?></div>
                                             <div class="text-muted small mb-2">
@@ -648,27 +709,148 @@ $userInfo = $data['userInfo'] ?? null;
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('checkoutForm');
-    const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
-    const bankDetails = document.getElementById('bank-details');
-    const qrDetails = document.getElementById('qr-details');
+    const deliveryMethods = document.querySelectorAll('input[name="payment_delivery_method"]');
+    const bankInfo = document.getElementById('bank_info');
+    const storeInfo = document.getElementById('store_info');
+    const addressFields = document.getElementById('addressFields');
     const loadingModalEl = document.getElementById('loadingModal');
     const loadingModal = loadingModalEl ? new bootstrap.Modal(loadingModalEl) : null;
 
-    // Payment method change handler (guard elements exist)
-    paymentMethods.forEach(method => {
-        method.addEventListener('change', function() {
-            if (bankDetails) bankDetails.classList.add('d-none');
-            if (qrDetails) qrDetails.classList.add('d-none');
+    // Province and Ward selects
+    const provinceSelect = document.getElementById('province');
+    const wardSelect = document.getElementById('ward');
+    const phoneInput = document.querySelector('input[name="phone"]');
+    const transferContent = document.getElementById('transfer_content');
 
-            if (this.value === 'bank_transfer' && bankDetails) {
-                bankDetails.classList.remove('d-none');
-            } else if (this.value === 'qr_code' && qrDetails) {
-                qrDetails.classList.remove('d-none');
+    // Load provinces on page load
+    loadProvinces();
+
+    // Province change handler
+    if (provinceSelect) {
+        provinceSelect.addEventListener('change', function() {
+            const provinceCode = this.value;
+            if (provinceCode) {
+                loadWards(provinceCode);
+            } else {
+                wardSelect.innerHTML = '<option value="">Chọn phường/xã...</option>';
             }
+        });
+    }
+
+    // Phone input change handler - update transfer content
+    if (phoneInput && transferContent) {
+        phoneInput.addEventListener('input', function() {
+            const phone = this.value.trim();
+            if (phone) {
+                transferContent.textContent = `DH[MÃ ĐƠN HÀNG] ${phone}`;
+            } else {
+                transferContent.textContent = 'DH[MÃ ĐƠN HÀNG] [SỐ ĐIỆN THOẠI]';
+            }
+        });
+    }
+
+    // Delivery method change handler
+    deliveryMethods.forEach(method => {
+        method.addEventListener('change', function() {
+            console.log('Payment method changed to:', this.value);
+            toggleDeliveryMethod(this.value);
         });
     });
 
-    // Form submission handler (guard form exists)
+    // Initialize with default selection
+    const checkedMethod = document.querySelector('input[name="payment_delivery_method"]:checked');
+    if (checkedMethod) {
+        toggleDeliveryMethod(checkedMethod.value);
+    }
+
+    function toggleDeliveryMethod(method) {
+        console.log('Toggling delivery method:', method);
+        console.log('Bank info element:', bankInfo);
+        console.log('Store info element:', storeInfo);
+        console.log('Address fields element:', addressFields);
+        
+        if (method === 'bank_transfer_home') {
+            // Show bank info and address fields, hide store info
+            if (bankInfo) {
+                bankInfo.style.display = 'block';
+                console.log('Showing bank info');
+            }
+            if (storeInfo) {
+                storeInfo.style.display = 'none';
+                console.log('Hiding store info');
+            }
+            if (addressFields) {
+                addressFields.style.display = 'block';
+                console.log('Showing address fields');
+                // Make address fields required
+                addressFields.querySelectorAll('input, select').forEach(field => {
+                    field.required = true;
+                });
+            }
+        } else if (method === 'cash_store') {
+            // Show store info, hide bank info and address fields
+            if (bankInfo) {
+                bankInfo.style.display = 'none';
+                console.log('Hiding bank info');
+            }
+            if (storeInfo) {
+                storeInfo.style.display = 'block';
+                console.log('Showing store info');
+            }
+            if (addressFields) {
+                addressFields.style.display = 'none';
+                console.log('Hiding address fields');
+                // Remove required from address fields
+                addressFields.querySelectorAll('input, select').forEach(field => {
+                    field.required = false;
+                });
+            }
+        }
+    }
+
+    async function loadProvinces() {
+        try {
+            const response = await fetch('<?= url('/api/locations/provinces') ?>');
+            const data = await response.json();
+            
+            if (data.success && data.data) {
+                provinceSelect.innerHTML = '<option value="">Chọn tỉnh/thành phố...</option>';
+                data.data.forEach(province => {
+                    const option = document.createElement('option');
+                    option.value = province.code;
+                    option.textContent = province.name;
+                    provinceSelect.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Error loading provinces:', error);
+        }
+    }
+
+    async function loadWards(provinceCode) {
+        try {
+            wardSelect.innerHTML = '<option value="">Đang tải...</option>';
+            const response = await fetch(`<?= url('/api/locations/wards') ?>?province=${provinceCode}`);
+            const data = await response.json();
+            
+            if (data.success && data.data) {
+                wardSelect.innerHTML = '<option value="">Chọn phường/xã...</option>';
+                data.data.forEach(ward => {
+                    const option = document.createElement('option');
+                    option.value = ward.code;
+                    option.textContent = ward.name;
+                    wardSelect.appendChild(option);
+                });
+            } else {
+                wardSelect.innerHTML = '<option value="">Không có dữ liệu</option>';
+            }
+        } catch (error) {
+            console.error('Error loading wards:', error);
+            wardSelect.innerHTML = '<option value="">Lỗi tải dữ liệu</option>';
+        }
+    }
+
+    // Form submission handler
     if (form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -686,7 +868,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Prepare form data
             const formData = new FormData(form);
 
-            // Submit checkout (use url helper)
+            // Submit checkout
             fetch('<?= url('/checkout/process') ?>', {
                 method: 'POST',
                 body: formData,
@@ -774,6 +956,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 </body>
 </html>
