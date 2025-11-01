@@ -1,35 +1,60 @@
 <?php
 /**
  * URL Helper Functions
- * Đảm bảo tất cả URLs đều có prefix đúng cho XAMPP
+ * Tự động tạo URL chính xác bất kể tên thư mục gốc là gì.
  */
 
 /**
- * Generate base URL for the application
+ * Tạo base URL gốc cho ứng dụng một cách tự động.
+ * Hàm này sẽ luôn trả về đường dẫn đúng, ví dụ: '/Ecom_website' hoặc '/ten_folder_khac'
+ * hoặc rỗng '' nếu dự án nằm ngay trong thư mục gốc htdocs.
+ * @return string
  */
 function getBaseUrl() {
-    // For XAMPP, always include project folder name
-    return '/Ecom_website';
+    // Lấy đường dẫn của script đang chạy (ví dụ: /Ecom_website/index.php)
+    $script_name = $_SERVER['SCRIPT_NAME'];
+
+    // Lấy tên thư mục chứa script đó (ví dụ: /Ecom_website)
+    $base_path = dirname($script_name);
+
+    // Xử lý trường hợp đặc biệt khi dự án nằm ở thư mục gốc của web server (htdocs)
+    // Trong trường hợp này, dirname sẽ trả về '/' hoặc '\', ta cần đổi nó thành chuỗi rỗng.
+    if ($base_path === '/' || $base_path === '\\') {
+        $base_path = '';
+    }
+    
+    return $base_path;
 }
 
 /**
- * Generate full URL from relative path
+ * Tạo URL đầy đủ từ một đường dẫn tương đối.
+ * @param string $path Đường dẫn con, ví dụ: 'products/show/1'
+ * @return string URL hoàn chỉnh, ví dụ: /Ecom_website/products/show/1
  */
 function url($path = '') {
     $base = getBaseUrl();
+    // Đảm bảo $path không có dấu / ở đầu để tránh lỗi nối chuỗi
     $path = ltrim($path, '/');
+    
+    // Nếu path rỗng thì chỉ trả về base, ngược lại thì nối thêm dấu /
     return $base . ($path ? '/' . $path : '');
 }
 
 /**
- * Generate asset URL (CSS, JS, Images)
+ * Tạo URL cho các file tài nguyên (CSS, JS, Images, etc.).
+ * @param string $path Đường dẫn file trong thư mục public/assets, ví dụ: 'css/style.css'
+ * @return string URL hoàn chỉnh đến file tài nguyên.
  */
 function asset($path) {
+    // Bạn có thể đổi 'public/assets' thành thư mục chứa tài nguyên của bạn, ví dụ 'public'
     return url('public/assets/' . ltrim($path, '/'));
 }
 
 /**
- * Generate route URL with clean paths
+ * Tạo URL theo route đã định nghĩa, hỗ trợ clean URLs.
+ * @param string $route Tên route, ví dụ: 'product'
+ * @param array $params Mảng các tham số cho URL, ví dụ: ['id' => 123]
+ * @return string URL hoàn chỉnh.
  */
 function route($route, $params = []) {
     // Convert old customer routes to clean URLs
@@ -52,6 +77,8 @@ function route($route, $params = []) {
     
     $url = url($route);
     if (!empty($params)) {
+        // Nối các tham số vào URL, ví dụ: /product?id=123
+        // Nếu bạn muốn URL dạng /product/123 thì cần sửa logic ở đây và trong Router.
         $url .= '?' . http_build_query($params);
     }
     return $url;

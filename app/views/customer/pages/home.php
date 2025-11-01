@@ -55,12 +55,12 @@
                 <div class="hero-slide">
                     <div class="row h-100 align-items-center">
                         <div class="col-md-6">
-                            <div class="hero-content">
+                            <!-- <div class="hero-content">
                                 <h1 class="hero-title">Adorn yourself</h1>
                                 <h2 class="hero-subtitle">IN BRILLIANCE</h2>
                                 <p class="hero-text">Discover our exquisite collection of handcrafted jewelry designed to shine as bright as you do.</p>
                                 <button class="btn btn-gold">DISCOVER MORE</button>
-                            </div>
+                            </div> -->
                         </div>
                         <div class="col-md-6">
                             <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&h=600&fit=crop" alt="Jewelry 1" class="hero-image">
@@ -72,12 +72,12 @@
                 <div class="hero-slide">
                     <div class="row h-100 align-items-center">
                         <div class="col-md-6">
-                            <div class="hero-content">
+                            <!-- <div class="hero-content">
                                 <h1 class="hero-title">Elegant</h1>
                                 <h2 class="hero-subtitle">GOLD COLLECTION</h2>
                                 <p class="hero-text">Timeless pieces crafted with precision and passion for the modern woman.</p>
                                 <button class="btn btn-gold">EXPLORE NOW</button>
-                            </div>
+                            </div> -->
                         </div>
                         <div class="col-md-6">
                             <img src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&h=600&fit=crop" alt="Jewelry 2" class="hero-image">
@@ -89,12 +89,12 @@
                 <div class="hero-slide">
                     <div class="row h-100 align-items-center">
                         <div class="col-md-6">
-                            <div class="hero-content">
+                            <!-- <div class="hero-content">
                                 <h1 class="hero-title">Luxury</h1>
                                 <h2 class="hero-subtitle">DIAMOND RINGS</h2>
                                 <p class="hero-text">Celebrate life's precious moments with our stunning diamond collection.</p>
                                 <button class="btn btn-gold">SHOP RINGS</button>
-                            </div>
+                            </div> -->
                         </div>
                         <div class="col-md-6">
                             <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&h=600&fit=crop" alt="Jewelry 3" class="hero-image">
@@ -106,12 +106,12 @@
                 <div class="hero-slide">
                     <div class="row h-100 align-items-center">
                         <div class="col-md-6">
-                            <div class="hero-content">
+                            <!-- <div class="hero-content">
                                 <h1 class="hero-title">Sophisticated</h1>
                                 <h2 class="hero-subtitle">NECKLACES</h2>
                                 <p class="hero-text">Grace your neckline with our carefully curated necklace collection.</p>
                                 <button class="btn btn-gold">VIEW COLLECTION</button>
-                            </div>
+                            </div> -->
                         </div>
                         <div class="col-md-6">
                             <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&h=600&fit=crop" alt="Jewelry 4" class="hero-image">
@@ -123,12 +123,12 @@
                 <div class="hero-slide">
                     <div class="row h-100 align-items-center">
                         <div class="col-md-6">
-                            <div class="hero-content">
+                            <!-- <div class="hero-content">
                                 <h1 class="hero-title">Exquisite</h1>
                                 <h2 class="hero-subtitle">EARRINGS</h2>
                                 <p class="hero-text">Complete your look with our stunning earring designs.</p>
                                 <button class="btn btn-gold">DISCOVER EARRINGS</button>
-                            </div>
+                            </div> -->
                         </div>
                         <div class="col-md-6">
                             <img src="https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=600&h=600&fit=crop" alt="Jewelry 5" class="hero-image">

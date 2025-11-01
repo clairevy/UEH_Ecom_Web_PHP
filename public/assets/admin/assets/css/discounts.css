@@ -1,0 +1,11 @@
+/* Styles extracted from discounts.html */
+.discount-code {
+    font-family: 'Courier New', monospace;
+    background-color: #f8f9fa;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    border: 1px dashed #dee2e6;
+}
+.usage-progress {
+    height: 8px;
+}

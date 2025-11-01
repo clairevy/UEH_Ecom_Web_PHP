@@ -5,17 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $title ?? 'Thông tin cá nhân'; ?> - Jewelry Store</title>
     
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <html xmlns:th="http://www.thymeleaf.org">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="<?= asset('css/css.css?v=' . time()) ?>" rel="stylesheet">  
     
     <style>
+        :root {
+            --gold: #d4af37;
+            --dark-gold: #b8941f;
+            --light-gold: #f0e68c;
+            --cream: #f8f6f0;
+            --dark-brown: #3a2f28;
+            --light-gray: #f5f5f5;
+        }
+        
         .profile-sidebar {
-            background: #f8f9fa;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 30px 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 25px rgba(212, 175, 55, 0.2);
+            border: 1px solid rgba(212, 175, 55, 0.1);
         }
         
         .profile-avatar {
@@ -23,61 +36,87 @@
             height: 120px;
             border-radius: 50%;
             object-fit: cover;
-            border: 4px solid #667eea;
+            border: 4px solid var(--gold);
             cursor: pointer;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
         }
         
         .profile-avatar:hover {
             transform: scale(1.05);
+            border-color: var(--dark-gold);
         }
         
         .profile-content {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 25px rgba(212, 175, 55, 0.2);
+            border: 1px solid rgba(212, 175, 55, 0.1);
         }
         
         .nav-pills .nav-link {
             border-radius: 10px;
             margin-bottom: 10px;
             transition: all 0.3s ease;
+            color: var(--dark-brown);
+            font-weight: 500;
+        }
+        
+        .nav-pills .nav-link:hover {
+            background-color: var(--cream);
+            color: var(--gold);
         }
         
         .nav-pills .nav-link.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gold);
+            color: white;
+        }
+        
+        .nav-pills .nav-link.active:hover {
+            background: var(--dark-gold);
+            color: white;
         }
         
         .form-control {
             border-radius: 10px;
             border: 2px solid #e9ecef;
             padding: 12px 15px;
-            transition: border-color 0.3s ease;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
         }
         
         .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            border-color: var(--gold);
+            box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+            background: white;
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gold);
             border: none;
             border-radius: 10px;
             padding: 12px 30px;
             font-weight: 600;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         .btn-primary:hover {
+            background: var(--dark-gold);
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
         }
         
         .alert {
             border-radius: 10px;
             border: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
         .upload-overlay {
@@ -86,7 +125,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.7);
+            background: rgba(212, 175, 55, 0.7);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -100,19 +139,40 @@
             opacity: 1;
         }
         
-        .stats-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            margin-bottom: 20px;
+        .badge.bg-success {
+            background-color: var(--gold) !important;
         }
         
-        .stats-number {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 5px;
+        .text-primary {
+            color: var(--gold) !important;
+        }
+        
+        h5.fw-bold {
+            color: var(--dark-brown);
+        }
+        
+        .form-label {
+            color: var(--dark-brown);
+        }
+        
+        select.form-control {
+            background-image: linear-gradient(45deg, transparent 50%, var(--dark-brown) 50%), 
+                            linear-gradient(135deg, var(--dark-brown) 50%, transparent 50%);
+            background-position: calc(100% - 20px) calc(1em + 2px), 
+                               calc(100% - 15px) calc(1em + 2px);
+            background-size: 5px 5px, 5px 5px;
+            background-repeat: no-repeat;
+            appearance: none;
+        }
+        
+        select.form-control:focus {
+            background-image: linear-gradient(45deg, var(--gold) 50%, transparent 50%), 
+                            linear-gradient(135deg, transparent 50%, var(--gold) 50%);
+        }
+        
+        body {
+            background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.7)),
+                        url("https://images.unsplash.com/photo-1608042314453-ae338d80c427") center/cover fixed;
         }
         
         .wishlist-card {

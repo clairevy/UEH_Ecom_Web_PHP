@@ -487,11 +487,6 @@ $userInfo = $data['userInfo'] ?? null;
             </div>
         <?php endif; ?>
     </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- Loading Modal -->
@@ -507,7 +502,6 @@ $userInfo = $data['userInfo'] ?? null;
         </div>
     </div>
 </div>
-</body>
 <style>
 .payment-method .form-check-input:checked + .form-check-label .payment-option {
     border-color: #0d6efd !important;
@@ -548,102 +542,100 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('checkoutForm');
     const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
     const bankDetails = document.getElementById('bank-details');
-    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    const qrDetails = document.getElementById('qr-details');
+    const loadingModalEl = document.getElementById('loadingModal');
+    const loadingModal = loadingModalEl ? new bootstrap.Modal(loadingModalEl) : null;
 
-    // Payment method change handler
+    // Payment method change handler (guard elements exist)
     paymentMethods.forEach(method => {
         method.addEventListener('change', function() {
-            // Hide all payment details
-            bankDetails.classList.add('d-none');
-            qrDetails.classList.add('d-none');
+            if (bankDetails) bankDetails.classList.add('d-none');
+            if (qrDetails) qrDetails.classList.add('d-none');
 
-            // Show relevant payment details
-            if (this.value === 'bank_transfer') {
+            if (this.value === 'bank_transfer' && bankDetails) {
                 bankDetails.classList.remove('d-none');
-            } else if (this.value === 'qr_code') {
+            } else if (this.value === 'qr_code' && qrDetails) {
                 qrDetails.classList.remove('d-none');
             }
         });
     });
 
-    // Form submission handler
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
+    // Form submission handler (guard form exists)
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
 
-        // Validate form
-        if (!form.checkValidity()) {
-            e.stopPropagation();
-            form.classList.add('was-validated');
-            return;
-        }
-
-        // Show loading modal
-        loadingModal.show();
-
-        // Prepare form data
-        const formData = new FormData(form);
-
-        // Submit checkout
-        fetch('/Ecom_website/checkout/process', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+            // Validate form
+            if (!form.checkValidity()) {
+                e.stopPropagation();
+                form.classList.add('was-validated');
+                return;
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            loadingModal.hide();
-            
-            if (data.success) {
-                // Show success message and redirect
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Đặt hàng thành công!',
-                    text: 'Cảm ơn bạn đã đặt hàng. Chúng tôi sẽ liên hệ với bạn sớm nhất.',
-                    confirmButtonText: 'Xem đơn hàng',
-                    confirmButtonColor: '#28a745'
-                }).then((result) => {
-                    if (data.data && data.data.redirect) {
-                        window.location.href = data.data.redirect;
-                    } else {
-                        window.location.href = '/Ecom_website/';
+
+            // Show loading modal if available
+            if (loadingModal) loadingModal.show();
+
+            // Prepare form data
+            const formData = new FormData(form);
+
+            // Submit checkout (use url helper)
+            fetch('<?= url('/checkout/process') ?>', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (loadingModal) loadingModal.hide();
+
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đặt hàng thành công!',
+                        text: 'Cảm ơn bạn đã đặt hàng. Chúng tôi sẽ liên hệ với bạn sớm nhất.',
+                        confirmButtonText: 'Xem đơn hàng',
+                        confirmButtonColor: '#0d6efd',
+                        allowOutsideClick: false
+                    }).then(() => {
+                        if (data.data && data.data.redirect) {
+                            window.location.href = data.data.redirect;
+                        } else {
+                            window.location.href = '<?= url('/') ?>';
+                        }
+                    });
+                } else {
+                    let errorMessage = data.message || 'Có lỗi xảy ra khi đặt hàng';
+                    if (data.data && typeof data.data === 'object') {
+                        errorMessage = 'Vui lòng kiểm tra lại thông tin:\n';
+                        Object.values(data.data).forEach(error => {
+                            errorMessage += '• ' + error + '\n';
+                        });
                     }
-                });
-            } else {
-                // Show error message
-                let errorMessage = data.message || 'Có lỗi xảy ra khi đặt hàng';
-                
-                if (data.data && typeof data.data === 'object') {
-                    errorMessage += ':\n';
-                    Object.values(data.data).forEach(error => {
-                        errorMessage += '• ' + error + '\n';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi đặt hàng',
+                        text: errorMessage,
+                        confirmButtonText: 'Thử lại',
+                        confirmButtonColor: '#dc3545'
                     });
                 }
-                
+            })
+            .catch(error => {
+                if (loadingModal) loadingModal.hide();
+                console.error('Error:', error);
                 Swal.fire({
                     icon: 'error',
-                    title: 'Lỗi đặt hàng',
-                    text: errorMessage,
+                    title: 'Lỗi kết nối',
+                    text: 'Không thể kết nối đến máy chủ. Vui lòng thử lại.',
                     confirmButtonText: 'Thử lại',
                     confirmButtonColor: '#dc3545'
                 });
-            }
-        })
-        .catch(error => {
-            loadingModal.hide();
-            console.error('Error:', error);
-            
-            Swal.fire({
-                icon: 'error',
-                title: 'Lỗi kết nối',
-                text: 'Không thể kết nối đến máy chủ. Vui lòng thử lại.',
-                confirmButtonText: 'Thử lại',
-                confirmButtonColor: '#dc3545'
             });
-    //Footer
         });
-    }); 
+    }
+});
 </script>
     <footer class="bg-dark text-white py-5 mt-5">
         <div class="container">
@@ -672,141 +664,8 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </footer>
 
-</html>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('checkoutForm');
-            
-            // Form submission
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                if (!form.checkValidity()) {
-                    e.stopPropagation();
-                    form.classList.add('was-validated');
-                    
-                    // Scroll to first invalid field
-                    const firstInvalid = form.querySelector(':invalid');
-                    if (firstInvalid) {
-                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        firstInvalid.focus();
-                    }
-                    return;
-                }
-                
-                // Show loading
-                Swal.fire({
-                    title: 'Đang xử lý đơn hàng...',
-                    text: 'Vui lòng không tắt trang web',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    showConfirmButton: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-                
-                // Submit form
-                const formData = new FormData(form);
-                
-                fetch('<?= url('/checkout/process') ?>', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Show success message and redirect
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Đặt hàng thành công!',
-                            text: 'Cảm ơn bạn đã đặt hàng. Chúng tôi sẽ liên hệ với bạn sớm nhất.',
-                            confirmButtonText: 'Xem đơn hàng',
-                            confirmButtonColor: '#0d6efd',
-                            allowOutsideClick: false
-                        }).then((result) => {
-                            if (data.data && data.data.redirect) {
-                                window.location.href = data.data.redirect;
-                            } else {
-                                window.location.href = '<?= url('/') ?>';
-                            }
-                        });
-                    } else {
-                        // Show error message
-                        let errorMessage = data.message || 'Có lỗi xảy ra khi đặt hàng';
-                        
-                        if (data.data && typeof data.data === 'object') {
-                            errorMessage = 'Vui lòng kiểm tra lại thông tin:\n';
-                            Object.values(data.data).forEach(error => {
-                                errorMessage += '• ' + error + '\n';
-                            });
-                        }
-                        
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Lỗi đặt hàng',
-                            text: errorMessage,
-                            confirmButtonText: 'Thử lại',
-                            confirmButtonColor: '#dc3545'
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Lỗi kết nối',
-                        text: 'Không thể kết nối đến máy chủ. Vui lòng thử lại.',
-                        confirmButtonText: 'Thử lại',
-                        confirmButtonColor: '#dc3545'
-                    });
-                });
-            });
-
-            // Form validation styling
-            const inputs = form.querySelectorAll('input, textarea, select');
-            inputs.forEach(input => {
-                input.addEventListener('blur', function() {
-                    if (this.checkValidity()) {
-                        this.classList.remove('is-invalid');
-                        this.classList.add('is-valid');
-                    } else {
-                        this.classList.remove('is-valid');
-                        this.classList.add('is-invalid');
-                    }
-                });
-                
-                input.addEventListener('input', function() {
-                    if (this.classList.contains('is-invalid') && this.checkValidity()) {
-                        this.classList.remove('is-invalid');
-                        this.classList.add('is-valid');
-                    }
-                });
-            });
-            
-            // Payment method selection animation
-            const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
-            paymentMethods.forEach(method => {
-                method.addEventListener('change', function() {
-                    // Remove active state from all
-                    document.querySelectorAll('.payment-option').forEach(option => {
-                        option.style.transform = 'scale(1)';
-                    });
-                    
-                    // Add active state to selected
-                    if (this.checked) {
-                        const selectedOption = this.parentElement.querySelector('.payment-option');
-                        selectedOption.style.transform = 'scale(1.02)';
-                        selectedOption.style.transition = 'transform 0.2s ease';
-                    }
-                });
-            });
-        });
-    </script>
+</body>
+</html>
