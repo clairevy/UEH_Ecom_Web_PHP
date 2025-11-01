@@ -3,9 +3,6 @@
 if (!function_exists('url')) {
     require_once __DIR__ . '/../../../../helpers/url_helper.php';
 }
-
-// Include session helper for login checking
-require_once __DIR__ . '/../../../../helpers/session_helper.php';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -55,25 +52,25 @@ require_once __DIR__ . '/../../../../helpers/session_helper.php';
             <!-- Product Images -->
             <div class="col-lg-6">
                 <div class="product-images">
-                    <div class="row">
+                    <!-- Desktop Layout -->
+                    <div class="row desktop-gallery">
                         <div class="col-2">
                             <div class="thumbnail-container">
                                 <?php if (isset($product->images) && !empty($product->images)): ?>
                                     <?php foreach ($product->images as $index => $image): ?>
-                                        <div class="thumbnail-item <?= $index === 0 ? 'active' : '' ?>" onclick="changeImage(this, '<?= $image->file_path ?>')">
+                                        <div class="thumbnail-item <?= $index === 0 ? 'active' : '' ?>" onclick="changeImage(this, '<?= $image->file_path ?>', <?= $index ?>)">
                                             <img src="<?= $image->file_path ?>" alt="<?= htmlspecialchars($image->alt_text ?: $product->name) ?>">
                                         </div>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <!-- Fallback images if no images in database -->
-                                    <div class="thumbnail-item active" onclick="changeImage(this, 'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=500')">
+                                    <div class="thumbnail-item active" onclick="changeImage(this, 'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=500', 0)">
                                         <img src="https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=100" alt="Thumbnail 1">
                                     </div>
-                                    <div class="thumbnail-item" onclick="changeImage(this, 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500')">
+                                    <div class="thumbnail-item" onclick="changeImage(this, 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500', 1)">
                                         <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=100" alt="Thumbnail 2">
                                     </div>
-
-                                    <div class="thumbnail-item" onclick="changeImage(this, 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500')">
+                                    <div class="thumbnail-item" onclick="changeImage(this, 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500', 2)">
                                         <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=100" alt="Thumbnail 3">
                                     </div>
                                 <?php endif; ?>
@@ -85,6 +82,60 @@ require_once __DIR__ . '/../../../../helpers/session_helper.php';
                                      src="<?= isset($product->primary_image) ? $product->primary_image->file_path : (isset($product->images[0]) ? $product->images[0]->file_path : 'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=500') ?>" 
                                      alt="<?= isset($product) ? htmlspecialchars($product->name) : 'Product Image' ?>">
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Slider Layout -->
+                    <div class="mobile-gallery">
+                        <div class="gallery-slider">
+                            <?php
+                            // Ensure we have the product images array
+                            $productImages = [];
+                            if (isset($product->images) && !empty($product->images)) {
+                                $productImages = $product->images;
+                            } elseif (isset($product->primary_image)) {
+                                $productImages[] = $product->primary_image;
+                            }
+
+                            // If we still have no images, use defaults
+                            if (empty($productImages)) {
+                                $productImages = [
+                                    (object)['file_path' => 'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=500', 'alt_text' => 'Default Product Image 1'],
+                                    (object)['file_path' => 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500', 'alt_text' => 'Default Product Image 2'],
+                                    (object)['file_path' => 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500', 'alt_text' => 'Default Product Image 3']
+                                ];
+                            }
+
+                            // Generate slider slides
+                            foreach ($productImages as $index => $image):
+                                $isActive = $index === 0 ? 'active' : '';
+                                $altText = isset($image->alt_text) && !empty($image->alt_text) 
+                                    ? htmlspecialchars($image->alt_text) 
+                                    : htmlspecialchars($product->name ?? 'Product Image');
+                            ?>
+                                <div class="gallery-slide <?= $isActive ?>" data-index="<?= $index ?>">
+                                    <img src="<?= $image->file_path ?>" 
+                                         alt="<?= $altText ?>"
+                                         loading="lazy">
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        
+                        <!-- Gallery Navigation -->
+                        <button class="gallery-nav prev" onclick="prevSlide()" aria-label="Previous image">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="gallery-nav next" onclick="nextSlide()" aria-label="Next image">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+
+                        <!-- Gallery Dots -->
+                        <div class="gallery-dots">
+                            <?php foreach ($productImages as $index => $image): ?>
+                                <button class="gallery-dot <?= $index === 0 ? 'active' : '' ?>" 
+                                        onclick="goToSlide(<?= $index ?>)"
+                                        aria-label="Go to image <?= $index + 1 ?>"></button>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 </div>
@@ -142,15 +193,30 @@ require_once __DIR__ . '/../../../../helpers/session_helper.php';
                     <?php endif; ?>
                 </div>
 
-                <div class="quantity-selector">
-                    <input type="number" class="quantity-input" value="1" min="1" id="quantityInput">
-                    
-                    <div class="action-buttons mt-3">
-                        <button class="btn-add-to-cart me-3" onclick="addToCart()" id="addToCartBtn">
-                            <i class="fas fa-shopping-cart me-2"></i>Thêm vào giỏ hàng
-                        </button>
-                        <button class="btn-buy" onclick="buyNow()" id="buyNowBtn">
-                            <i class="fas fa-bolt me-2"></i>Mua Ngay
+                <!-- Product action row: quantity | add to cart | buy now -->
+                <div class="product-actions-wrapper">
+                    <div class="product-actions d-flex flex-wrap w-100">
+                        <div class="quantity-cart-row d-flex align-items-center gap-2">
+                            <div class="quantity-box">
+                                <div class="quantity-controls d-flex align-items-center">
+                                    <button class="quantity-btn minus" onclick="updateQuantity('decrease')">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <input type="number" class="quantity-input form-control" value="1" min="1" id="quantityInput">
+                                    <button class="quantity-btn plus" onclick="updateQuantity('increase')">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button class="btn-add-to-cart d-flex align-items-center justify-content-center flex-grow-1" onclick="addToCart()" id="addToCartBtn">
+                                <i class="fas fa-shopping-cart me-2"></i>
+                                <span class="btn-text">Thêm vào giỏ hàng</span>
+                            </button>
+                        </div>
+
+                        <button class="btn-buy d-flex align-items-center justify-content-center w-100 mt-2" onclick="buyNow()" id="buyNowBtn">
+                            <span>Mua Ngay</span>
                         </button>
                     </div>
                 </div>
@@ -299,69 +365,62 @@ require_once __DIR__ . '/../../../../helpers/session_helper.php';
                 <!-- Add Review Form -->
                 <div class="mt-5">
                     <h5>Viết đánh giá của bạn</h5>
-                    
-                    <?php if (SessionHelper::isLoggedIn()): ?>
-                        <!-- Form cho user đã đăng nhập -->
-                        <div class="card">
-                            <div class="card-body">
-                                <form id="reviewForm" class="needs-validation" novalidate>
-                                    <input type="hidden" id="productId" value="<?= $data['product']->product_id ?>">
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label">Đánh giá của bạn *</label>
-                                        <div class="rating-input">
-                                            <input type="radio" name="rating" value="5" id="star5" required>
-                                            <label for="star5"><i class="fas fa-star"></i></label>
-                                            <input type="radio" name="rating" value="4" id="star4" required>
-                                            <label for="star4"><i class="fas fa-star"></i></label>
-                                            <input type="radio" name="rating" value="3" id="star3" required>
-                                            <label for="star3"><i class="fas fa-star"></i></label>
-                                            <input type="radio" name="rating" value="2" id="star2" required>
-                                            <label for="star2"><i class="fas fa-star"></i></label>
-                                            <input type="radio" name="rating" value="1" id="star1" required>
-                                            <label for="star1"><i class="fas fa-star"></i></label>
-                                        </div>
-                                        <div class="invalid-feedback">Vui lòng chọn số sao đánh giá.</div>
+                    <div class="card">
+                        <div class="card-body">
+                            <form id="reviewForm" class="needs-validation" novalidate>
+                                <input type="hidden" id="productId" value="<?= $data['product']->product_id ?>">
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Đánh giá của bạn *</label>
+                                    <div class="rating-input">
+                                        <input type="radio" name="rating" value="5" id="star5">
+                                        <label for="star5"><i class="fas fa-star"></i></label>
+                                        <input type="radio" name="rating" value="4" id="star4">
+                                        <label for="star4"><i class="fas fa-star"></i></label>
+                                        <input type="radio" name="rating" value="3" id="star3">
+                                        <label for="star3"><i class="fas fa-star"></i></label>
+                                        <input type="radio" name="rating" value="2" id="star2">
+                                        <label for="star2"><i class="fas fa-star"></i></label>
+                                        <input type="radio" name="rating" value="1" id="star1">
+                                        <label for="star1"><i class="fas fa-star"></i></label>
                                     </div>
-                                    
-                                    <div class="mb-3">
-                                        <label for="reviewTitle" class="form-label">Tiêu đề đánh giá *</label>
-                                        <input type="text" class="form-control" id="reviewTitle" 
-                                               placeholder="Nhập tiêu đề đánh giá..." maxlength="255" required>
-                                        <div class="invalid-feedback">Vui lòng nhập tiêu đề đánh giá.</div>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label for="reviewComment" class="form-label">Nhận xét của bạn *</label>
-                                        <textarea class="form-control" id="reviewComment" rows="4" 
-                                                  placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..." 
-                                                  maxlength="1000" required></textarea>
-                                        <div class="invalid-feedback">Vui lòng nhập nhận xét của bạn.</div>
-                                        <small class="form-text text-muted">Tối đa 1000 ký tự</small>
-                                    </div>
-                                    
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-paper-plane me-2"></i>Gửi đánh giá
-                                    </button>
-                                </form>
-                            </div>
+                                    <div class="invalid-feedback">Vui lòng chọn số sao đánh giá.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="reviewTitle" class="form-label">Tiêu đề đánh giá *</label>
+                                    <input type="text" class="form-control" id="reviewTitle" 
+                                           placeholder="Nhập tiêu đề đánh giá..." maxlength="200" required>
+                                    <div class="invalid-feedback">Vui lòng nhập tiêu đề đánh giá.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="reviewComment" class="form-label">Nhận xét của bạn *</label>
+                                    <textarea class="form-control" id="reviewComment" rows="4" 
+                                              placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..." required></textarea>
+                                    <div class="invalid-feedback">Vui lòng nhập nhận xét của bạn.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="reviewerName" class="form-label">Tên của bạn *</label>
+                                    <input type="text" class="form-control" id="reviewerName" 
+                                           placeholder="Nhập tên của bạn..." required>
+                                    <div class="invalid-feedback">Vui lòng nhập tên của bạn.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="reviewerEmail" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="reviewerEmail" 
+                                           placeholder="Nhập email của bạn..." required>
+                                    <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>Gửi đánh giá
+                                </button>
+                            </form>
                         </div>
-                    <?php else: ?>
-                        <!-- Thông báo cho khách vãng lai -->
-                        <div class="card">
-                            <div class="card-body text-center py-5">
-                                <i class="fas fa-user-lock fa-3x text-muted mb-3"></i>
-                                <h5 class="text-muted mb-3">Đăng nhập để viết đánh giá</h5>
-                                <p class="text-muted mb-4">Bạn cần đăng nhập tài khoản để có thể viết đánh giá về sản phẩm này.</p>
-                                <a href="<?= url('/login') ?>" class="btn btn-primary">
-                                    <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập ngay
-                                </a>
-                                <a href="<?= url('/register') ?>" class="btn btn-outline-primary ms-2">
-                                    <i class="fas fa-user-plus me-2"></i>Đăng ký tài khoản
-                                </a>
-                            </div>
-                        </div>
-                    <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>
@@ -380,7 +439,7 @@ require_once __DIR__ . '/../../../../helpers/session_helper.php';
                                         <div class="product-image">
                                             <img src="<?= $relatedProduct->primary_image ? $relatedProduct->primary_image->file_path : 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=300' ?>" 
                                                  alt="<?= htmlspecialchars($relatedProduct->name) ?>">
-                                            <button class="wishlist-btn" onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist(<?= $relatedProduct->product_id ?>);"><i class="far fa-heart"></i></button>
+                                            <button class="wishlist-btn" onclick="event.preventDefault(); event.stopPropagation();"><i class="far fa-heart"></i></button>
                                             <button class="compare-btn" onclick="event.preventDefault(); event.stopPropagation();"><i class="fas fa-eye"></i></button>
                                             <button class="add-to-cart-overlay" onclick="event.preventDefault(); event.stopPropagation();">Thêm vào giỏ</button>
                                         </div>
@@ -511,82 +570,91 @@ body {
     background-color: #f8f9fa;
 }
 
-/* Action Buttons */
-.action-buttons {
+/* Product action/buttons layout and responsive behaviour */
+.product-actions {
     display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
 }
 
-.btn-add-to-cart {
-    background: linear-gradient(45deg, #28a745, #20c997);
-    border: none;
-    color: white;
-    padding: 12px 25px;
+.product-actions .quantity-box {
+    flex: 0 0 auto;
+}
+
+.product-actions .quantity-input {
+    width: 90px;
+}
+
+.product-actions .btn-add-to-cart {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
     border-radius: 8px;
+    border: 2px solid #ffd455ff;
+    background: white;
+    color: #ffd455ff;
     font-weight: 600;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    flex: 1;
-    min-width: 200px;
-    display: flex;
+    font-size: 14px;
+    text-transform: uppercase;
+    transition: all 0.25s ease;
+}
+
+.product-actions .btn-add-to-cart:hover {
+    background: var(--gold);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(212,175,55,0.18);
+}
+
+.product-actions .btn-buy {
+    flex: 1 1 auto;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-}
-
-.btn-add-to-cart:hover {
-    background: linear-gradient(45deg, #218838, #1ba085);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
-    color: white;
-}
-
-.btn-add-to-cart:active {
-    transform: translateY(0);
-}
-
-.btn-add-to-cart:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-.btn-buy {
-    background: linear-gradient(45deg, #dc3545, #fd7e14);
-    border: none;
-    color: white;
-    padding: 12px 25px;
+    padding: 12px 22px;
     border-radius: 8px;
-    font-weight: 600;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    flex: 1;
-    min-width: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.btn-buy:hover {
-    background: linear-gradient(45deg, #c82333, #fd6c14);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+    background: var(--gold);
     color: white;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    transition: all 0.25s ease;
 }
 
+.product-actions .btn-buy:hover {
+    background: var(--dark-gold);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(212,175,55,0.22);
+}
+
+/* Desktop: keep all in one row; Mobile: move buy button to full-width second row */
 @media (max-width: 768px) {
-    .action-buttons {
-        flex-direction: column;
+    .product-actions {
+        flex-wrap: wrap;
     }
-    
-    .btn-add-to-cart,
-    .btn-buy {
+
+    /* quantity + add-to-cart stay on first row */
+    .product-actions .quantity-box,
+    .product-actions .btn-add-to-cart {
+        order: 1;
+        flex: 0 0 auto;
+    }
+
+    /* buy button below, full width */
+    .product-actions .btn-buy {
+        order: 2;
+        flex-basis: 100%;
         width: 100%;
-        min-width: auto;
+        margin-top: 8px;
     }
+
+    /* show only icon for add-to-cart on small screens to save space */
+    .product-actions .btn-add-to-cart span { display: none; }
+    .product-actions .btn-add-to-cart { padding: 10px; width: 48px; justify-content: center; }
 }
 
 /* Tab Content Visibility */
@@ -600,6 +668,121 @@ body {
 </style>
 
 <script>
+// Gallery Slider Functions
+document.addEventListener('DOMContentLoaded', function() {
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.gallery-slide');
+    const dots = document.querySelectorAll('.gallery-dot');
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const slider = document.querySelector('.gallery-slider');
+
+    // Touch events for mobile swipe
+    if (slider) {
+        slider.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+
+        slider.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, false);
+    }
+
+    function handleSwipe() {
+        const swipeThreshold = 50;
+        const difference = touchStartX - touchEndX;
+        
+        if (Math.abs(difference) > swipeThreshold) {
+            if (difference > 0) {
+                // Swiped left
+                nextSlide();
+            } else {
+                // Swiped right
+                prevSlide();
+            }
+        }
+    }
+
+    window.showSlide = function(index) {
+        if (!slides.length) return;
+        
+        if (index >= slides.length) index = 0;
+        if (index < 0) index = slides.length - 1;
+        
+        // Remove active class from all slides and dots
+        slides.forEach(slide => slide.classList.remove('active'));
+        dots.forEach(dot => dot.classList.remove('active'));
+        
+        // Add active class to current slide and dot
+        slides[index].classList.add('active');
+        dots[index].classList.add('active');
+        
+        currentSlide = index;
+        
+        // Update thumbnail selection if on desktop
+        const thumbnails = document.querySelectorAll('.thumbnail-item');
+        if (thumbnails.length) {
+            thumbnails.forEach(thumb => thumb.classList.remove('active'));
+            if (thumbnails[index]) thumbnails[index].classList.add('active');
+        }
+    }
+
+    window.nextSlide = function() {
+        showSlide(currentSlide + 1);
+    }
+
+    window.prevSlide = function() {
+        showSlide(currentSlide - 1);
+    }
+
+    window.goToSlide = function(index) {
+        showSlide(index);
+    }
+
+    // Auto hide navigation buttons if only one slide
+    if (slides.length <= 1) {
+        const navButtons = document.querySelectorAll('.gallery-nav');
+        navButtons.forEach(btn => btn.style.display = 'none');
+        const dotsContainer = document.querySelector('.gallery-dots');
+        if (dotsContainer) dotsContainer.style.display = 'none';
+    }
+
+    // Add keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft') {
+            prevSlide();
+        } else if (e.key === 'ArrowRight') {
+            nextSlide();
+        }
+    });
+});
+
+// Quantity Control Functions
+function updateQuantity(action) {
+    const input = document.getElementById('quantityInput');
+    let value = parseInt(input.value);
+    
+    if (action === 'increase') {
+        value++;
+    } else if (action === 'decrease' && value > 1) {
+        value--;
+    }
+    
+    input.value = value;
+}
+
+// Update image gallery for both mobile and desktop
+function changeImage(element, imagePath, index) {
+    // Update desktop view
+    document.getElementById('mainImage').src = imagePath;
+    document.querySelectorAll('.thumbnail-item').forEach(item => item.classList.remove('active'));
+    element.classList.add('active');
+    
+    // Update mobile slider
+    showSlide(index);
+}
+
 /**
  * Add product to cart
  */
@@ -818,245 +1001,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
-    // Initialize review form handler
-    initializeReviewForm();
 });
-
-/**
- * Initialize review form
- */
-function initializeReviewForm() {
-    const reviewForm = document.getElementById('reviewForm');
-    if (!reviewForm) return;
-
-    reviewForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        
-        // Validate form
-        if (!this.checkValidity()) {
-            event.stopPropagation();
-            this.classList.add('was-validated');
-            return;
-        }
-
-        // Check if rating is selected
-        const rating = this.querySelector('input[name="rating"]:checked');
-        if (!rating) {
-            showToast('error', 'Vui lòng chọn số sao đánh giá');
-            return;
-        }
-
-        // Get form data
-        const formData = new FormData();
-        formData.append('product_id', document.getElementById('productId').value);
-        formData.append('rating', rating.value);
-        formData.append('title', document.getElementById('reviewTitle').value.trim());
-        formData.append('comment', document.getElementById('reviewComment').value.trim());
-
-        // Show loading
-        const submitBtn = this.querySelector('button[type="submit"]');
-        const originalBtnText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang gửi...';
-
-        // Submit review
-        fetch('<?= url('/api/reviews/add') ?>', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => {
-            // Check if response is ok
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            // Check content type
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                return response.text().then(text => {
-                    console.error('Non-JSON response:', text);
-                    throw new Error('Server returned non-JSON response');
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Show success message
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Thành công!',
-                    text: data.message,
-                    showConfirmButton: true,
-                    confirmButtonText: 'OK'
-                }).then(() => {
-                    // Reset form
-                    reviewForm.reset();
-                    reviewForm.classList.remove('was-validated');
-                    
-                    // Reset star rating display
-                    const stars = reviewForm.querySelectorAll('.rating-input label');
-                    stars.forEach(star => star.style.color = '#ddd');
-                });
-            } else {
-                // Show error message
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: data.message || 'Có lỗi xảy ra khi gửi đánh giá',
-                });
-                
-                // Handle redirect if needed (e.g., to login)
-                if (data.redirect) {
-                    setTimeout(() => {
-                        window.location.href = data.redirect;
-                    }, 2000);
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Review submission error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Lỗi kết nối',
-                text: 'Không thể gửi đánh giá, vui lòng kiểm tra kết nối mạng.',
-            });
-        })
-        .finally(() => {
-            // Reset button
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalBtnText;
-        });
-    });
-
-    // Handle star rating visual feedback
-    const ratingInputs = reviewForm.querySelectorAll('input[name="rating"]');
-    const ratingLabels = reviewForm.querySelectorAll('.rating-input label');
-    
-    ratingInputs.forEach((input, index) => {
-        input.addEventListener('change', function() {
-            const rating = parseInt(this.value);
-            ratingLabels.forEach((label, labelIndex) => {
-                if (labelIndex >= (5 - rating)) {
-                    label.style.color = '#ffc107';
-                } else {
-                    label.style.color = '#ddd';
-                }
-            });
-        });
-    });
-}
-
-// Wishlist functions
-async function toggleWishlist(productId) {
-    const button = event.target.closest('button');
-    const icon = button.querySelector('i');
-    const wasInWishlist = icon.classList.contains('fas');
-    
-    try {
-        // Temporarily update UI for immediate feedback
-        if (wasInWishlist) {
-            icon.classList.remove('fas');
-            icon.classList.add('far');
-            button.style.color = '';
-        } else {
-            icon.classList.remove('far');
-            icon.classList.add('fas');
-            button.style.color = '#dc3545';
-        }
-        
-        // Call API
-        const response = await fetch('/Ecom_website/wishlist/toggle', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: `product_id=${productId}`
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            // Update UI based on server response
-            if (data.data.action === 'added') {
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-                button.style.color = '#dc3545';
-                showToast('success', 'Đã thêm vào danh sách yêu thích!');
-            } else {
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-                button.style.color = '';
-                showToast('info', 'Đã xóa khỏi danh sách yêu thích!');
-            }
-            
-            // Update wishlist count in header
-            updateWishlistCount(data.data.wishlist_count);
-        } else {
-            // Revert UI changes on error
-            if (wasInWishlist) {
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-                button.style.color = '#dc3545';
-            } else {
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-                button.style.color = '';
-            }
-            
-            if (data.message === 'Vui lòng đăng nhập để sử dụng danh sách yêu thích') {
-                showToast('warning', data.message);
-                setTimeout(() => {
-                    window.location.href = '/Ecom_website/signin';
-                }, 2000);
-            } else {
-                showToast('error', data.message || 'Có lỗi xảy ra!');
-            }
-        }
-    } catch (error) {
-        console.error('Wishlist toggle error:', error);
-        // Revert UI changes on error
-        if (wasInWishlist) {
-            icon.classList.remove('far');
-            icon.classList.add('fas');
-            button.style.color = '#dc3545';
-        } else {
-            icon.classList.remove('fas');
-            icon.classList.add('far');  
-            button.style.color = '';
-        }
-        showToast('error', 'Lỗi kết nối!');
-    }
-}
-
-function updateWishlistCount(count) {
-    const wishlistBadge = document.querySelector('.wishlist-count');
-    if (wishlistBadge) {
-        wishlistBadge.textContent = count;
-        wishlistBadge.style.display = count > 0 ? 'inline' : 'none';
-    }
-}
-
-function showToast(type, message) {
-    if (typeof Swal !== 'undefined') {
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true
-        });
-        Toast.fire({
-            icon: type,
-            title: message
-        });
-    } else {
-        alert(message);
-    }
-}
 </script>
 

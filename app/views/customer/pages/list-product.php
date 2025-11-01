@@ -157,18 +157,7 @@ if (!function_exists('url')) {
             <div class="col-lg-9 col-md-8">
                 <!-- Product Header -->
                 <div class="product-header">
-                    <?php if (isset($title) && $title !== 'Sản phẩm'): ?>
-                    <div class="mb-3">
-                        <h3 class="mb-1"><?= htmlspecialchars($title) ?></h3>
-                        <?php if (isset($filters['sort_by'])): ?>
-                            <?php if ($filters['sort_by'] === 'newest'): ?>
-                                <small class="text-muted">Các sản phẩm được thêm gần đây nhất</small>
-                            <?php elseif ($filters['sort_by'] === 'popular'): ?>
-                                <small class="text-muted">Các sản phẩm được mua nhiều nhất</small>
-                            <?php endif; ?>
-                        <?php endif; ?>
-                    </div>
-                    <?php endif; ?>
+                   
                     <div class="row align-items-center mb-3">
                         <div class="results-info col-md-6">
                             <strong id="resultsCount"><?= isset($total) ? $total : 0 ?></strong> sản phẩm được tìm thấy
