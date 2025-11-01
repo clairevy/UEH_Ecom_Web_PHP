@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $title ?? 'Giỏ hàng'; ?> - Jewelry Store</title>
     
-     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <html xmlns:th="http://www.thymeleaf.org">
@@ -111,7 +111,7 @@
         }
         
         .price-text {
-            font-size: 1.1rem;
+            /* font-size: 1.1rem; */
             font-weight: bold;
             color: var(--gold);
         }
@@ -151,13 +151,28 @@
             border-radius: 10px;
             padding: 35px 15px;
             font-weight: 300;
-            width: 300px;
+            /* width: 300px; */
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+        .btn-gopayment {
+            background: var(--gold);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 30px;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            width: inherit;
+            text-align: center;
+        }
         
-        .btn-primary:hover {
+        .btn-primary, .btn-gopayment:hover {
             background: var(--dark-gold);
             color: white;
             transform: translateY(-2px);
@@ -168,6 +183,8 @@
             border: 2px solid var(--gold);
             color: var(--gold);
             font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
             transition: all 0.3s ease;
         }
         
@@ -181,15 +198,8 @@
         .empty-cart {
             text-align: center;
             padding: 60px 20px;
-        }
-        
-        .empty-cart i {
-            /* font-size: 4rem;
-            color: var(--gold);
-            margin-bottom: 20px;
-            opacity: 0.5; */
-    
-        }
+        }      
+      
         
         .empty-cart h4 {
             color: var(--dark-brown);
@@ -292,16 +302,13 @@
                             <?php foreach ($cartItems as $item): ?>
                                 <div class="cart-item" data-cart-key="<?php echo $item['cart_key']; ?>">
                                     <div class="row align-items-center">
-                        <div class="col-md-2">
-                            <?php 
-                                // Get primary image URL using the Product model method
-                                $productModel = new Product();
-                                $imageUrl = $productModel->getPrimaryImageUrl($item['product']->product_id);
-                            ?>
-                            <img src="<?php echo $imageUrl; ?>" 
-                                 alt="<?php echo htmlspecialchars($item['product']->name); ?>" 
-                                 class="product-image">
-                        </div>                                        <div class="col-md-4">
+                                        <div class="col-md-2">
+                                            <img src="<?php echo $item['product']->primary_image->file_path ?? '/public/assets/images/placeholder.jpg'; ?>" 
+                                                 alt="<?php echo htmlspecialchars($item['product']->name); ?>" 
+                                                 class="product-image">
+                                        </div>
+                                        
+                                        <div class="col-md-4">
                                             <h6 class="fw-semibold mb-1"><?php echo htmlspecialchars($item['product']->name); ?></h6>
                                             <p class="text-muted small mb-1">Mã SP: <?php echo $item['product']->product_id; ?></p>
                                             <?php if ($item['size']): ?>
@@ -395,7 +402,7 @@
                         
                         <hr style="border-color: rgba(255,255,255,0.3);">
                         
-                        <a href="/Ecom_website/checkout?cart=1" class="btn btn-primary mb-3">
+                        <a href="/Ecom_website/checkout" class="btn btn-gopayment mb-3">
                             <i class="fas fa-credit-card me-2"></i>
                             Tiến hành thanh toán
                         </a>

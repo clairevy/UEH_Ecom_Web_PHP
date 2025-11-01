@@ -197,27 +197,17 @@ if (!function_exists('url')) {
 
                 <!-- Product action row: quantity | add to cart | buy now -->
                 <div class="product-actions-wrapper">
-                    <div class="product-actions d-flex flex-wrap w-100">
-                        <div class="quantity-cart-row d-flex align-items-center gap-2">
-                            <div class="quantity-box">
-                                <div class="quantity-controls d-flex align-items-center">
-                                    <button class="quantity-btn minus" onclick="updateQuantity('decrease')">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
-                                    <input type="number" class="quantity-input form-control" value="1" min="1" id="quantityInput">
-                                    <button class="quantity-btn plus" onclick="updateQuantity('increase')">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <button class="btn-add-to-cart d-flex align-items-center justify-content-center flex-grow-1" onclick="addToCart()" id="addToCartBtn">
-                                <i class="fas fa-shopping-cart me-2"></i>
-                                <span class="btn-text">Thêm vào giỏ hàng</span>
-                            </button>
+                    <div class="product-actions d-flex align-items-center w-100">
+                        <div class="quantity-box me-3">
+                            <input type="number" class="quantity-input form-control" value="1" min="1" id="quantityInput">
                         </div>
 
-                        <button class="btn-buy d-flex align-items-center justify-content-center w-100 mt-2" onclick="buyNow()" id="buyNowBtn">
+                        <button class="btn-add-to-cart me-3 d-flex align-items-center" onclick="addToCart()" id="addToCartBtn">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            <span>Thêm vào giỏ hàng</span>
+                        </button>
+
+                        <button class="btn-buy ms-auto d-flex align-items-center" onclick="buyNow()" id="buyNowBtn">
                             <span>Mua Ngay</span>
                         </button>
                     </div>
@@ -578,8 +568,10 @@ body {
 .product-actions {
     display: flex;
     gap: 8px;
+    justify-content: space-between;
     align-items: center;
     width: 100%;
+    
 }
 
 .product-actions .quantity-box {
@@ -604,6 +596,8 @@ body {
     font-size: 14px;
     text-transform: uppercase;
     transition: all 0.25s ease;
+    width: auto;       /* bỏ width cố định */
+    margin-left: auto !important; /* căn lề trái tự động */
 }
 
 .product-actions .btn-add-to-cart:hover {
@@ -656,9 +650,8 @@ body {
         margin-top: 8px;
     }
 
-    /* show only icon for add-to-cart on small screens to save space */
-    .product-actions .btn-add-to-cart span { display: none; }
-    .product-actions .btn-add-to-cart { padding: 10px; width: 48px; justify-content: center; }
+    /* keep add-to-cart button text visible on small screens */
+    .product-actions .btn-add-to-cart { padding: 10px 16px; width: auto; justify-content: center; }
 }
 
 /* Tab Content Visibility */
