@@ -933,6 +933,11 @@ footer a:hover {
   position: relative;
 }
 
+/* Mobile gallery hidden by default; only show in mobile media query */
+.mobile-gallery {
+  display: none;
+}
+
 .thumbnail-container {
   width: 100px; /* chiều rộng cố định */
   max-height: 400px; /* bằng chiều cao ảnh lớn */
@@ -1910,15 +1915,40 @@ footer a:hover {
 
   .product-actions {
     display: flex;
-    flex-wrap: wrap;
+    /* flex-wrap: wrap; */
     gap: 12px;
     align-items: stretch;
     width: 100%;
   }
 
-  .product-actions .quantity-box {
-    /* width: 100%; */
+  /* Desktop: distribute controls evenly: left = quantity, center = add-to-cart, right = buy-now */
+  @media (min-width: 992px) {
+    .product-actions {
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .product-actions .quantity-box {
+      flex: 0 0 auto;
+      order: 1;
+    }
+
+    .product-actions .btn-add-to-cart {
+      flex: 0 0 auto;
+      order: 2;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .product-actions .btn-buy {
+      flex: 0 0 auto;
+      order: 3;
+      margin-left: 0;
+    }
   }
+
+  /* quantity-box sizing handled in layout rules above */
 
   .product-actions .quantity-input {
     width: 100%;
@@ -1941,8 +1971,9 @@ footer a:hover {
     min-width: 0;
   }
 
+  /* Keep add-to-cart text visible on responsive layouts */
   .product-actions .btn-add-to-cart .btn-text {
-    display: none;
+    display: inline !important;
   }
 
   .product-actions .btn-add-to-cart i {
@@ -1967,8 +1998,8 @@ footer a:hover {
   }
 
   .delivery-item {
-    flex-direction: column;
-    text-align: center;
+    /* flex-direction: column; */
+    /* text-align: center; */
     gap: 8px;
     padding: 12px 0;
   }
@@ -2029,4 +2060,141 @@ footer a:hover {
   .banner-section {
     display: none !important;
   }
+    /* --- Cart page mobile responsive --- */
+    .cart-container {
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(212,175,55,0.08);
+    }
+    .cart-item {
+      padding: 14px 0;
+    }
+    .cart-item .row {
+      flex-direction: column;
+      gap: 10px;
+    }
+      .cart-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .cart-item .row {
+        align-items: center !important;
+        justify-content: center !important;
+      }
+      .cart-item .quantity-controls {
+        justify-content: center;
+      }
+        .cart-item .cart-action-row {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+          gap: 16px;
+          margin-top: 8px;
+          margin-bottom: 0;
+          width: 100%;
+        }
+        .cart-item .remove-btn {
+          margin: 0;
+          position: static;
+        }
+      .cart-item .remove-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff0f0;
+        border: 1.5px solid #ffb3b3;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        color: #dc3545;
+        font-size: 1.2rem;
+        box-shadow: 0 2px 8px rgba(220,53,69,0.08);
+        transition: background 0.2s, border 0.2s, color 0.2s, transform 0.2s;
+      }
+      .cart-item .remove-btn:hover {
+        background: #ffb3b3;
+        border-color: #dc3545;
+        color: #fff;
+        transform: scale(1.08);
+      }
+    .cart-item .col-md-2,
+    .cart-item .col-md-4,
+    .cart-item .col-md-3,
+    .cart-item .col-md-1 {
+      max-width: 100%;
+      flex: 0 0 100%;
+      padding-left: 0;
+      padding-right: 0;
+    }
+    .cart-item .product-image {
+      width: 70px;
+      height: 70px;
+      margin-bottom: 8px;
+    }
+    .cart-item h6 {
+      font-size: 1rem;
+      margin-bottom: 2px;
+    }
+    .cart-item .price-text {
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+    .cart-item .quantity-controls {
+      gap: 6px;
+    }
+    .cart-item .quantity-btn {
+      width: 28px;
+      height: 28px;
+      font-size: 1rem;
+    }
+    .cart-item .quantity-input {
+      width: 40px;
+      font-size: 0.95rem;
+      padding: 2px;
+    }
+    .cart-item .remove-btn {
+      font-size: 1.1rem;
+      margin-top: 4px;
+    }
+    .summary-card {
+      position: static;
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(212,175,55,0.08);
+    }
+    .summary-row {
+      font-size: 0.98rem;
+      margin-bottom: 6px;
+      padding-bottom: 4px;
+    }
+    .summary-row.total {
+      font-size: 1.08rem;
+      margin-top: 10px;
+      padding-top: 10px;
+    }
+    .btn-primary {
+      width: 100%;
+      padding: 12px 0;
+      font-size: 1rem;
+      border-radius: 8px;
+    }
+    .btn-outline-light {
+      font-size: 0.98rem;
+      border-radius: 8px;
+      margin-top: 6px;
+    }
+    .empty-cart {
+      padding: 30px 6px;
+    }
+    .empty-cart h4 {
+      font-size: 1.1rem;
+    }
+    .empty-cart p {
+      font-size: 0.98rem;
+    }
+    /* --- End cart page mobile responsive --- */
 }
