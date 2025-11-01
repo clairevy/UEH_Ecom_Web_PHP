@@ -57,6 +57,68 @@ class Collection extends BaseModel {
         return $this->db->resultSet();
     }
 
+    /**
+     * Get products in a collection with images
+     */
+    public function getCollectionProductsWithImages($collectionId, $limit = null, $offset = 0) {
+        $limitClause = $limit ? "LIMIT $limit OFFSET $offset" : "";
+        
+        try {
+            $query = "SELECT p.*, 
+                             COALESCE(GROUP_CONCAT(DISTINCT i.file_path ORDER BY COALESCE(iu.is_primary, 0) DESC, iu.created_at ASC SEPARATOR ','), '') as images,
+                             COALESCE(GROUP_CONCAT(DISTINCT c.name SEPARATOR ', '), 'Uncategorized') as category_name
+                      FROM products p
+                      LEFT JOIN image_usages iu ON p.product_id = iu.ref_id AND iu.ref_type = 'product'
+                      LEFT JOIN images i ON iu.image_id = i.image_id
+                      LEFT JOIN product_categories pc ON p.product_id = pc.product_id
+                      LEFT JOIN categories c ON pc.category_id = c.category_id
+                      WHERE p.collection_id = :collection_id 
+                      AND p.is_active = 1
+                      GROUP BY p.product_id
+                      ORDER BY p.created_at DESC
+                      $limitClause";
+            
+            $this->db->query($query);
+            $this->db->bind(':collection_id', $collectionId);
+            
+            return $this->db->resultSet();
+        } catch (Exception $e) {
+            error_log("Collection products query error: " . $e->getMessage());
+            
+            // Fallback to simple query without images
+            $query = "SELECT p.*, 
+                             '' as images,
+                             COALESCE(GROUP_CONCAT(DISTINCT c.name SEPARATOR ', '), 'Uncategorized') as category_name
+                      FROM products p
+                      LEFT JOIN product_categories pc ON p.product_id = pc.product_id
+                      LEFT JOIN categories c ON pc.category_id = c.category_id
+                      WHERE p.collection_id = :collection_id 
+                      AND p.is_active = 1
+                      GROUP BY p.product_id
+                      ORDER BY p.created_at DESC
+                      $limitClause";
+            
+            $this->db->query($query);
+            $this->db->bind(':collection_id', $collectionId);
+            
+            return $this->db->resultSet();
+        }
+    }
+
+    /**
+     * Count products in a collection
+     */
+    public function countCollectionProducts($collectionId) {
+        $query = "SELECT COUNT(*) as total FROM products 
+                  WHERE collection_id = :collection_id AND is_active = 1";
+        
+        $this->db->query($query);
+        $this->db->bind(':collection_id', $collectionId);
+        
+        $result = $this->db->single();
+        return $result->total ?? 0;
+    }
+
     private function generateSlug($name) {
         $slug = strtolower(trim($name));
         $slug = preg_replace('/[^a-z0-9-]/', '-', $slug);

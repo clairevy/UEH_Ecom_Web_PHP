@@ -18,6 +18,10 @@ class Route {
         'about' => ['CustomerController', 'about'],
         'search' => ['CustomerController', 'searchApi'],
 
+        // Collection routes
+        'collections' => ['CollectionController', 'index'],
+        'collection' => ['CollectionController', 'show'],
+
         // Các route API (cấp 2)
         'api/new-arrivals' => ['CustomerController', 'getNewArrivals'],
         'api/popular' => ['CustomerController', 'getPopularProducts'],
@@ -25,6 +29,10 @@ class Route {
         'api/category' => ['CustomerController', 'getProductsByCategory'],
         'api/categories' => ['CustomerController', 'getCategories'],
         'api/collections' => ['CustomerController', 'getCollections'],
+        
+        // Collection API routes
+        'api/collection/products' => ['CollectionController', 'getProducts'],
+        'api/collections/list' => ['CollectionController', 'getCollectionsApi'],
         
         // Review routes (cấp 2)
         'api/reviews/add' => ['ReviewController', 'add'],
@@ -116,7 +124,16 @@ class Route {
             }
         }
         
-        // 3. Nếu không khớp, kiểm tra route 1 phần (VD: 'products')
+        // 3. Xử lý đặc biệt cho collection với slug (VD: 'collection/diamond-rings')
+        if (!$routeFound && isset($url[0]) && $url[0] === 'collection' && isset($url[1])) {
+            $this->controller = 'CollectionController';
+            $this->method = 'show';
+            // Giữ slug làm parameter
+            $this->params = [$url[1]];
+            $routeFound = true;
+        }
+        
+        // 4. Nếu không khớp, kiểm tra route 1 phần (VD: 'products')
         if (!$routeFound && isset($url[0])) {
             $key = $url[0];
             if (array_key_exists($key, $this->routes)) {
@@ -175,8 +192,12 @@ class Route {
             }
         }
 
-        // Xử lý Params
-        $this->params = $url ? array_values($url) : [];
+        // Xử lý Params (chỉ nếu chưa được set bởi custom route)
+        if (!isset($this->params)) {
+            $this->params = $url ? array_values($url) : [];
+        }
+
+        // error_log("Router: Calling " . get_class($this->controller) . "::{$this->method} with params: " . json_encode($this->params));
 
         // Gọi controller, method với các tham số
         call_user_func_array([$this->controller, $this->method], $this->params);

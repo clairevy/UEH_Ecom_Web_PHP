@@ -196,15 +196,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     
     // Load collections
-    fetch('<?= url('/api/collections') ?>')
+    fetch('<?= url('/api/collections/list') ?>')
         .then(response => response.json())
         .then(data => {
             if (data.success && data.data) {
                 const collectionsDiv = document.getElementById('collectionsDropdown');
                 collectionsDiv.innerHTML = '';
+                
+                // Add "All Collections" link
+                const allLi = document.createElement('li');
+                allLi.innerHTML = `<a class="dropdown-item" href="<?= url('/collections') ?>">All Collections</a>`;
+                collectionsDiv.appendChild(allLi);
+                
+                const dividerLi = document.createElement('li');
+                dividerLi.innerHTML = '<hr class="dropdown-divider">';
+                collectionsDiv.appendChild(dividerLi);
+                
                 data.data.forEach(collection => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<a class="dropdown-item" href="<?= url('/products') ?>?collection=${collection.collection_id}">${collection.collection_name}</a>`;
+                    li.innerHTML = `<a class="dropdown-item" href="<?= url('/collection/') ?>${collection.slug}">${collection.collection_name}</a>`;
                     collectionsDiv.appendChild(li);
                 });
             }
