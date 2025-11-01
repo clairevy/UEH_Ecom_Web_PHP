@@ -74,27 +74,35 @@ class CheckoutController extends BaseController {
                 return;
             }
 
-            // Validate form data
-            $errors = $this->validateCheckoutData($_POST);
-            if (!empty($errors)) {
-                $this->jsonResponse(false, 'Dữ liệu không hợp lệ', $errors);
-                return;
-            }
+        // Validate form data
+        $errors = $this->validateCheckoutData($_POST);
+        if (!empty($errors)) {
+            $this->jsonResponse(false, 'Dữ liệu không hợp lệ', $errors);
+            return;
+        }
 
-            // Get customer info
-            $customerInfo = [
-                'name' => trim($_POST['name']),
-                'email' => trim($_POST['email']),
-                'phone' => trim($_POST['phone']),
-                'address' => trim($_POST['address']),
-                'province' => trim($_POST['province']),
-                'notes' => trim($_POST['notes'] ?? '')
-            ];
+        // Get payment delivery method
+        $paymentDeliveryMethod = $_POST['payment_delivery_method'] ?? 'bank_transfer_home';
+        
+        // Get customer info
+        $customerInfo = [
+            'name' => trim($_POST['name']),
+            'email' => trim($_POST['email']),
+            'phone' => trim($_POST['phone']),
+            'notes' => trim($_POST['notes'] ?? '')
+        ];
 
-            // Get payment method
-            $paymentMethod = $_POST['payment_method'] ?? 'cod';
-
-            // Calculate order totals
+        // Add address info only for home delivery
+        if ($paymentDeliveryMethod === 'bank_transfer_home') {
+            $customerInfo['address'] = trim($_POST['address'] ?? '');
+            $customerInfo['ward'] = trim($_POST['ward'] ?? '');
+            $customerInfo['province'] = trim($_POST['province'] ?? '');
+        } else {
+            // Store pickup - no address needed
+            $customerInfo['address'] = null;
+            $customerInfo['ward'] = null;
+            $customerInfo['province'] = null;
+        }            // Calculate order totals
             if (isset($_SESSION['buy_now_item'])) {
                 // Buy now checkout
                 $cartItems = [$this->getBuyNowItem()];
@@ -114,7 +122,7 @@ class CheckoutController extends BaseController {
             }
 
             // Create order
-            $orderId = $this->createOrder($customerInfo, $cartItems, $cartSummary, $paymentMethod);
+            $orderId = $this->createOrder($customerInfo, $cartItems, $cartSummary, $paymentDeliveryMethod);
 
             if ($orderId) {
                 // Clear appropriate session data after successful order
@@ -159,26 +167,24 @@ class CheckoutController extends BaseController {
     /**
      * Create order in database
      */
-    private function createOrder($customerInfo, $cartItems, $cartSummary, $paymentMethod) {
+    private function createOrder($customerInfo, $cartItems, $cartSummary, $paymentDeliveryMethod) {
         try {
-            // Generate order ID
-            $orderId = 'ORD' . date('Ymd') . rand(1000, 9999);
-
             // Prepare order data to match database structure
             $orderData = [
                 'user_id' => SessionHelper::isLoggedIn() ? SessionHelper::getUserId() : null,
                 'full_name' => $customerInfo['name'],
                 'email' => $customerInfo['email'],
                 'phone' => $customerInfo['phone'],
-                'street' => $customerInfo['address'], // For now, put full address in street
-                'ward' => '', // Would need separate fields in form
-                'province' => $customerInfo['province'],
+                'street' => $customerInfo['address'], // Null for store pickup
+                'ward' => $customerInfo['ward'], // Null for store pickup
+                'province' => $customerInfo['province'], // Null for store pickup
                 'country' => 'Vietnam',
-                'order_status' => 'pending',
+                'order_status' => 'pending', // Always pending, admin will change manually
                 'shipping_fee' => $cartSummary['shipping'],
                 'total_amount' => $cartSummary['total'],
                 'discount_code' => null,
-                'discount_amount' => 0
+                'discount_amount' => 0,
+                'notes' => $customerInfo['notes']
             ];
 
             // Create order using proper database method
@@ -206,6 +212,18 @@ class CheckoutController extends BaseController {
                     $itemCreated = $this->orderModel->addOrderItem($itemData);
                     error_log("Order item creation result: " . ($itemCreated ? 'SUCCESS' : 'FAILED'));
                 }
+
+                // Create payment record
+                $paymentData = [
+                    'order_id' => $actualOrderId,
+                    'payment_method' => strtoupper($paymentDeliveryMethod), // BANK_TRANSFER_HOME or CASH_STORE
+                    'payment_status' => 'pending', // Always pending, admin will change manually
+                    'amount' => $cartSummary['total']
+                ];
+                
+                error_log("Creating payment record: " . json_encode($paymentData));
+                $paymentCreated = $this->orderModel->createPayment($paymentData);
+                error_log("Payment creation result: " . ($paymentCreated ? 'SUCCESS' : 'FAILED'));
 
                 // Update product stock (simplified)
                 foreach ($cartItems as $item) {
@@ -246,17 +264,22 @@ class CheckoutController extends BaseController {
             $errors['phone'] = 'Số điện thoại không hợp lệ';
         }
 
-        if (empty($data['address'])) {
-            $errors['address'] = 'Địa chỉ giao hàng là bắt buộc';
+        // Validate payment delivery method
+        $paymentDeliveryMethod = $data['payment_delivery_method'] ?? '';
+        $allowedMethods = ['bank_transfer_home', 'cash_store'];
+        
+        if (empty($paymentDeliveryMethod) || !in_array($paymentDeliveryMethod, $allowedMethods)) {
+            $errors['payment_delivery_method'] = 'Phương thức thanh toán và nhận hàng không hợp lệ';
         }
 
-        if (empty($data['province'])) {
-            $errors['province'] = 'Tỉnh/Thành phố là bắt buộc';
-        }
-
-        $allowedPaymentMethods = ['cod', 'bank_transfer', 'qr_code'];
-        if (empty($data['payment_method']) || !in_array($data['payment_method'], $allowedPaymentMethods)) {
-            $errors['payment_method'] = 'Phương thức thanh toán không hợp lệ';
+        // Validate address only for home delivery
+        if ($paymentDeliveryMethod === 'bank_transfer_home') {
+            if (empty($data['address'])) {
+                $errors['address'] = 'Địa chỉ giao hàng là bắt buộc khi chọn giao hàng tận nơi';
+            }
+            if (empty($data['province'])) {
+                $errors['province'] = 'Tỉnh/Thành phố là bắt buộc khi chọn giao hàng tận nơi';
+            }
         }
 
         return $errors;

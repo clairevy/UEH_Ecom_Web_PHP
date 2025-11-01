@@ -20,8 +20,8 @@ class LocationController extends BaseController {
     }
     public function getWards() {
         try {
-            // 1. Lấy mã tỉnh từ JavaScript
-            $provinceCode = $_GET['province_code'] ?? ''; 
+            // 1. Lấy mã tỉnh từ JavaScript (thử cả 'province' và 'province_code')
+            $provinceCode = $_GET['province'] ?? $_GET['province_code'] ?? ''; 
             
             if (empty($provinceCode) || !is_numeric($provinceCode)) {
                 $this->jsonResponse(false, 'Thiếu hoặc sai mã tỉnh/thành phố');

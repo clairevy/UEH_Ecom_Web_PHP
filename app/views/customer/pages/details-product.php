@@ -357,6 +357,7 @@ if (!function_exists('url')) {
                 <!-- Add Review Form -->
                 <div class="mt-5">
                     <h5>Viết đánh giá của bạn</h5>
+                    <?php if (isset($_SESSION['user_id'])): ?>
                     <div class="card">
                         <div class="card-body">
                             <form id="reviewForm" class="needs-validation" novalidate>
@@ -396,6 +397,7 @@ if (!function_exists('url')) {
                                 <div class="mb-3">
                                     <label for="reviewerName" class="form-label">Tên của bạn *</label>
                                     <input type="text" class="form-control" id="reviewerName" 
+                                           value="<?= isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : '' ?>"
                                            placeholder="Nhập tên của bạn..." required>
                                     <div class="invalid-feedback">Vui lòng nhập tên của bạn.</div>
                                 </div>
@@ -403,6 +405,7 @@ if (!function_exists('url')) {
                                 <div class="mb-3">
                                     <label for="reviewerEmail" class="form-label">Email *</label>
                                     <input type="email" class="form-control" id="reviewerEmail" 
+                                           value="<?= isset($_SESSION['user_email']) ? htmlspecialchars($_SESSION['user_email']) : '' ?>"
                                            placeholder="Nhập email của bạn..." required>
                                     <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
                                 </div>
@@ -413,6 +416,23 @@ if (!function_exists('url')) {
                             </form>
                         </div>
                     </div>
+                    <?php else: ?>
+                    <div class="card">
+                        <div class="card-body text-center py-5">
+                            <i class="fas fa-user-lock fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted mb-3">Đăng nhập để đánh giá sản phẩm</h5>
+                            <p class="text-muted mb-4">Bạn cần đăng nhập để có thể viết đánh giá và chia sẻ trải nghiệm về sản phẩm này.</p>
+                            <div class="d-flex gap-3 justify-content-center">
+                                <a href="<?= url('auth/signin') ?>" class="btn btn-primary">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
+                                </a>
+                                <a href="<?= url('auth/signup') ?>" class="btn btn-outline-secondary">
+                                    <i class="fas fa-user-plus me-2"></i>Đăng ký
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -1014,6 +1034,9 @@ function selectOption(element) {
     
     // Add active class to clicked element
     element.classList.add('active');
+    initializeReviewForm();
+
+
 }
 
 // Initialize quantity controls
@@ -1028,6 +1051,133 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Initialize review form
+    initializeReviewForm();
 });
+function initializeReviewForm() {
+    const reviewForm = document.getElementById('reviewForm');
+    if (!reviewForm) return;
+
+    reviewForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        // Validate form
+        if (!this.checkValidity()) {
+            event.stopPropagation();
+            this.classList.add('was-validated');
+            return;
+        }
+
+        // Check if rating is selected
+        const rating = this.querySelector('input[name="rating"]:checked');
+        if (!rating) {
+            showToast('error', 'Vui lòng chọn số sao đánh giá');
+            return;
+        }
+
+        // Get form data
+        const formData = new FormData();
+        formData.append('product_id', document.getElementById('productId').value);
+        formData.append('rating', rating.value);
+        formData.append('title', document.getElementById('reviewTitle').value.trim());
+        formData.append('comment', document.getElementById('reviewComment').value.trim());
+
+        // Show loading
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang gửi...';
+
+        // Submit review
+        fetch('<?= url('api/reviews/add') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            // Check if response is ok
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            // Check content type
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                return response.text().then(text => {
+                    console.error('Non-JSON response:', text);
+                    throw new Error('Server returned non-JSON response');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: data.message,
+                    showConfirmButton: true,
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    // Reset form
+                    reviewForm.reset();
+                    reviewForm.classList.remove('was-validated');
+                    
+                    // Reset star rating display
+                    const stars = reviewForm.querySelectorAll('.rating-input label');
+                    stars.forEach(star => star.style.color = '#ddd');
+                });
+            } else {
+                // Show error message
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: data.message || 'Có lỗi xảy ra khi gửi đánh giá',
+                });
+                
+                // Handle redirect if needed (e.g., to login)
+                if (data.redirect) {
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 2000);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Review submission error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi kết nối',
+                text: 'Không thể gửi đánh giá, vui lòng kiểm tra kết nối mạng.',
+            });
+        })
+        .finally(() => {
+            // Reset button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        });
+    });
+
+    // Handle star rating visual feedback
+    const ratingInputs = reviewForm.querySelectorAll('input[name="rating"]');
+    const ratingLabels = reviewForm.querySelectorAll('.rating-input label');
+    
+    ratingInputs.forEach((input, index) => {
+        input.addEventListener('change', function() {
+            const rating = parseInt(this.value);
+            ratingLabels.forEach((label, labelIndex) => {
+                if (labelIndex >= (5 - rating)) {
+                    label.style.color = '#ffc107';
+                } else {
+                    label.style.color = '#ddd';
+                }
+            });
+        });
+    });
+}
+
 </script>
 

@@ -133,6 +133,15 @@ class Route {
             $routeFound = true;
         }
         
+        // 3.5. Xử lý đặc biệt cho product với id (VD: 'product/1')
+        if (!$routeFound && isset($url[0]) && $url[0] === 'product' && isset($url[1])) {
+            $this->controller = 'CustomerController';
+            $this->method = 'productDetail';
+            // Giữ product id làm parameter
+            $this->params = [$url[1]];
+            $routeFound = true;
+        }
+        
         // 4. Nếu không khớp, kiểm tra route 1 phần (VD: 'products')
         if (!$routeFound && isset($url[0])) {
             $key = $url[0];

@@ -502,10 +502,10 @@ $userInfo = $data['userInfo'] ?? null;
                                         <div class="invalid-feedback">Vui lòng chọn phường/xã</div>
                                     </div>
                                     <div class="col-12 mb-3">
-                                        <label class="form-label fw-semibold">Số nhà, tên đường <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="street" 
+                                        <label class="form-label fw-semibold">Địa chỉ chi tiết <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="address" 
                                                placeholder="Ví dụ: 123 Nguyễn Du" required>
-                                        <div class="invalid-feedback">Vui lòng nhập số nhà và tên đường</div>
+                                        <div class="invalid-feedback">Vui lòng nhập địa chỉ chi tiết</div>
                                     </div>
                                 </div>
                                 <div class="col-12 mb-3">
@@ -726,13 +726,16 @@ document.addEventListener('DOMContentLoaded', function() {
     loadProvinces();
 
     // Province change handler
-    if (provinceSelect) {
+    if (provinceSelect && wardSelect) {
         provinceSelect.addEventListener('change', function() {
             const provinceCode = this.value;
+            
+            // Reset ward selection
+            wardSelect.innerHTML = '<option value="">Chọn phường/xã...</option>';
+            wardSelect.disabled = !provinceCode;
+            
             if (provinceCode) {
                 loadWards(provinceCode);
-            } else {
-                wardSelect.innerHTML = '<option value="">Chọn phường/xã...</option>';
             }
         });
     }
@@ -810,7 +813,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function loadProvinces() {
         try {
-            const response = await fetch('<?= url('/api/locations/provinces') ?>');
+            const response = await fetch('<?= url('api/locations/provinces') ?>');
             const data = await response.json();
             
             if (data.success && data.data) {
@@ -824,29 +827,39 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('Error loading provinces:', error);
+            showNotification('Không thể tải danh sách tỉnh/thành phố', 'error');
         }
     }
 
     async function loadWards(provinceCode) {
+        if (!provinceCode) return;
+        
         try {
             wardSelect.innerHTML = '<option value="">Đang tải...</option>';
-            const response = await fetch(`<?= url('/api/locations/wards') ?>?province=${provinceCode}`);
+            wardSelect.disabled = true;
+            
+            const wardUrl = `<?= url('api/locations/wards') ?>?province=${provinceCode}`;
+            const response = await fetch(wardUrl);
             const data = await response.json();
             
-            if (data.success && data.data) {
+            if (data.success && data.data && data.data.length > 0) {
                 wardSelect.innerHTML = '<option value="">Chọn phường/xã...</option>';
                 data.data.forEach(ward => {
                     const option = document.createElement('option');
                     option.value = ward.code;
-                    option.textContent = ward.name;
+                    option.textContent = ward.district_name ? `${ward.name} (${ward.district_name})` : ward.name;
+                    option.dataset.fullName = ward.full_name || ward.name;
+                    option.dataset.districtName = ward.district_name || '';
                     wardSelect.appendChild(option);
                 });
+                wardSelect.disabled = false;
             } else {
                 wardSelect.innerHTML = '<option value="">Không có dữ liệu</option>';
             }
         } catch (error) {
             console.error('Error loading wards:', error);
             wardSelect.innerHTML = '<option value="">Lỗi tải dữ liệu</option>';
+            showNotification('Không thể tải danh sách phường/xã', 'error');
         }
     }
 
@@ -854,6 +867,28 @@ document.addEventListener('DOMContentLoaded', function() {
     if (form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
+
+            // Custom validation for dynamic fields
+            const paymentMethod = document.querySelector('input[name="payment_delivery_method"]:checked');
+            if (!paymentMethod) {
+                showNotification('Vui lòng chọn phương thức thanh toán và nhận hàng', 'error');
+                e.stopPropagation();
+                return;
+            }
+
+            // Validate address fields only for bank_transfer_home
+            if (paymentMethod.value === 'bank_transfer_home') {
+                const province = document.getElementById('province')?.value;
+                const ward = document.getElementById('ward')?.value;
+                const address = document.querySelector('input[name="address"]')?.value;
+
+                if (!province || !ward || !address?.trim()) {
+                    showNotification('Vui lòng điền đầy đủ thông tin địa chỉ giao hàng', 'error');
+                    e.stopPropagation();
+                    form.classList.add('was-validated');
+                    return;
+                }
+            }
 
             // Validate form
             if (!form.checkValidity()) {
@@ -924,6 +959,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             });
         });
+    }
+
+    // Helper function for notifications
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'error' ? 'danger' : 'info'} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
     }
 });
 </script>

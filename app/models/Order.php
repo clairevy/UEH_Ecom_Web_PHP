@@ -7,23 +7,24 @@ class Order extends BaseModel {
     public function createOrder($data) {
         $this->db->query("INSERT INTO " . $this->table . " 
                          (user_id, full_name, email, phone, street, ward, province, country, 
-                          order_status, shipping_fee, total_amount, discount_code, discount_amount, created_at, updated_at) 
+                          order_status, shipping_fee, total_amount, discount_code, discount_amount, notes, created_at, updated_at) 
                          VALUES (:user_id, :full_name, :email, :phone, :street, :ward, :province, :country, 
-                                 :order_status, :shipping_fee, :total_amount, :discount_code, :discount_amount, NOW(), NOW())");
+                                 :order_status, :shipping_fee, :total_amount, :discount_code, :discount_amount, :notes, NOW(), NOW())");
         
         $this->db->bind(':user_id', $data['user_id'] ?? null);
         $this->db->bind(':full_name', $data['full_name']);
         $this->db->bind(':email', $data['email']);
         $this->db->bind(':phone', $data['phone']);
-        $this->db->bind(':street', $data['street']);
-        $this->db->bind(':ward', $data['ward']);
-        $this->db->bind(':province', $data['province']);
+        $this->db->bind(':street', $data['street'] ?? null);
+        $this->db->bind(':ward', $data['ward'] ?? null);
+        $this->db->bind(':province', $data['province'] ?? null);
         $this->db->bind(':country', $data['country'] ?? 'Vietnam');
         $this->db->bind(':order_status', $data['order_status'] ?? 'pending');
         $this->db->bind(':shipping_fee', $data['shipping_fee'] ?? 0);
         $this->db->bind(':total_amount', $data['total_amount']);
         $this->db->bind(':discount_code', $data['discount_code'] ?? null);
         $this->db->bind(':discount_amount', $data['discount_amount'] ?? 0);
+        $this->db->bind(':notes', $data['notes'] ?? null);
         
         return $this->db->execute();
     }
@@ -175,6 +176,27 @@ class Order extends BaseModel {
         $this->db->bind(':total_price', $orderData['total_price']);
         
         return $this->db->execute();
+    }
+
+    /**
+     * Create payment record for order
+     */
+    public function createPayment($paymentData) {
+        try {
+            $this->db->query("INSERT INTO payments 
+                             (order_id, payment_method, payment_status, amount, created_at) 
+                             VALUES (:order_id, :payment_method, :payment_status, :amount, NOW())");
+            
+            $this->db->bind(':order_id', $paymentData['order_id']);
+            $this->db->bind(':payment_method', $paymentData['payment_method']);
+            $this->db->bind(':payment_status', $paymentData['payment_status']);
+            $this->db->bind(':amount', $paymentData['amount']);
+            
+            return $this->db->execute();
+        } catch (Exception $e) {
+            error_log("Create Payment Error: " . $e->getMessage());
+            return false;
+        }
     }
 
     // Get orders with pagination
