@@ -82,6 +82,10 @@ class Route {
         'order' => ['OrderController', 'index'],
         'order/buynow' => ['OrderController', 'buyNow'],
         'order-success' => ['CheckoutController', 'orderSuccess'],
+
+        // Location API routes
+        'api/locations/provinces' => ['LocationController', 'getProvinces'],
+        'api/locations/wards' => ['LocationController', 'getWards'],
     ];
 
     public function __construct() {

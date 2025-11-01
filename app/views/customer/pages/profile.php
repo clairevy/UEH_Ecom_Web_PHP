@@ -316,10 +316,12 @@
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label fw-semibold">Số điện thoại</label>
                                         <input type="tel" class="form-control" name="phone" value="<?php echo htmlspecialchars($user->phone ?? ''); ?>">
+                                        <!-- Debug: <?php echo "DEBUG: phone = '" . ($user->phone ?? 'NULL') . "'"; ?> -->
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label fw-semibold">Ngày sinh</label>
                                         <input type="date" class="form-control" name="date_of_birth" value="<?php echo $user->date_of_birth ?? ''; ?>">
+                                        <!-- Debug: <?php echo "DEBUG: date_of_birth = '" . ($user->date_of_birth ?? 'NULL') . "'"; ?> -->
                                     </div>
                                 </div>
                                 
@@ -332,12 +334,45 @@
                                             <option value="female" <?php echo ($user->gender ?? '') === 'female' ? 'selected' : ''; ?>>Nữ</option>
                                             <option value="other" <?php echo ($user->gender ?? '') === 'other' ? 'selected' : ''; ?>>Khác</option>
                                         </select>
+                                        <!-- Debug: <?php echo "DEBUG: gender = '" . ($user->gender ?? 'NULL') . "'"; ?> -->
                                     </div>
                                 </div>
                                 
-                                <div class="mb-3">
+                                <!-- Address Section with UX -->
+                                <div class="mb-4">
                                     <label class="form-label fw-semibold">Địa chỉ</label>
-                                    <textarea class="form-control" name="address" rows="3" placeholder="Nhập địa chỉ của bạn"><?php echo htmlspecialchars($user->address ?? ''); ?></textarea>
+                                    
+                                    <!-- Country (Fixed) -->
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Quốc gia</label>
+                                        <input type="text" class="form-control" value="Việt Nam" readonly>
+                                        <input type="hidden" name="country" value="Vietnam">
+                                    </div>
+                                    
+                                    <!-- Province/City -->
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Tỉnh/Thành phố <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="provinceSelect" name="province" required>
+                                            <option value="">Chọn tỉnh/thành phố...</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Ward (directly under Province) -->
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Phường/Xã/Thị trấn <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="wardSelect" name="ward" required disabled>
+                                            <option value="">Chọn phường/xã/thị trấn...</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Street Address -->
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Số nhà, tên đường <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="street" 
+                                               placeholder="Ví dụ: 123 Nguyễn Du" 
+                                               value="<?php echo htmlspecialchars(($defaultAddress && isset($defaultAddress->street)) ? $defaultAddress->street : ''); ?>" required>
+                                        <div class="form-text">Nhập số nhà và tên đường chi tiết</div>
+                                    </div>
                                 </div>
                                 
                                 <button type="submit" class="btn btn-primary">
@@ -720,6 +755,109 @@
             } catch (error) {
                 console.error('Error removing from wishlist:', error);
                 showAlert(document.getElementById('alertContainer'), false, 'Có lỗi xảy ra khi xóa sản phẩm!');
+            }
+        }
+        
+        // ================ ADDRESS LOCATION HANDLERS ================
+        
+        // Load provinces on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProvinces();
+        });
+        
+        // Load provinces
+        async function loadProvinces() {
+            try {
+                const response = await fetch('/Ecom_website/api/locations/provinces');
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const provinceSelect = document.getElementById('provinceSelect');
+                    provinceSelect.innerHTML = '<option value="">Chọn tỉnh/thành phố...</option>';
+                    
+                    result.data.forEach(province => {
+                        const option = document.createElement('option');
+                        option.value = province.code;
+                        option.textContent = province.name;
+                        option.dataset.fullName = province.full_name || province.name;
+                        provinceSelect.appendChild(option);
+                    });
+                    
+                    // Set current province if exists
+                    const currentProvince = "<?php echo ($defaultAddress && isset($defaultAddress->province)) ? $defaultAddress->province : ''; ?>";
+                    if (currentProvince) {
+                        // Try to match by code first, then by name
+                        let foundOption = Array.from(provinceSelect.options).find(option => 
+                            option.value === currentProvince || 
+                            option.textContent === currentProvince ||
+                            (option.dataset.fullName && option.dataset.fullName === currentProvince)
+                        );
+                        
+                        if (foundOption) {
+                            provinceSelect.value = foundOption.value;
+                            loadWardsByProvince(foundOption.value);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading provinces:', error);
+            }
+        }
+        
+        // Province change handler
+        document.getElementById('provinceSelect').addEventListener('change', function() {
+            const provinceCode = this.value;
+            const wardSelect = document.getElementById('wardSelect');
+            
+            // Reset wards
+            wardSelect.innerHTML = '<option value="">Chọn phường/xã/thị trấn...</option>';
+            
+            if (provinceCode) {
+                wardSelect.disabled = false;
+                loadWardsByProvince(provinceCode);
+            } else {
+                wardSelect.disabled = true;
+            }
+        });
+        
+        // Load wards directly by province code (modern structure)
+        async function loadWardsByProvince(provinceCode) {
+            try {
+                const response = await fetch(`/Ecom_website/api/locations/wards?province_code=${provinceCode}`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const wardSelect = document.getElementById('wardSelect');
+                    wardSelect.innerHTML = '<option value="">Chọn phường/xã/thị trấn...</option>';
+                    
+                    result.data.forEach(ward => {
+                        const option = document.createElement('option');
+                        option.value = ward.code;
+                        option.textContent = ward.district_name ? `${ward.name} (${ward.district_name})` : ward.name;
+                        option.dataset.fullName = ward.full_name || ward.name;
+                        option.dataset.districtName = ward.district_name || '';
+                        wardSelect.appendChild(option);
+                    });
+                    
+                    // Set current ward if exists
+                    const currentWard = "<?php echo ($defaultAddress && isset($defaultAddress->ward)) ? $defaultAddress->ward : ''; ?>";
+                    if (currentWard) {
+                        // Try to match by code first, then by name
+                        setTimeout(() => {
+                            let foundWardOption = Array.from(wardSelect.options).find(option => 
+                                option.value === currentWard || 
+                                option.textContent === currentWard ||
+                                (option.dataset.fullName && option.dataset.fullName === currentWard)
+                            );
+                            
+                            if (foundWardOption) {
+                                wardSelect.value = foundWardOption.value;
+                            }
+                        }, 500); // Wait for wards to load
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading wards:', error);
             }
         }
     </script>
