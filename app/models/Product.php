@@ -53,6 +53,26 @@ class Product extends BaseModel {
     }
     
     /**
+     * Get primary image URL for a product
+     */
+    public function getPrimaryImageUrl($productId) {
+        $sql = "SELECT i.file_path 
+                FROM images i 
+                JOIN image_usages iu ON i.image_id = iu.image_id 
+                WHERE iu.ref_type = 'product' 
+                AND iu.ref_id = :product_id 
+                AND iu.is_primary = 1 
+                LIMIT 1";
+        
+        $this->db->query($sql);
+        $this->db->bind(':product_id', $productId);
+        $result = $this->db->single();
+        
+        // Return image URL or default fallback
+        return $result ? $result->file_path : 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=100&h=100&fit=crop';
+    }
+
+    /**
      * UPDATE - Cập nhật sản phẩm (sử dụng SP)
      */
     public function update($id, $data) {
@@ -130,18 +150,26 @@ class Product extends BaseModel {
     }
     
     /**
-     * READ - Kiểm tra stock từ variant (sử dụng SP)
-     * (Loại bỏ logic debug)
+     * READ - Kiểm tra stock từ variant thực tế
      */
     public function checkStock($productId, $size, $color, $quantity) {
-        $sql = "CALL sp_product_checkStock(:product_id, :size, :color)";
+        // Check if specific variant has enough stock
+        $sql = "SELECT pv.stock
+                FROM product_variants pv 
+                JOIN products p ON pv.product_id = p.product_id 
+                WHERE pv.product_id = :product_id 
+                AND pv.size = :size 
+                AND pv.color = :color 
+                AND p.is_active = 1";
+        
         $this->db->query($sql);
         $this->db->bind(':product_id', $productId);
         $this->db->bind(':size', $size);
         $this->db->bind(':color', $color);
+        
         $result = $this->db->single();
         
-        // Logic kiểm tra số lượng vẫn nằm ở PHP
+        // Return true if variant exists and has enough stock
         return $result && $result->stock >= $quantity;
     }
     

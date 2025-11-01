@@ -21,18 +21,27 @@ class CheckoutController extends BaseController {
         $cartItems = [];
         $cartSummary = [];
         
-        // Check if this is buy now checkout
-        if (isset($_SESSION['buy_now_item'])) {
+        // Check if this is a buy now checkout (via URL parameter or specific session)
+        $isCartCheckout = isset($_GET['cart']);
+        $isBuyNow = isset($_GET['buy_now']) || (!$isCartCheckout && isset($_SESSION['buy_now_item']) && empty($_SESSION['cart']));
+        
+        if ($isBuyNow && isset($_SESSION['buy_now_item'])) {
+            // Buy now checkout
             $cartItems = [$this->getBuyNowItem()];
             $cartSummary = $this->calculateBuyNowSummary($_SESSION['buy_now_item']);
         } else {
-            // Regular cart checkout
+            // Regular cart checkout - prioritize cart over buy_now_item
             if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
                 header('Location: /Ecom_website/cart');
                 exit;
             }
             $cartItems = $this->getCartItems();
             $cartSummary = $this->calculateCartSummary($cartItems);
+            
+            // Clear buy_now_item if we're doing cart checkout
+            if (isset($_SESSION['buy_now_item'])) {
+                unset($_SESSION['buy_now_item']);
+            }
         }
 
         // Get user info if logged in

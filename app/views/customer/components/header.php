@@ -122,44 +122,6 @@ $user = SessionHelper::getUser();
     </div>
 </nav>
 
-<!-- Additional Styles for User Navigation -->
-<style>
-/* .navbar {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-} */
-
-/* .navbar-brand {
-    font-weight: bold;
-    font-size: 1.5rem;
-   
-} */
-
-/* .navbar-nav .nav-link {
-    font-weight: 500;
-    margin: 0 5px;
-    transition: color 0.3s ease;
-} */
-
-/* .navbar-nav .nav-link:hover {
-    color: #667eea !important;
-} */
-
-/* .search-input {
-    border-radius: 20px 0 0 20px;
-    border-right: none;
-} */
-
-/* .search-input:focus {
-    box-shadow: none;
-    border-color: #667eea;
-} */
-
-
-</style>
-
 <!-- JavaScript for User Actions -->
 <script>
 // Logout function
@@ -242,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 collectionsDiv.innerHTML = '';
                 data.data.forEach(collection => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<a class="dropdown-item" href="<?= url('/products') ?>?collection=${collection.collection_id}">${collection.name}</a>`;
+                    li.innerHTML = `<a class="dropdown-item" href="<?= url('/products') ?>?collection=${collection.collection_id}">${collection.collection_name}</a>`;
                     collectionsDiv.appendChild(li);
                 });
             }
