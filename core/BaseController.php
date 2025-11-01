@@ -19,14 +19,15 @@ class BaseController{
     }
     
     protected function jsonResponse($success = true, $message = '', $data = null) {
-        // Clear any previous output
-        if (ob_get_length()) {
-            ob_clean();
+        // Clear all output buffers
+        while (ob_get_level()) {
+            ob_end_clean();
         }
         
         // Set headers if not already sent
         if (!headers_sent()) {
             header('Content-Type: application/json; charset=utf-8');
+            header('Cache-Control: no-cache, must-revalidate');
         }
         
         $response = [
@@ -38,7 +39,12 @@ class BaseController{
             $response['data'] = $data;
         }
         
-        echo json_encode($response, JSON_UNESCAPED_UNICODE);
+        $json = json_encode($response, JSON_UNESCAPED_UNICODE);
+        
+        // Debug log để kiểm tra
+        error_log("JSON Response: " . $json);
+        
+        echo $json;
         exit;
     }
 }

@@ -103,107 +103,26 @@ class Category extends BaseModel {
     // =================== CATEGORY IMAGE METHODS ===================
     
     /**
-     * Get all images for a category
+     * Get category banner image URL
      */
-    public function getCategoryImages($categoryId) {
-        $sql = "SELECT i.*, iu.usage_id, iu.ref_type, iu.ref_id, iu.is_primary
+    public function getCategoryBanner($categoryId) {
+        $sql = "SELECT i.file_path
                 FROM images i 
                 JOIN image_usages iu ON i.image_id = iu.image_id 
-                WHERE iu.ref_type = 'category' 
+                WHERE iu.ref_type = 'banner' 
                 AND iu.ref_id = :category_id 
-                ORDER BY iu.is_primary DESC, iu.created_at ASC";
+                ORDER BY iu.is_primary DESC, iu.created_at ASC
+                LIMIT 1";
         
         $this->db->query($sql);
         $this->db->bind(':category_id', $categoryId);
+        $result = $this->db->single();
         
-        return $this->db->resultSet();
+        return $result ? $result->file_path : null;
     }
     
     /**
-     * Get category banner (primary image)
-     */
-    public function getCategoryBanner($categoryId) {
-        $images = $this->getCategoryImages($categoryId);
-        return $images ? $images[0] : null;
-    }
-    
-    /**
-     * Add banner to category (replaces existing)
-     */
-    public function addCategoryBanner($categoryId, $imagePath) {
-        // Delete existing banner first (categories usually have 1 banner)
-        $this->deleteAllCategoryImages($categoryId);
-        
-        // Insert into images table first
-        $this->db->query("INSERT INTO images (file_path, file_name, alt_text, created_at) VALUES (:path, :name, :alt, NOW())");
-        $this->db->bind(':path', $imagePath);
-        $this->db->bind(':name', basename($imagePath));
-        $this->db->bind(':alt', basename($imagePath));
-        
-        if (!$this->db->execute()) {
-            return false;
-        }
-        
-        $imageId = $this->db->lastInsertId();
-        
-        // Insert into image_usages table
-        $this->db->query("INSERT INTO image_usages (image_id, ref_type, ref_id, is_primary, created_at) 
-                         VALUES (:image_id, 'category', :ref_id, 1, NOW())");
-        $this->db->bind(':image_id', $imageId);
-        $this->db->bind(':ref_id', $categoryId);
-        
-        return $this->db->execute() ? $imageId : false;
-    }
-    
-    /**
-     * Delete a specific category image by usage_id
-     */
-    public function deleteCategoryImage($usageId) {
-        // Get image_id first
-        $this->db->query("SELECT image_id FROM image_usages WHERE usage_id = :usage_id");
-        $this->db->bind(':usage_id', $usageId);
-        $imageRecord = $this->db->single();
-        
-        if (!$imageRecord) return false;
-        
-        // Delete from image_usages
-        $this->db->query("DELETE FROM image_usages WHERE usage_id = :usage_id");
-        $this->db->bind(':usage_id', $usageId);
-        $result1 = $this->db->execute();
-        
-        // Check if image is used elsewhere
-        $this->db->query("SELECT COUNT(*) as count FROM image_usages WHERE image_id = :image_id");
-        $this->db->bind(':image_id', $imageRecord->image_id);
-        $usage_count = $this->db->single();
-        
-        // If not used elsewhere, delete from images table
-        if ($usage_count->count == 0) {
-            $this->db->query("DELETE FROM images WHERE image_id = :image_id");
-            $this->db->bind(':image_id', $imageRecord->image_id);
-            $this->db->execute();
-        }
-        
-        return $result1;
-    }
-    
-    /**
-     * Delete all images for a category
-     */
-    public function deleteAllCategoryImages($categoryId) {
-        $this->db->query("SELECT usage_id FROM image_usages 
-                         WHERE ref_type = 'category' AND ref_id = :category_id");
-        $this->db->bind(':category_id', $categoryId);
-        $usages = $this->db->resultSet();
-        
-        foreach ($usages as $usage) {
-            $this->deleteCategoryImage($usage->usage_id);
-        }
-        
-        return true;
-    }
-    
-    /**
-     * Get categories with their banners (for display purposes)
+     * Get categories with their banner images (for display purposes)
      */
     public function getAllCategoriesWithBanners($onlyActive = true) {
         $categories = $this->getAllCategories($onlyActive);
@@ -213,27 +132,5 @@ class Category extends BaseModel {
         }
         
         return $categories;
-    }
-    
-    /**
-     * Get single category with banner
-     */
-    public function getCategoryWithBanner($categoryId) {
-        $category = $this->findById($categoryId);
-        if ($category) {
-            $category->banner_image = $this->getCategoryBanner($categoryId);
-        }
-        return $category;
-    }
-    
-    /**
-     * Get category by slug with banner
-     */
-    public function getCategoryBySlugWithBanner($slug) {
-        $category = $this->findBySlug($slug);
-        if ($category) {
-            $category->banner_image = $this->getCategoryBanner($category->category_id);
-        }
-        return $category;
     }
 }

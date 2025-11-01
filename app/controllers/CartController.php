@@ -40,8 +40,8 @@ class CartController extends BaseController {
         try {
             $productId = (int)$_POST['product_id'];
             $quantity = (int)($_POST['quantity'] ?? 1);
-            $size = $_POST['size'] ?? null;
-            $color = $_POST['color'] ?? null;
+            $size = trim($_POST['size'] ?? '') ?: null;
+            $color = trim($_POST['color'] ?? '') ?: null;
 
             // Debug logging
             error_log("Cart Add Debug - Product ID: $productId, Size: '$size', Color: '$color', Quantity: $quantity");
@@ -60,7 +60,10 @@ class CartController extends BaseController {
 
             // Check stock from variants
             if (!$this->productModel->checkStock($productId, $size, $color, $quantity)) {
-                $this->jsonResponse(false, 'Số lượng hàng trong kho không đủ hoặc biến thể không tồn tại');
+                // Log chi tiết để debug
+                error_log("Stock check failed - Product ID: $productId, Size: '$size', Color: '$color', Quantity: $quantity");
+                
+                $this->jsonResponse(false, "Biến thể sản phẩm (Size: $size, Color: $color) không tồn tại hoặc không đủ hàng trong kho");
                 return;
             }
 
@@ -90,8 +93,8 @@ class CartController extends BaseController {
         try {
             $productId = (int)$_POST['product_id'];
             $quantity = (int)$_POST['quantity'];
-            $size = $_POST['size'] ?? null;
-            $color = $_POST['color'] ?? null;
+            $size = trim($_POST['size'] ?? '') ?: null;
+            $color = trim($_POST['color'] ?? '') ?: null;
 
             if ($productId <= 0) {
                 $this->jsonResponse(false, 'Dữ liệu không hợp lệ');
@@ -134,8 +137,8 @@ class CartController extends BaseController {
     public function remove() {
         try {
             $productId = (int)$_POST['product_id'];
-            $size = $_POST['size'] ?? null;
-            $color = $_POST['color'] ?? null;
+            $size = trim($_POST['size'] ?? '') ?: null;
+            $color = trim($_POST['color'] ?? '') ?: null;
 
             if ($productId <= 0) {
                 $this->jsonResponse(false, 'Dữ liệu không hợp lệ');
@@ -325,8 +328,8 @@ class CartController extends BaseController {
         try {
             $productId = (int)$_POST['product_id'];
             $quantity = (int)($_POST['quantity'] ?? 1);
-            $size = $_POST['size'] ?? null;
-            $color = $_POST['color'] ?? null;
+            $size = trim($_POST['size'] ?? '') ?: null;
+            $color = trim($_POST['color'] ?? '') ?: null;
 
             // Debug logging
             error_log("Cart BuyNow Debug - Product ID: $productId, Size: '$size', Color: '$color', Quantity: $quantity");
@@ -343,8 +346,12 @@ class CartController extends BaseController {
                 return;
             }
 
-            // For debugging, let's just skip stock check temporarily
-            error_log("Cart BuyNow - Bypassing stock check for testing");
+            // Check stock from variants
+            if (!$this->productModel->checkStock($productId, $size, $color, $quantity)) {
+                error_log("BuyNow stock check failed - Product ID: $productId, Size: '$size', Color: '$color', Quantity: $quantity");
+                $this->jsonResponse(false, "Biến thể sản phẩm (Size: $size, Color: $color) không tồn tại hoặc không đủ hàng trong kho");
+                return;
+            }
 
             // Store buy now item in separate session
             $_SESSION['buy_now_item'] = [

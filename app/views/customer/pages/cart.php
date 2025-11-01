@@ -292,13 +292,16 @@
                             <?php foreach ($cartItems as $item): ?>
                                 <div class="cart-item" data-cart-key="<?php echo $item['cart_key']; ?>">
                                     <div class="row align-items-center">
-                                        <div class="col-md-2">
-                                            <img src="<?php echo $item['product']->primary_image->file_path ?? '/public/assets/images/placeholder.jpg'; ?>" 
-                                                 alt="<?php echo htmlspecialchars($item['product']->name); ?>" 
-                                                 class="product-image">
-                                        </div>
-                                        
-                                        <div class="col-md-4">
+                        <div class="col-md-2">
+                            <?php 
+                                // Get primary image URL using the Product model method
+                                $productModel = new Product();
+                                $imageUrl = $productModel->getPrimaryImageUrl($item['product']->product_id);
+                            ?>
+                            <img src="<?php echo $imageUrl; ?>" 
+                                 alt="<?php echo htmlspecialchars($item['product']->name); ?>" 
+                                 class="product-image">
+                        </div>                                        <div class="col-md-4">
                                             <h6 class="fw-semibold mb-1"><?php echo htmlspecialchars($item['product']->name); ?></h6>
                                             <p class="text-muted small mb-1">Mã SP: <?php echo $item['product']->product_id; ?></p>
                                             <?php if ($item['size']): ?>
@@ -392,7 +395,7 @@
                         
                         <hr style="border-color: rgba(255,255,255,0.3);">
                         
-                        <a href="/Ecom_website/checkout" class="btn btn-primary mb-3">
+                        <a href="/Ecom_website/checkout?cart=1" class="btn btn-primary mb-3">
                             <i class="fas fa-credit-card me-2"></i>
                             Tiến hành thanh toán
                         </a>

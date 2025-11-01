@@ -24,7 +24,10 @@ class CustomerController extends BaseController {
             // Get data from Service Layer
             $newArrivals = $this->productService->getNewArrivals(8);
             $popularProducts = $this->productService->getPopularProducts(8);
-            $categories = $this->productService->getActiveCategories();
+            
+            // Get categories with banner images
+            $categoryModel = new Category();
+            $categories = $categoryModel->getAllCategoriesWithBanners();
             
             // Pass data to view
             $data = [

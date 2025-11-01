@@ -15,7 +15,9 @@ if (!function_exists('url')) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <html xmlns:th="http://www.thymeleaf.org">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link href="<?= asset('css/css.css?v=' . time()) ?>" rel="stylesheet">  
+    <link href="<?= asset('css/css.css?v=' . time()) ?>" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">  
     
 </head>
 <body>
@@ -510,6 +512,8 @@ if (!function_exists('url')) {
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+<!-- SweetAlert2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 <!-- Test if JS file loads -->
 <script src="<?= asset('js/product-detail.js') ?>" defer></script>
 
@@ -835,7 +839,27 @@ function addToCart() {
             'X-Requested-With': 'XMLHttpRequest'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+        
+        // Check if response is ok
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Get response text first to debug
+        return response.text().then(text => {
+            console.log('Raw response:', text);
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('JSON parse error:', e);
+                console.error('Raw text:', text);
+                throw new Error('Invalid JSON response from server');
+            }
+        });
+    })
     .then(data => {
         // Restore button state
         addToCartBtn.innerHTML = originalHtml;
@@ -848,20 +872,25 @@ function addToCart() {
             }
             
             // Show success message with action buttons
-            Swal.fire({
-                icon: 'success',
-                title: 'Thêm vào giỏ hàng thành công!',
-                text: `Đã thêm ${quantity} sản phẩm vào giỏ hàng`,
-                showCancelButton: true,
-                confirmButtonText: '<i class="fas fa-shopping-cart me-1"></i>Xem giỏ hàng',
-                cancelButtonText: 'Tiếp tục mua sắm',
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#6c757d'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = '<?= url('cart') ?>';
-                }
-            });
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thêm vào giỏ hàng thành công!',
+                    text: `Đã thêm ${quantity} sản phẩm vào giỏ hàng`,
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fas fa-shopping-cart me-1"></i>Xem giỏ hàng',
+                    cancelButtonText: 'Tiếp tục mua sắm',
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '<?= url('cart') ?>';
+                    }
+                });
+            } else {
+                // Fallback if SweetAlert2 not loaded
+                alert('Thêm vào giỏ hàng thành công!');
+            }
         } else {
             showToast('error', data.message || 'Có lỗi xảy ra khi thêm vào giỏ hàng');
         }
@@ -884,8 +913,8 @@ function buyNow() {
     const quantity = parseInt(document.getElementById('quantityInput').value) || 1;
     
     // Get selected options
-    const selectedColor = document.querySelector('.color-options .option-btn.active')?.textContent || '';
-    const selectedSize = document.querySelector('.size-options .option-btn.active')?.textContent || '';
+    const selectedColor = document.querySelector('.color-options .option-btn.active')?.textContent?.trim() || '';
+    const selectedSize = document.querySelector('.size-options .option-btn.active')?.textContent?.trim() || '';
     
     console.log('BuyNow - Selected Color:', selectedColor);
     console.log('BuyNow - Selected Size:', selectedSize);
@@ -940,9 +969,9 @@ function buyNow() {
                 updateCartBadge();
             }
             
-            // Redirect to checkout
+            // Redirect to checkout with buy_now parameter
             console.log('BuyNow - Redirecting to checkout...');
-            window.location.href = '<?= url('checkout') ?>';
+            window.location.href = '<?= url('checkout') ?>?buy_now=1';
         } else {
             console.log('BuyNow - Error:', data.message);
             showToast('error', data.message || 'Có lỗi xảy ra khi thêm vào giỏ hàng');
@@ -959,22 +988,27 @@ function buyNow() {
  * Show toast notification
  */
 function showToast(type, message) {
-    const Toast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-            toast.addEventListener('mouseenter', Swal.stopTimer)
-            toast.addEventListener('mouseleave', Swal.resumeTimer)
-        }
-    });
+    if (typeof Swal !== 'undefined') {
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
 
-    Toast.fire({
-        icon: type,
-        title: message
-    });
+        Toast.fire({
+            icon: type,
+            title: message
+        });
+    } else {
+        // Fallback if SweetAlert2 not loaded
+        alert(message);
+    }
 }
 
 /**
