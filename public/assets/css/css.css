@@ -244,7 +244,7 @@ body {
 }
 
 .badge {
-    font-size: 0.6em;
+    font-size: 0.8em;
 }
 
 @media (max-width: 991px) {
@@ -1486,6 +1486,10 @@ footer a:hover {
 }
 .list-card-product .text-muted.text-decoration-line-through {
   font-size: 0.95rem;
+}
+
+.text-primary {
+  color: var(--gold) !important;
 }
 .list-card-product .rating {
   font-size: 1.1rem;

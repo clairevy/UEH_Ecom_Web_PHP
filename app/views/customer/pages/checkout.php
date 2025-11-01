@@ -12,21 +12,29 @@ $userInfo = $data['userInfo'] ?? null;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?> - Jewelry Store</title>
     
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <html xmlns:th="http://www.thymeleaf.org">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="<?= asset('css/css.css?v=' . time()) ?>" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">  
+    
     
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: var(--cream);
+            background-image: linear-gradient(rgb(255, 255, 255), rgba(255, 255, 255, 0.755)),
+                url("https://images.unsplash.com/photo-1608042314453-ae338d80c427?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjR8fGpld2Vscnl8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600");
+            background-size: cover;
+            background-attachment: fixed;
         }
         
         .checkout-header {
-            background: white;
-            border-bottom: 1px solid #dee2e6;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             padding: 1.5rem 0;
         }
         
@@ -41,89 +49,127 @@ $userInfo = $data['userInfo'] ?? null;
             display: flex;
             align-items: center;
             margin: 0 1rem;
+            position: relative;
+        }
+        
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: -2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2rem;
+            height: 2px;
+            background: var(--light-gold);
         }
         
         .step-number {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: #dee2e6;
-            color: #6c757d;
+            background: var(--light-gray);
+            color: var(--dark-brown);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            margin-right: 0.5rem;
+            margin-right: 0.8rem;
+            border: 2px solid var(--light-gold);
+            transition: all 0.3s ease;
         }
         
         .step.active .step-number {
-            background: #0d6efd;
+            background: var(--gold);
             color: white;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+            transform: scale(1.1);
         }
         
         .step.completed .step-number {
-            background: #198754;
+            background: var(--dark-gold);
             color: white;
+            border-color: var(--dark-gold);
         }
         
         .checkout-card {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.2);
             margin-bottom: 1.5rem;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+        
+        .checkout-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(212, 175, 55, 0.15);
         }
         
         .checkout-card .card-header {
-            background: white;
-            border-bottom: 1px solid #dee2e6;
+            background: linear-gradient(45deg, var(--cream), white);
+            border-bottom: 2px solid var(--light-gold);
             border-radius: 15px 15px 0 0 !important;
-            padding: 1.25rem;
-        }
-        
-        .checkout-card .card-body {
             padding: 1.5rem;
         }
         
+        .checkout-card .card-body {
+            padding: 1.8rem;
+        }
+        
         .section-title {
-            color: #495057;
+            color: var(--dark-brown);
             font-weight: 600;
             margin-bottom: 0;
             display: flex;
             align-items: center;
+            font-size: 16px;
+            letter-spacing: 0.5px;
         }
         
         .section-title i {
-            width: 20px;
-            margin-right: 0.5rem;
-            color: #0d6efd;
+            width: 24px;
+            margin-right: 0.8rem;
+            color: var(--gold);
         }
         
         .payment-option {
             transition: all 0.3s ease;
             cursor: pointer;
+            background: white;
+            border: 2px solid rgba(212, 175, 55, 0.2) !important;
         }
         
         .payment-option:hover {
-            border-color: #0d6efd !important;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+            border-color: var(--gold) !important;
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.15);
+            transform: translateY(-2px);
         }
         
         .form-check-input:checked + .form-check-label .payment-option {
-            border-color: #0d6efd !important;
-            background-color: rgba(13, 110, 253, 0.1);
+            border-color: var(--gold) !important;
+            background: linear-gradient(45deg, var(--cream), white);
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--gold);
+            border-color: var(--gold);
         }
         
         .summary-card {
             position: sticky;
             top: 100px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.98));
+            border: 1px solid var(--light-gold);
         }
         
         .summary-row {
             display: flex;
             justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #f1f3f4;
+            padding: 0.9rem 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+            color: var(--dark-brown);
+            font-size: 0.95rem;
         }
         
         .summary-row:last-child {
@@ -131,18 +177,29 @@ $userInfo = $data['userInfo'] ?? null;
         }
         
         .summary-row.total {
-            font-weight: bold;
-            font-size: 1.1rem;
-            border-top: 2px solid #dee2e6;
+            font-weight: 700;
+            font-size: 1.2rem;
+            border-top: 2px solid var(--light-gold);
             margin-top: 1rem;
-            padding-top: 1rem;
+            padding-top: 1.2rem;
+            color: var(--dark-brown);
+        }
+        
+        .summary-row.total span:last-child {
+            color: var(--gold);
         }
         
         .product-item {
             display: flex;
             align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid #f1f3f4;
+            padding: 1.2rem 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .product-item:hover {
+            transform: translateX(5px);
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.05));
         }
         
         .product-item:last-child {
@@ -150,44 +207,90 @@ $userInfo = $data['userInfo'] ?? null;
         }
         
         .product-image {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             object-fit: cover;
-            border-radius: 8px;
-            margin-right: 1rem;
+            border-radius: 10px;
+            margin-right: 1.2rem;
+            border: 2px solid var(--light-gold);
+            transition: all 0.3s ease;
+        }
+        
+        .product-item:hover .product-image {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2);
         }
         
         .btn-checkout {
-            background: #0d6efd;
+            background: var(--gold);
             border: none;
-            padding: 1rem 2rem;
+            padding: 1.2rem 2rem;
             border-radius: 10px;
             font-weight: 600;
             font-size: 1.1rem;
             width: 100%;
             transition: all 0.3s ease;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-checkout::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
         }
         
         .btn-checkout:hover {
-            background: #0b5ed7;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+            background: var(--dark-gold);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+        }
+        
+        .btn-checkout:hover::before {
+            left: 100%;
         }
         
         .form-control, .form-select {
-            border: 2px solid #e9ecef;
+            border: 2px solid rgba(212, 175, 55, 0.2);
             border-radius: 8px;
-            padding: 0.75rem;
-            transition: border-color 0.3s ease;
+            padding: 0.85rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--dark-brown);
+            font-size: 0.95rem;
         }
         
         .form-control:focus, .form-select:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+            border-color: var(--gold);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+            background: white;
+        }
+        
+        .form-control::placeholder {
+            color: #999;
+            font-style: italic;
+        }
+        
+        .form-label {
+            color: var(--dark-brown);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
         }
         
         .invalid-feedback {
             display: block;
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 0.4rem;
         }
         
         @media (max-width: 768px) {

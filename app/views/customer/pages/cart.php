@@ -144,7 +144,7 @@
             color: var(--gold);
         }
         
-        .btn-primary,  {
+        .btn-primary {
             background: var(--gold);
             color: white;
             border: none;
