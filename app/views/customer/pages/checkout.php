@@ -504,9 +504,14 @@ $userInfo = $data['userInfo'] ?? null;
                             <?php if (!empty($cartItems)): ?>
                                 <?php foreach ($cartItems as $item): ?>
                                     <div class="product-item">
-                                        <img src="<?= $item['product']->primary_image->file_path ?? '/public/assets/images/placeholder.jpg' ?>" 
-                                             alt="<?= htmlspecialchars($item['product']->name) ?>"
-                                             class="product-image">
+                                          <?php 
+                                // Get primary image URL using the Product model method
+                                           $productModel = new Product();
+                                            $imageUrl = $productModel->getPrimaryImageUrl($item['product']->product_id);
+                                        ?>
+                                             <img src="<?php echo $imageUrl; ?>" 
+                                              alt="<?php echo htmlspecialchars($item['product']->name); ?>" 
+                                              class="product-image">
                                         <div class="flex-grow-1">
                                             <div class="fw-semibold mb-1"><?= htmlspecialchars($item['product']->name) ?></div>
                                             <div class="text-muted small mb-2">

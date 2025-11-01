@@ -303,10 +303,15 @@
                                 <div class="cart-item" data-cart-key="<?php echo $item['cart_key']; ?>">
                                     <div class="row align-items-center">
                                         <div class="col-md-2">
-                                            <img src="<?php echo $item['product']->primary_image->file_path ?? '/public/assets/images/placeholder.jpg'; ?>" 
-                                                 alt="<?php echo htmlspecialchars($item['product']->name); ?>" 
-                                                 class="product-image">
-                                        </div>
+                            <?php 
+                                // Get primary image URL using the Product model method
+                                $productModel = new Product();
+                                $imageUrl = $productModel->getPrimaryImageUrl($item['product']->product_id);
+                            ?>
+                            <img src="<?php echo $imageUrl; ?>" 
+                                 alt="<?php echo htmlspecialchars($item['product']->name); ?>" 
+                                 class="product-image">
+                        </div>                                       
                                         
                                         <div class="col-md-4">
                                             <h6 class="fw-semibold mb-1"><?php echo htmlspecialchars($item['product']->name); ?></h6>
