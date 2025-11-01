@@ -181,15 +181,8 @@
         .empty-cart {
             text-align: center;
             padding: 60px 20px;
-        }
-        
-        .empty-cart i {
-            /* font-size: 4rem;
-            color: var(--gold);
-            margin-bottom: 20px;
-            opacity: 0.5; */
-    
-        }
+        }      
+      
         
         .empty-cart h4 {
             color: var(--dark-brown);
