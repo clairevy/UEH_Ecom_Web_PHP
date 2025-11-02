@@ -19,8 +19,7 @@ class LocationController extends BaseController {
         }
     }
     public function getWards() {
-        try {
-            // 1. Lấy mã tỉnh từ JavaScript (thử cả 'province' và 'province_code')
+        try {            // 1. Lấy mã tỉnh từ JavaScript (thử cả 'province' và 'province_code')
             $provinceCode = $_GET['province'] ?? $_GET['province_code'] ?? ''; 
             
             if (empty($provinceCode) || !is_numeric($provinceCode)) {
