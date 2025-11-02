@@ -133,6 +133,9 @@ class AuthController extends BaseController {
             // Create session
             $this->createUserSession($user);
 
+            // Load user's previous cart from database
+            $this->loadUserCartFromDatabase($user->user_id);
+
             $this->jsonResponse(true, 'Đăng nhập thành công', [
                 'redirect' => '/Ecom_website/'
             ]);
@@ -198,7 +201,16 @@ class AuthController extends BaseController {
      * Handle logout
      */
     public function logout() {
+        // Lưu cart của user vào database trước khi logout (nếu có)
+        if (SessionHelper::isLoggedIn() && isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
+            $this->saveUserCartToDatabase();
+        }
+        
+        // Xóa user session
         SessionHelper::destroyUserSession();
+        
+        // Reset cart về trống cho guest user
+        unset($_SESSION['cart']);
         
         if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
             $this->jsonResponse(true, 'Đăng xuất thành công');
@@ -500,6 +512,227 @@ class AuthController extends BaseController {
      */
     private function createUserSession($user) {
         SessionHelper::createUserSession($user);
+    }
+
+    /**
+     * Save user cart to database before logout
+     */
+    private function saveUserCartToDatabase() {
+        try {
+            $userId = SessionHelper::getUserId();
+            
+            if (empty($_SESSION['cart'])) {
+                return; // No cart to save
+            }
+            
+            require_once __DIR__ . '/../models/Cart.php';
+            require_once __DIR__ . '/../models/Product.php';
+            
+            $cartModel = new Cart();
+            $productModel = new Product();
+            
+            // Get or create user cart in database
+            $cart = $cartModel->getCartByUser($userId);
+            if (!$cart) {
+                $cartId = $cartModel->createCart($userId);
+            } else {
+                $cartId = $cart->cart_id;
+                // Clear existing items
+                $cartModel->clearCart($cartId);
+            }
+            
+            if ($cartId) {
+                // Save each session cart item to database with variant info
+                foreach ($_SESSION['cart'] as $cartKey => $cartItem) {
+                    $product = $productModel->findById($cartItem['product_id']);
+                    if ($product) {
+                        $this->insertCartItemWithVariants(
+                            $cartId,
+                            $cartItem['product_id'],
+                            $product->base_price,
+                            $cartItem['quantity'],
+                            $cartItem['size'],
+                            $cartItem['color']
+                        );
+                    }
+                }
+            }
+            
+            error_log("Cart saved to database for user $userId");
+            
+        } catch (Exception $e) {
+            error_log("Error saving user cart: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Load user cart from database after login
+     */
+    private function loadUserCartFromDatabase($userId) {
+        try {
+            // Load user cart from database using simple approach
+            $cartData = $this->getUserCartFromDatabase($userId);
+            
+            if ($cartData && !empty($cartData)) {
+                $_SESSION['cart'] = $cartData;
+            } else {
+                // Start with empty cart if no saved cart found
+                $_SESSION['cart'] = [];
+            }
+            
+        } catch (Exception $e) {
+            error_log("Error loading user cart: " . $e->getMessage());
+            $_SESSION['cart'] = []; // Fallback to empty cart
+        }
+    }
+
+    /**
+     * Get user cart data from database
+     */
+    private function getUserCartFromDatabase($userId) {
+        try {
+            require_once __DIR__ . '/../models/Cart.php';
+            require_once __DIR__ . '/../models/Product.php';
+            
+            $cartModel = new Cart();
+            $productModel = new Product();
+            
+            // Get user cart from database
+            $cart = $cartModel->getCartByUser($userId);
+            if (!$cart) {
+                return []; // No cart found
+            }
+            
+            // Get cart items
+            $cartItems = $cartModel->getCartItems($cart->cart_id);
+            if (empty($cartItems)) {
+                return []; // Empty cart
+            }
+            
+            // Convert database cart items to session cart format
+            $sessionCart = [];
+            foreach ($cartItems as $item) {
+                // Get variant info from variant_id
+                $variantInfo = $this->getVariantInfo($item->variant_id ?? null);
+                $size = $variantInfo['size'];
+                $color = $variantInfo['color'];
+                
+                // Use the same key generation as in CartController
+                $cartKey = $item->product_id . '_' . ($size ?? 'default') . '_' . ($color ?? 'default');
+                
+                $sessionCart[$cartKey] = [
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'size' => $size,
+                    'color' => $color,
+                    'added_at' => strtotime($item->added_at)
+                ];
+            }
+            
+            return $sessionCart;
+            
+        } catch (Exception $e) {
+            error_log("Error getting user cart from database: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get or create variant_id based on size and color
+     */
+    private function getOrCreateVariantId($productId, $size, $color) {
+        if (!$size && !$color) {
+            return null; // No variant needed
+        }
+        
+        try {
+            require_once __DIR__ . '/../../configs/database.php';
+            $db = Database::getInstance();
+            
+            // Try to find existing variant
+            $db->query("SELECT variant_id FROM product_variants WHERE product_id = :product_id AND size = :size AND color = :color");
+            $db->bind(':product_id', $productId);
+            $db->bind(':size', $size);
+            $db->bind(':color', $color);
+            $result = $db->single();
+            
+            if ($result) {
+                return $result->variant_id;
+            }
+            
+            // Create new variant if not exists
+            $db->query("INSERT INTO product_variants (product_id, size, color, stock_quantity, price) VALUES (:product_id, :size, :color, 0, 0)");
+            $db->bind(':product_id', $productId);
+            $db->bind(':size', $size);
+            $db->bind(':color', $color);
+            $db->execute();
+            
+            return $db->lastInsertId();
+            
+        } catch (Exception $e) {
+            error_log("Error getting/creating variant: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Get variant info (size, color) from variant_id
+     */
+    private function getVariantInfo($variantId) {
+        if (!$variantId) {
+            return ['size' => null, 'color' => null];
+        }
+        
+        try {
+            require_once __DIR__ . '/../../configs/database.php';
+            $db = Database::getInstance();
+            
+            $db->query("SELECT size, color FROM product_variants WHERE variant_id = :variant_id");
+            $db->bind(':variant_id', $variantId);
+            $result = $db->single();
+            
+            if ($result) {
+                return [
+                    'size' => $result->size,
+                    'color' => $result->color
+                ];
+            }
+            
+            return ['size' => null, 'color' => null];
+            
+        } catch (Exception $e) {
+            error_log("Error getting variant info: " . $e->getMessage());
+            return ['size' => null, 'color' => null];
+        }
+    }
+
+    /**
+     * Insert cart item with variant_id
+     */
+    private function insertCartItemWithVariants($cartId, $productId, $price, $quantity, $size = null, $color = null) {
+        try {
+            $variantId = $this->getOrCreateVariantId($productId, $size, $color);
+            
+            require_once __DIR__ . '/../../configs/database.php';
+            $db = Database::getInstance();
+            
+            // Insert cart item with variant_id
+            $db->query("INSERT INTO cart_items (cart_id, product_id, variant_id, quantity, price, added_at, created_at, updated_at) 
+                       VALUES (:cart_id, :product_id, :variant_id, :quantity, :price, NOW(), NOW(), NOW())");
+            
+            $db->bind(':cart_id', $cartId);
+            $db->bind(':product_id', $productId);
+            $db->bind(':variant_id', $variantId);
+            $db->bind(':quantity', $quantity);
+            $db->bind(':price', $price);
+            $db->execute();
+            
+            return true;
+            
+        } catch (Exception $e) {
+            error_log("Error inserting cart item: " . $e->getMessage());
+            return false;
+        }
     }
 }
 ?>

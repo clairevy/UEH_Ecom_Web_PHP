@@ -85,6 +85,8 @@ class SessionHelper {
      */
     public static function destroyUserSession() {
         self::start();
+        
+        // Chỉ xóa thông tin user, giữ lại cart và other session data
         unset($_SESSION['user_id']);
         unset($_SESSION['user_email']);
         unset($_SESSION['user_name']);
@@ -94,9 +96,9 @@ class SessionHelper {
         unset($_SESSION['role_id']);
         unset($_SESSION['logged_in']);
         unset($_SESSION['login_time']);
+        unset($_SESSION['last_activity']);
         
-        // Xóa toàn bộ session
-        session_destroy();
+        // Không xóa cart - cart vẫn được bảo toàn cho guest user
     }
     
     /**
