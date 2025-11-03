@@ -68,7 +68,7 @@ class CollectionController extends BaseController {
                     $product->main_image = $product->image_array[0];
                 } else {
                     $product->image_array = [];
-                    $product->main_image = '/public/assets/images/placeholder.svg';
+                    $product->main_image = 'assets/images/placeholder.svg';
                 }
             }
 
@@ -116,7 +116,7 @@ class CollectionController extends BaseController {
                     'description' => $product->description,
                     'category_name' => $product->category_name,
                     'images' => $images,
-                    'main_image' => !empty($images) ? $images[0] : '/public/assets/images/placeholder.svg'
+                    'main_image' => !empty($images) ? $images[0] : 'assets/images/placeholder.svg'
                 ];
             }
 

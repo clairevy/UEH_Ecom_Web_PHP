@@ -5,20 +5,6 @@ class Order extends BaseModel {
     protected $primaryKey = 'order_id';
 
     public function createOrder($data) {
-        try {
-            // Start transaction
-            $this->db->beginTransaction();
-
-            // Create cart service for stock validation
-            $cartService = new CartService();
-            
-            // Validate order items stock
-            $stockErrors = $cartService->validateCartStock($data['items']);
-            if (!empty($stockErrors)) {
-                throw new Exception(implode("\n", $stockErrors));
-            }
-
-        // Create order (include payment_method column)
         $this->db->query("INSERT INTO " . $this->table . " 
                          (user_id, full_name, email, phone, street, ward, province, country, 
                           order_status, shipping_fee, total_amount, discount_code, discount_amount, notes, created_at, updated_at) 
@@ -149,6 +135,12 @@ class Order extends BaseModel {
         return $result->total;
     }
 
+    public function getAllOrders(){
+        $this->db->query("SELECT o.*, u.name as user_name FROM " . $this->table . " o 
+                         LEFT JOIN users u ON o.user_id = u.user_id 
+                         ORDER BY o.created_at DESC");
+        return $this->db->resultSet();
+    }
 
     public function getOrderDetails($orderId) {
         $this->db->query("SELECT o.*, u.name as user_name, u.email as user_email 
@@ -161,36 +153,13 @@ class Order extends BaseModel {
 
     // Get order items
     public function getOrderItems($orderId) {
-        $this->db->query("SELECT oi.*, p.name as product_name, p.base_price, pv.size AS variant_size, pv.color AS variant_color, pv.price AS variant_price 
+        $this->db->query("SELECT oi.*, p.name as product_name, p.base_price, pv.variant_id, pv.price 
                          FROM order_items oi 
                          JOIN products p ON oi.product_id = p.product_id 
                          LEFT JOIN product_variants pv ON oi.variant_id = pv.variant_id 
                          WHERE oi.order_id = :order_id");
         $this->db->bind(':order_id', $orderId);
-        $items = $this->db->resultSet();
-
-        // Normalize variant display name for views (keep presentation data out of controllers)
-        if (!empty($items)) {
-            foreach ($items as $idx => $it) {
-                $variantParts = [];
-                if (!empty($it->variant_size)) {
-                    $variantParts[] = 'Size: ' . $it->variant_size;
-                }
-                if (!empty($it->variant_color)) {
-                    $variantParts[] = 'Color: ' . $it->variant_color;
-                }
-
-                $it->variant_name = !empty($variantParts) ? implode(' / ', $variantParts) : null;
-                // Provide a unit_price_snapshot fallback if missing
-                if (empty($it->unit_price_snapshot) && !empty($it->variant_price)) {
-                    $it->unit_price_snapshot = $it->variant_price;
-                }
-
-                $items[$idx] = $it;
-            }
-        }
-
-        return $items;
+        return $this->db->resultSet();
     }
 
     // Add item to order
@@ -203,10 +172,7 @@ class Order extends BaseModel {
         $this->db->bind(':product_id', $orderData['product_id']);
         $this->db->bind(':variant_id', $orderData['variant_id'] ?? null);
         $this->db->bind(':quantity', $orderData['quantity']);
-
-
         $this->db->bind(':unit_price_snapshot', $orderData['unit_price']);
-
         $this->db->bind(':total_price', $orderData['total_price']);
         
         return $this->db->execute();
@@ -289,28 +255,16 @@ class Order extends BaseModel {
                          GROUP BY order_status");
         return $this->db->resultSet();
     }
-
-    /**
-     * Lấy tất cả đơn hàng với thông tin chi tiết
-     */
-    public function getAllOrders() {
-        $sql = "SELECT o.*, u.name as customer_name, u.email as customer_email,
-                       oi.product_id, oi.quantity, p.name as product_name, img.file_path as primary_image
-                FROM {$this->table} o 
-                LEFT JOIN users u ON o.user_id = u.user_id
-                LEFT JOIN order_items oi ON o.order_id = oi.order_id
-                LEFT JOIN products p ON oi.product_id = p.product_id
-                LEFT JOIN image_usages iu ON p.product_id = iu.ref_id AND iu.ref_type = 'product' AND iu.is_primary = 1
-                LEFT JOIN images img ON iu.image_id = img.image_id
-                ORDER BY o.created_at DESC";
+     public function getTotalCount() {
+        $sql = "SELECT COUNT(*) as total FROM {$this->table}";
         $this->db->query($sql);
-        return $this->db->resultSet();
+        $result = $this->db->single();
+        return $result ? (int)$result->total : 0;
     }
-
-    /**
-     * Lấy đơn hàng gần đây
-     */
-    public function getRecentOrders($limit = 10) {
+    public function getTotalRevenue() {
+        return $this->calculateTotalRevenue();
+    }
+       public function getRecentOrders($limit = 10) {
         $sql = "SELECT o.*, u.name as customer_name, u.email as customer_email
                 FROM {$this->table} o 
                 LEFT JOIN users u ON o.user_id = u.user_id
@@ -320,64 +274,5 @@ class Order extends BaseModel {
         $this->db->bind(':limit', $limit, PDO::PARAM_INT);
         return $this->db->resultSet();
     }
-
-    /**
-     * Đếm tổng số đơn hàng
-     */
-    public function getTotalCount() {
-        $sql = "SELECT COUNT(*) as total FROM {$this->table}";
-        $this->db->query($sql);
-        $result = $this->db->single();
-        return $result ? (int)$result->total : 0;
-    }
-
-    /**
-     * Cập nhật trạng thái đơn hàng
-     */
-    public function updateStatus($id, $status) {
-        return $this->updateOrderStatus($id, $status);
-    }
-
-    /**
-     * Cập nhật trạng thái thanh toán
-     * @param int $id Order ID
-     * @param string $status Payment status (paid, unpaid)
-     * @return bool
-     */
-    public function updatePaymentStatus($id, $status) {
-        $validStatuses = ['paid', 'unpaid'];
-        if (!in_array($status, $validStatuses)) {
-            return false;
-        }
-        
-        $this->db->query("UPDATE " . $this->table . " 
-                         SET payment_status = :status, updated_at = NOW() 
-                         WHERE order_id = :id");
-        $this->db->bind(':status', $status);
-        $this->db->bind(':id', $id);
-        return $this->db->execute();
-    }
-
-    /**
-     * Lấy thông tin đơn hàng với email khách hàng
-     * Dùng để gửi email confirmation
-     * @param int $id Order ID
-     * @return object|null
-     */
-    public function getOrderWithCustomerEmail($id) {
-        $sql = "SELECT o.*, u.email as customer_email, u.name as customer_name
-                FROM {$this->table} o 
-                LEFT JOIN users u ON o.user_id = u.user_id
-                WHERE o.order_id = :id";
-        $this->db->query($sql);
-        $this->db->bind(':id', $id);
-        return $this->db->single();
-    }
-
-    /**
-     * Lấy tổng doanh thu
-     */
-    public function getTotalRevenue() {
-        return $this->calculateTotalRevenue();
-    }
+    
 }

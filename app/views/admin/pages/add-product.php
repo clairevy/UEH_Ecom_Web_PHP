@@ -60,8 +60,16 @@ unset($_SESSION['old_input']);
                     <?php unset($_SESSION['success']); ?>
                 <?php endif; ?>
 
+                <?php if (isset($_SESSION['warning'])): ?>
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <?= $_SESSION['warning'] ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <?php unset($_SESSION['warning']); ?>
+                <?php endif; ?>
+
                 <!-- Product Form -->
-                <form id="addProductForm" method="POST" action="index.php?url=products&action=create" enctype="multipart/form-data">
+                <form id="addProductForm" method="POST" action="?url=products&action=create" enctype="multipart/form-data">
                     <div class="row">
                         <!-- Product Form Fields -->
                         <div class="col-lg-8 mb-4">
@@ -95,19 +103,27 @@ unset($_SESSION['old_input']);
                                         <!-- Category -->
                                         <div class="col-md-6">
                                             <div class="form-group mb-3">
-                                                <label for="category_ids" class="form-label">Danh Mục <span class="text-danger">*</span></label>
-                                                <select class="form-control" id="category_ids" name="category_ids[]" multiple size="5">
+                                                <label class="form-label">Danh Mục <span class="text-danger">*</span></label>
+                                                <div class="border rounded p-3" style="max-height: 150px; overflow-y: auto;">
                                                     <?php if (!empty($categories)): ?>
                                                         <?php foreach ($categories as $category): ?>
-                                                            <option value="<?= $category->category_id ?>">
-                                                                <?= htmlspecialchars($category->name) ?>
-                                                            </option>
+                                                            <div class="form-check mb-2">
+                                                                <input class="form-check-input category-checkbox" 
+                                                                       type="checkbox" 
+                                                                       name="category_ids[]" 
+                                                                       value="<?= $category->category_id ?>" 
+                                                                       id="category_<?= $category->category_id ?>"
+                                                                       <?= (isset($oldInput['category_ids']) && in_array($category->category_id, $oldInput['category_ids'])) ? 'checked' : '' ?>>
+                                                                <label class="form-check-label" for="category_<?= $category->category_id ?>">
+                                                                    <?= htmlspecialchars($category->name) ?>
+                                                                </label>
+                                                            </div>
                                                         <?php endforeach; ?>
                                                     <?php else: ?>
-                                                        <option value="">Chưa có danh mục nào</option>
+                                                        <p class="text-muted mb-0">Chưa có danh mục nào</p>
                                                     <?php endif; ?>
-                                                </select>
-                                                <small class="text-muted">Giữ Ctrl (hoặc Cmd) để chọn nhiều danh mục</small>
+                                                </div>
+                                                <small class="text-muted">Chọn một hoặc nhiều danh mục cho sản phẩm</small>
                                             </div>
                                         </div>
 
@@ -309,10 +325,7 @@ unset($_SESSION['old_input']);
                                     <div class="mb-4">
                                         <div class="border-2 border-dashed rounded-custom p-4 text-center upload-area" 
                                              style="border-color: var(--border-color); cursor: pointer; transition: all 0.3s ease;" 
-                                             onclick="document.getElementById('product_images').click()" 
-                                             ondragover="handleDragOver(event)" 
-                                             ondragleave="handleDragLeave(event)"
-                                             ondrop="handleDrop(event)">
+                                             onclick="document.getElementById('product_images').click()">
                                             <img src="https://cdn-icons-png.flaticon.com/512/2920/2920277.png" alt="Upload" width="48" height="48" class="mb-2 opacity-50">
                                             <p class="text-muted mb-2">Kéo thả ảnh vào đây, hoặc click để chọn</p>
                                             <p class="text-muted small">Hỗ trợ: JPG, PNG, GIF, WEBP (Max 5MB/file)</p>
@@ -328,14 +341,14 @@ unset($_SESSION['old_input']);
                                     <!-- Preview Images Container -->
                                     <div id="imagePreviewContainer" class="uploaded-images" style="display: none;">
                                         <h6 class="fw-bold mb-3">Ảnh Đã Chọn</h6>
-                                        <div id="imageList"></div>
+                                        <div id="imageList" class="row"></div>
                                     </div>
 
                                     <!-- Tips -->
                                     <div class="mt-3 p-3 bg-light rounded-custom">
                                         <h6 class="fw-bold mb-2">Lưu Ý:</h6>
                                         <ul class="small text-muted mb-0">
-                                            <li>Tải lên ít nhất một ảnh sản phẩm</li>
+                                            <li><strong>Bắt buộc:</strong> Phải tải lên ít nhất một ảnh sản phẩm</li>
                                             <li>Kích thước đề xuất: 800x800px</li>
                                             <li>Sử dụng ảnh chất lượng cao</li>
                                             <li>Ảnh đầu tiên sẽ là ảnh chính</li>

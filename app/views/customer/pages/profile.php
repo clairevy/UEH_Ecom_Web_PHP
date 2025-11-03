@@ -677,7 +677,7 @@
                     items.forEach(item => {
                         const name = item.querySelector('.product-name')?.textContent?.trim() || 'Sản phẩm';
                         const price = item.querySelector('.price')?.textContent?.trim() || '0₫';
-                        const img = item.querySelector('img')?.src || '/public/assets/images/placeholder.svg';
+                        const img = item.querySelector('img')?.src || '<?= getBaseUrl() ?>/public/assets/images/placeholder.svg';
                         const productId = item.dataset.productId || '';
                         const href = item.querySelector('a')?.href || '#';
                         

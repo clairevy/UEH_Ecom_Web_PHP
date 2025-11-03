@@ -419,14 +419,17 @@ $products = $data['products'] ?? [];
                 const card = document.createElement('div');
                 card.className = 'product-card';
                 
-                // Get main image
-                const mainImage = product.main_image || '/public/assets/images/placeholder.svg';
-                const imageUrl = mainImage.startsWith('/') ? mainImage : `/public/uploads/products/${product.product_id}/${mainImage}`;
+                // Get main image with base URL
+                const baseUrl = '<?= getBaseUrl() ?>';
+                const mainImage = product.main_image || 'assets/images/placeholder.svg';
+                const imageUrl = mainImage.startsWith('/') 
+                    ? baseUrl + mainImage 
+                    : baseUrl + `/public/uploads/products/${product.product_id}/${mainImage}`;
                 
                 card.innerHTML = `
                     <div class="product-image">
                         <img src="${imageUrl}" alt="${product.name}" 
-                             onerror="this.src='/public/assets/images/placeholder.svg'">
+                             onerror="this.src='${baseUrl}/public/assets/images/placeholder.svg'">`
                     </div>
                     <div class="product-info">
                         <h3 class="product-title">${product.name}</h3>

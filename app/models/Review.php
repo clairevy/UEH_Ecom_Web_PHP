@@ -463,5 +463,12 @@ class Review extends BaseModel
 //             return [];
 //         }
 //     }
- }
+ public function getTotalCount() {
+        $sql = "SELECT COUNT(*) as total FROM {$this->table}";
+        $this->db->query($sql);
+        $result = $this->db->single();
+        return $result ? (int)$result->total : 0;
+    } 
+}
+ 
 ?>
