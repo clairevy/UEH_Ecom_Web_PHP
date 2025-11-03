@@ -46,7 +46,17 @@ function url($path = '') {
  * @return string URL hoàn chỉnh đến file tài nguyên.
  */
 function asset($path) {
-    // Bạn có thể đổi 'public/assets' thành thư mục chứa tài nguyên của bạn, ví dụ 'public'
+    // If already absolute URL (starts with http or /), return as-is
+    if (strpos($path, 'http') === 0 || strpos($path, '/') === 0) {
+        return $path;
+    }
+    
+    // If path starts with 'public/', use it directly
+    if (strpos($path, 'public/') === 0) {
+        return url($path);
+    }
+    
+    // Default behavior for assets folder
     return url('public/assets/' . ltrim($path, '/'));
 }
 

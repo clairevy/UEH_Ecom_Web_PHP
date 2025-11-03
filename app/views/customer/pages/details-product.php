@@ -58,8 +58,8 @@ if (!function_exists('url')) {
                             <div class="thumbnail-container">
                                 <?php if (isset($product->images) && !empty($product->images)): ?>
                                     <?php foreach ($product->images as $index => $image): ?>
-                                        <div class="thumbnail-item <?= $index === 0 ? 'active' : '' ?>" onclick="changeImage(this, '<?= $image->file_path ?>')">
-                                            <img src="<?= $image->file_path ?>" alt="<?= htmlspecialchars($image->alt_text ?: $product->name) ?>">
+                                        <div class="thumbnail-item <?= $index === 0 ? 'active' : '' ?>" onclick="changeImage(this, '<?= asset($image->file_path) ?>')">
+                                            <img src="<?= asset($image->file_path) ?>" alt="<?= htmlspecialchars($image->alt_text ?: $product->name) ?>">
                                         </div>
                                     <?php endforeach; ?>
                                 <?php else: ?>
@@ -80,7 +80,7 @@ if (!function_exists('url')) {
                         <div class="col-10" style="padding-left: 30px;">
                             <div class="main-image">
                                 <img id="mainImage" 
-                                     src="<?= isset($product->primary_image) ? $product->primary_image->file_path : (isset($product->images[0]) ? $product->images[0]->file_path : 'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=500') ?>" 
+                                     src="<?= isset($product->primary_image) ? asset($product->primary_image->file_path) : (isset($product->images[0]) ? asset($product->images[0]->file_path) : 'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=500') ?>" 
                                      alt="<?= isset($product) ? htmlspecialchars($product->name) : 'Product Image' ?>">
                             </div>
                         </div>
@@ -197,7 +197,7 @@ if (!function_exists('url')) {
                     </div>
                     <div class="col-md-4">
                         <div class="inf-images">
-                            <img src="<?php echo (isset($product) && isset($product->images[0])) ? htmlspecialchars($product->images[0]->file_path) : ''; ?>" alt="Chi tiết ">
+                            <img src="<?php echo (isset($product) && isset($product->images[0])) ? asset($product->images[0]->file_path) : ''; ?>" alt="Chi tiết ">
                         </div>
                     </div>
                 </div>
@@ -369,7 +369,7 @@ if (!function_exists('url')) {
                                 <div class="related-product-card">
                                     <a href="<?= route('product/' . ($relatedProduct->slug ?? $relatedProduct->product_id)) ?>" style="text-decoration: none; color: inherit; display: block;">
                                         <div class="product-image">
-                                            <img src="<?= $relatedProduct->primary_image ? $relatedProduct->primary_image->file_path : 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=300' ?>" 
+                                            <img src="<?= $relatedProduct->primary_image ? asset($relatedProduct->primary_image->file_path) : 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=300' ?>" 
                                                  alt="<?= htmlspecialchars($relatedProduct->name) ?>">
                                             <button class="wishlist-btn" onclick="event.preventDefault(); event.stopPropagation();"><i class="far fa-heart"></i></button>
                                             <button class="compare-btn" onclick="event.preventDefault(); event.stopPropagation();"><i class="fas fa-eye"></i></button>

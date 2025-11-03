@@ -197,7 +197,7 @@ if (!function_exists('url')) {
                                 <div class="list-card-product">
                                     <a href="<?= route('product/' . ($product->slug ?? $product->product_id)) ?>" style="text-decoration: none; color: inherit; display: block;">
                                         <div class="position-relative">
-                                            <img src="<?= $product->primary_image ? $product->primary_image->file_path : asset('images/placeholder.svg') ?>" 
+                                            <img src="<?= $product->primary_image ? asset($product->primary_image->file_path) : asset('images/placeholder.svg') ?>" 
                                                  class="card-img-top" alt="<?= htmlspecialchars($product->name) ?>">
                                             <span class="badge bg-danger position-absolute top-0 end-0 m-2">NEW</span>
                                         </div>
