@@ -6,7 +6,6 @@ require_once __DIR__ . '/../models/Product.php';
 require_once __DIR__ . '/../models/Category.php';
 require_once __DIR__ . '/../models/Collection.php';
 require_once __DIR__ . '/../models/Review.php';
-require_once __DIR__ . '/../models/SiteAssets.php';
 require_once __DIR__ . '/ReviewService.php';
 
 /**
@@ -18,7 +17,6 @@ class ProductService extends BaseModel {
     private $productModel;
     private $categoryModel;
     private $collectionModel;
-    private $siteAssetsModel;
     private $reviewModel;
     private $reviewService;
     
@@ -30,7 +28,6 @@ class ProductService extends BaseModel {
         $this->categoryModel = new Category();
         $this->collectionModel = new Collection(); 
         $this->reviewModel = new Review();
-        $this->siteAssetsModel = new SiteAssets();
         $this->reviewService = new ReviewService();
 
     }

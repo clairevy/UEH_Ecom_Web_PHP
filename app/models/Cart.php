@@ -241,38 +241,38 @@ class Cart extends BaseModel
     }
 
     // Tính tổng giá trị giỏ hàng
-    public function getCartTotal($cartId)
-    {
-        try {
-            $sql = "SELECT SUM(quantity * price) as total 
-                    FROM cart_items WHERE cart_id = :cart_id";
+    // public function getCartTotal($cartId)
+    // {
+    //     try {
+    //         $sql = "SELECT SUM(quantity * price) as total 
+    //                 FROM cart_items WHERE cart_id = :cart_id";
             
-            $this->db->query($sql);
-            $this->db->bind(':cart_id', $cartId);
+    //         $this->db->query($sql);
+    //         $this->db->bind(':cart_id', $cartId);
             
-            $result = $this->db->single();
-            return $result ? (float)$result['total'] : 0;
-        } catch (Exception $e) {
-            error_log("Error calculating cart total: " . $e->getMessage());
-            return 0;
-        }
-    }
+    //         $result = $this->db->single();
+    //         return $result ? (float)$result['total'] : 0;
+    //     } catch (Exception $e) {
+    //         error_log("Error calculating cart total: " . $e->getMessage());
+    //         return 0;
+    //     }
+    // }
 
     // Đếm số lượng items trong giỏ
-    public function getCartItemCount($cartId)
-    {
-        try {
-            $sql = "SELECT SUM(quantity) as count FROM cart_items WHERE cart_id = :cart_id";
-            $this->db->query($sql);
-            $this->db->bind(':cart_id', $cartId);
+    // public function getCartItemCount($cartId)
+    // {
+    //     try {
+    //         $sql = "SELECT SUM(quantity) as count FROM cart_items WHERE cart_id = :cart_id";
+    //         $this->db->query($sql);
+    //         $this->db->bind(':cart_id', $cartId);
             
-            $result = $this->db->single();
-            return $result ? (int)$result['count'] : 0;
-        } catch (Exception $e) {
-            error_log("Error counting cart items: " . $e->getMessage());
-            return 0;
-        }
-    }
+    //         $result = $this->db->single();
+    //         return $result ? (int)$result['count'] : 0;
+    //     } catch (Exception $e) {
+    //         error_log("Error counting cart items: " . $e->getMessage());
+    //         return 0;
+    //     }
+    // }
 
     // Cập nhật timestamp của cart
     private function updateCartTimestamp($cartId)
@@ -288,34 +288,34 @@ class Cart extends BaseModel
     }
 
     // Merge guest cart với user cart khi login
-    public function mergeGuestCartToUser($guestCartId, $userCartId)
-    {
-        try {
-            $guestItems = $this->getCartItems($guestCartId);
+    // public function mergeGuestCartToUser($guestCartId, $userCartId)
+    // {
+    //     try {
+    //         $guestItems = $this->getCartItems($guestCartId);
             
-            foreach ($guestItems as $item) {
-                $existingItem = $this->getCartItem($userCartId, $item['product_id'], $item['variant_id']);
+    //         foreach ($guestItems as $item) {
+    //             $existingItem = $this->getCartItem($userCartId, $item['product_id'], $item['variant_id']);
                 
-                if ($existingItem) {
-                    // Cập nhật số lượng
-                    $this->updateCartItemQuantity($existingItem['cart_item_id'], 
-                                                $existingItem['quantity'] + $item['quantity']);
-                } else {
-                    // Thêm item mới
-                    $this->addToCart($userCartId, $item['product_id'], $item['variant_id'], 
-                                   $item['quantity'], $item['price']);
-                }
-            }
+    //             if ($existingItem) {
+    //                 // Cập nhật số lượng
+    //                 $this->updateCartItemQuantity($existingItem['cart_item_id'], 
+    //                                             $existingItem['quantity'] + $item['quantity']);
+    //             } else {
+    //                 // Thêm item mới
+    //                 $this->addToCart($userCartId, $item['product_id'], $item['variant_id'], 
+    //                                $item['quantity'], $item['price']);
+    //             }
+    //         }
             
-            // Xóa guest cart
-            $this->deleteCart($guestCartId);
+    //         // Xóa guest cart
+    //         $this->deleteCart($guestCartId);
             
-            return true;
-        } catch (Exception $e) {
-            error_log("Error merging guest cart: " . $e->getMessage());
-            return false;
-        }
-    }
+    //         return true;
+    //     } catch (Exception $e) {
+    //         error_log("Error merging guest cart: " . $e->getMessage());
+    //         return false;
+    //     }
+    // }
 
     // Xóa cart hoàn toàn
     public function deleteCart($cartId)

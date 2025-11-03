@@ -204,6 +204,22 @@ class Product extends BaseModel {
         return $this->db->resultSet();
     }
 
+    /**
+     * UPDATE - Cập nhật stock cho sản phẩm đơn giản (không có variant)
+     */
+    public function updateSimpleStock($productId, $newStock) {
+        try {
+            $sql = "UPDATE products SET stock_quantity = :new_stock WHERE product_id = :product_id";
+            $this->db->query($sql);
+            $this->db->bind(':new_stock', $newStock);
+            $this->db->bind(':product_id', $productId);
+            return $this->db->execute();
+        } catch (Exception $e) {
+            error_log("Update Simple Product Stock Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
     // ============= HELPER METHODS =============
     
     /**

@@ -225,10 +225,24 @@ class CheckoutController extends BaseController {
                 $paymentCreated = $this->orderModel->createPayment($paymentData);
                 error_log("Payment creation result: " . ($paymentCreated ? 'SUCCESS' : 'FAILED'));
 
-                // Update product stock (simplified)
+                // Update product stock - Trừ stock ngay khi đặt hàng thành công
                 foreach ($cartItems as $item) {
-                    $newStock = $item['product']->stock_quantity - $item['quantity'];
-                    // In real app: $this->productModel->updateStock($item['product']->product_id, $newStock);
+                    if (isset($item['size']) && isset($item['color']) && 
+                        !empty($item['size']) && !empty($item['color'])) {
+                        // Sản phẩm có variant (size + color) - sử dụng stored procedure
+                        $stockUpdated = $this->productModel->updateStock(
+                            $item['product']->product_id, 
+                            $item['size'], 
+                            $item['color'], 
+                            $item['quantity'] // SỐ DƯƠNG - SP sẽ tự trừ (stock - quantity)
+                        );
+                        error_log("Stock update for variant product {$item['product']->product_id}: " . ($stockUpdated ? 'SUCCESS' : 'FAILED'));
+                    } else {
+                        // Sản phẩm không có variant - tạo method updateSimpleProductStock
+                        $newStock = max(0, $item['product']->stock_quantity - $item['quantity']); // Không cho âm
+                        $stockUpdated = $this->updateSimpleProductStock($item['product']->product_id, $newStock);
+                        error_log("Stock update for simple product {$item['product']->product_id}: " . ($stockUpdated ? 'SUCCESS' : 'FAILED'));
+                    }
                 }
 
                 return $actualOrderId;
@@ -370,6 +384,19 @@ class CheckoutController extends BaseController {
             'total' => $total,
             'totalQuantity' => $buyNowItem['quantity']
         ];
+    }
+
+    /**
+     * Update stock for simple products (without variants)
+     */
+    private function updateSimpleProductStock($productId, $newStock) {
+        try {
+            // Sử dụng method có sẵn trong Product model
+            return $this->productModel->updateSimpleStock($productId, $newStock);
+        } catch (Exception $e) {
+            error_log("Update Simple Product Stock Error: " . $e->getMessage());
+            return false;
+        }
     }
 
     /**

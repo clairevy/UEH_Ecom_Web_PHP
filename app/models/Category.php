@@ -50,48 +50,6 @@ class Category extends BaseModel {
         return $this->db->resultSet();
     }
 
-    // Get all active categories (alias for getAllCategories with active filter)
-    public function getAllActiveCategories() {
-        return $this->getAllCategories(true);
-    }
-
-    // Get parent categories
-    public function getParentCategories() {
-        $this->db->query("SELECT * FROM " . $this->table . " WHERE parent_id IS NULL AND is_active = 1 ORDER BY name ASC");
-        return $this->db->resultSet();
-    }
-
-    // Get child categories of a specific parent
-    public function getChildCategories($parentId) {
-        $this->db->query("SELECT * FROM " . $this->table . " WHERE parent_id = :parent_id AND is_active = 1 ORDER BY name ASC");
-        $this->db->bind(':parent_id', $parentId);
-        return $this->db->resultSet();
-    }
-
-    // Assign a product to a category
-    public function assignProductToCategory($productId, $categoryId) {
-        $this->db->query("INSERT INTO product_categories (product_id, category_id) VALUES (:product_id, :category_id)");
-        $this->db->bind(':product_id', $productId);
-        $this->db->bind(':category_id', $categoryId);
-        return $this->db->execute();
-    }
-
-    // Remove a product from a category
-    public function removeProductFromCategory($productId, $categoryId) {
-        $this->db->query("DELETE FROM product_categories WHERE product_id = :product_id AND category_id = :category_id");
-        $this->db->bind(':product_id', $productId);
-        $this->db->bind(':category_id', $categoryId);
-        return $this->db->execute();
-    }
-
-    // Get all categories for a product
-    public function getCategoriesForProduct($productId) {
-        $this->db->query("SELECT c.* FROM " . $this->table . " c 
-                         JOIN product_categories pc ON c.category_id = pc.category_id 
-                         WHERE pc.product_id = :product_id AND c.is_active = 1");
-        $this->db->bind(':product_id', $productId);
-        return $this->db->resultSet();
-    }
 
     private function generateSlug($name) {
         $slug = strtolower(trim($name));

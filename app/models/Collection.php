@@ -50,12 +50,6 @@ class Collection extends BaseModel {
         return $this->db->resultSet();
     }
 
-    // Get all products in a collection
-    public function getProductsInCollection($collectionId) {
-        $this->db->query("SELECT p.* FROM products p WHERE p.collection_id = :collection_id AND p.is_active = 1 ORDER BY p.name ASC");
-        $this->db->bind(':collection_id', $collectionId);
-        return $this->db->resultSet();
-    }
 
     /**
      * Get products in a collection with images
@@ -108,17 +102,7 @@ class Collection extends BaseModel {
     /**
      * Count products in a collection
      */
-    public function countCollectionProducts($collectionId) {
-        $query = "SELECT COUNT(*) as total FROM products 
-                  WHERE collection_id = :collection_id AND is_active = 1";
-        
-        $this->db->query($query);
-        $this->db->bind(':collection_id', $collectionId);
-        
-        $result = $this->db->single();
-        return $result->total ?? 0;
-    }
-
+    
     private function generateSlug($name) {
         $slug = strtolower(trim($name));
         $slug = preg_replace('/[^a-z0-9-]/', '-', $slug);
@@ -153,33 +137,8 @@ class Collection extends BaseModel {
         return $images ? $images[0] : null;
     }
     
-    /**
-     * Add cover to collection (replaces existing)
-     */
-    public function addCollectionCover($collectionId, $imagePath) {
-        // Delete existing cover first
-        $this->deleteAllCollectionImages($collectionId);
-        
-        // Insert into images table first
-        $this->db->query("INSERT INTO images (file_path, file_name, alt_text, created_at) VALUES (:path, :name, :alt, NOW())");
-        $this->db->bind(':path', $imagePath);
-        $this->db->bind(':name', basename($imagePath));
-        $this->db->bind(':alt', basename($imagePath));
-        
-        if (!$this->db->execute()) {
-            return false;
-        }
-        
-        $imageId = $this->db->lastInsertId();
-        
-        // Insert into image_usages table
-        $this->db->query("INSERT INTO image_usages (image_id, ref_type, ref_id, is_primary, created_at) 
-                         VALUES (:image_id, 'collection', :ref_id, 1, NOW())");
-        $this->db->bind(':image_id', $imageId);
-        $this->db->bind(':ref_id', $collectionId);
-        
-        return $this->db->execute() ? $imageId : false;
-    }
+
+   
     
     /**
      * Delete a specific collection image by usage_id
@@ -239,17 +198,6 @@ class Collection extends BaseModel {
         }
         
         return $collections;
-    }
-    
-    /**
-     * Get single collection with cover
-     */
-    public function getCollectionWithCover($collectionId) {
-        $collection = $this->findById($collectionId);
-        if ($collection) {
-            $collection->cover_image = $this->getCollectionCover($collectionId);
-        }
-        return $collection;
     }
     
     /**
