@@ -16,5 +16,7 @@ define('ROOT', __DIR__ . '/../app/views/admin/');
 define('ADMIN_PATH', __DIR__ . '/../app/views/admin/');
 define('PUBLIC_PATH', __DIR__ . '/../public/');
 
+// Email verification settings (moved to email.php)
+
 // Include URL helper functions
 require_once __DIR__ . '/../helpers/url_helper.php';

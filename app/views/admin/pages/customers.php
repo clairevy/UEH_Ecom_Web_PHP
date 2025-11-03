@@ -260,14 +260,14 @@
                 brandName: 'JEWELLERY',
                 activePage: 'customers',
                 links: {
-                    dashboard: '/admin/index.php?url=dashboard',
-                    products: '/admin/index.php?url=products',
-                    categories: '/admin/index.php?url=categories',
-                    orders: '/admin/index.php?url=orders',
-                    customers: '/admin/index.php?url=customers',
-                    collections: '/admin/index.php?url=collections',
-                    reviews: '/admin/index.php?url=reviews',
-                    media: '/admin/index.php?url=media'
+                    dashboard: '<?= BASE_URL ?>' + '/admin/index.php?url=dashboard',
+                    products: '<?= BASE_URL ?>' + '/admin/index.php?url=products',
+                    categories: '<?= BASE_URL ?>' + '/admin/index.php?url=categories',
+                    orders: '<?= BASE_URL ?>' + '/admin/index.php?url=orders',
+                    customers: '<?= BASE_URL ?>' + '/admin/index.php?url=customers',
+                    collections: '<?= BASE_URL ?>' + '/admin/index.php?url=collections',
+                    reviews: '<?= BASE_URL ?>' + '/admin/index.php?url=reviews',
+                    media: '<?= BASE_URL ?>' + '/admin/index.php?url=media'
                 }
             },
             header: {
@@ -283,22 +283,24 @@
     <!-- Customer Management Functions -->
     <script>
         function addNewCustomer() {
-            window.location.href = '/admin/index.php?url=customers&action=create';
+            // Redirect to the Add Customer page (MVC: controller/view handled by admin router)
+            window.location.href = '<?= BASE_URL ?>' + '/admin/index.php?url=add-customer';
         }
         
+        //
         function viewCustomer(userId) {
-            window.location.href = '/admin/index.php?url=customers&action=show&id=' + userId;
+            window.location.href = '<?= BASE_URL ?>' + '/admin/index.php?url=customers&action=show&id=' + userId;
         }
         
         function editCustomer(userId) {
-            window.location.href = '/admin/index.php?url=customers&action=edit&id=' + userId;
+            window.location.href = '<?= BASE_URL ?>' + '/admin/index.php?url=customers&action=edit&id=' + userId;
         }
         
         function toggleCustomerStatus(userId) {
             if (confirm('Bạn có chắc chắn muốn thay đổi trạng thái của khách hàng này không?')) {
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '/admin/index.php?url=customers&action=toggle&id=' + userId;
+                form.action = '<?= BASE_URL ?>' + '/admin/index.php?url=customers&action=toggle&id=' + userId;
                 document.body.appendChild(form);
                 form.submit();
             }
@@ -308,7 +310,7 @@
             if (confirm('Bạn có chắc chắn muốn xóa khách hàng này không?')) {
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '/admin/index.php?url=customers&action=delete&id=' + userId;
+                form.action = '<?= BASE_URL ?>' + '/admin/index.php?url=customers&action=delete&id=' + userId;
                 document.body.appendChild(form);
                 form.submit();
             }

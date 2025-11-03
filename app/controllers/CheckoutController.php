@@ -104,8 +104,37 @@ class CheckoutController extends BaseController {
                 }
             }
 
-            // Create order
-            $orderId = $this->createOrder($customerInfo, $cartItems, $cartSummary, $paymentMethod);
+            // Create order (pass items and payment method to model which will handle items & stock)
+            $itemsForOrder = [];
+            foreach ($cartItems as $item) {
+                $itemsForOrder[] = [
+                    'product_id' => $item['product_id'] ?? ($item['product']->product_id ?? null),
+                    'quantity' => $item['quantity'],
+                    'size' => $item['size'] ?? null,
+                    'color' => $item['color'] ?? null,
+                    'unit_price' => $item['price'] ?? ($item['product']->base_price ?? 0)
+                ];
+            }
+
+            $orderData = [
+                'user_id' => SessionHelper::isLoggedIn() ? SessionHelper::getUserId() : null,
+                'full_name' => $customerInfo['name'],
+                'email' => $customerInfo['email'],
+                'phone' => $customerInfo['phone'],
+                'street' => $customerInfo['address'],
+                'ward' => '',
+                'province' => $customerInfo['province'],
+                'country' => 'Vietnam',
+                'payment_method' => $paymentMethod,
+                'order_status' => 'pending',
+                'shipping_fee' => $cartSummary['shipping'],
+                'total_amount' => $cartSummary['total'],
+                'discount_code' => null,
+                'discount_amount' => 0,
+                'items' => $itemsForOrder
+            ];
+
+            $orderId = $this->orderModel->createOrder($orderData);
 
             if ($orderId) {
                 // Clear appropriate session data after successful order
@@ -245,7 +274,7 @@ class CheckoutController extends BaseController {
             $errors['province'] = 'Tỉnh/Thành phố là bắt buộc';
         }
 
-        $allowedPaymentMethods = ['cod', 'bank_transfer', 'qr_code'];
+    $allowedPaymentMethods = ['cod', 'bank_transfer', 'momo', 'vnpay', 'qr_code'];
         if (empty($data['payment_method']) || !in_array($data['payment_method'], $allowedPaymentMethods)) {
             $errors['payment_method'] = 'Phương thức thanh toán không hợp lệ';
         }

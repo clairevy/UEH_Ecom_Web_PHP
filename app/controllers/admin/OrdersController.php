@@ -66,9 +66,17 @@ class OrdersController extends BaseController {
                 throw new Exception('Không thể cập nhật trạng thái thanh toán');
             }
 
-            // NẾU payment_status = 'paid' → GỬI EMAIL
+            // NẾU payment_status = 'paid' → GỬI EMAIL chỉ khi phương thức là chuyển khoản ngân hàng
             if ($paymentStatus === 'paid') {
-                $this->sendPaymentConfirmationEmail($orderId);
+                // Lấy thông tin đơn hàng để kiểm tra phương thức thanh toán
+                $order = $this->orderModel->getOrderWithCustomerEmail($orderId);
+                $paymentMethod = $order->payment_method ?? $order->paymentMethod ?? null;
+                if ($paymentMethod === 'bank_transfer') {
+                    $this->sendPaymentConfirmationEmail($orderId);
+                } else {
+                    // Log that no email sent because payment method not bank transfer
+                    error_log("Order #$orderId paid but payment_method='{$paymentMethod}' — no bank transfer email sent.");
+                }
             }
 
             $_SESSION['success'] = 'Cập nhật trạng thái thanh toán thành công!';

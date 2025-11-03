@@ -153,6 +153,12 @@ class AdminRouter {
                     unset($url[0]);
                     break;
                     
+                case 'add-customer':
+                    $this->controller = 'CustomersController';
+                    $this->method = 'showAddForm';
+                    unset($url[0]);
+                    break;
+                    
                 case 'reviews':
                     $this->controller = 'ReviewsController';
                     $this->method = 'index';

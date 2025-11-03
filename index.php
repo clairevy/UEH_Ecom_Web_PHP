@@ -3,9 +3,7 @@ date_default_timezone_set("Asia/Ho_Chi_Minh");
 session_start();
 ob_start(); //tránh lỗi khi dùng hàm liên quan header, côkie (kiểm soát việc xuất dữ liệu ra trình duyệt)
 
-
 // Load required files
-
 
 // Create logs directory if it doesn't exist
 if (!is_dir(__DIR__ . '/logs')) {

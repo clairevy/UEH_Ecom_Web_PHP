@@ -193,35 +193,45 @@ class Product extends BaseModel {
     
     /**
      * READ - Kiểm tra stock từ variant
+     * Nếu size và color là null, sẽ kiểm tra variant mặc định
      */
     public function checkStock($productId, $size, $color, $quantity) {
-        // Debug: First check all variants for this product
-        $debugSql = "SELECT variant_id, size, color, stock, HEX(size) as size_hex, HEX(color) as color_hex FROM product_variants WHERE product_id = :product_id";
-        $this->db->query($debugSql);
-        $this->db->bind(':product_id', $productId);
-        $allVariants = $this->db->resultSet();
-        
-        error_log("CheckStock Debug - All variants for product $productId:");
-        foreach ($allVariants as $variant) {
-            error_log("  ID: {$variant->variant_id}, Size: '{$variant->size}' (hex: {$variant->size_hex}), Color: '{$variant->color}' (hex: {$variant->color_hex}), Stock: {$variant->stock}");
+        try {
+            // Lấy tất cả variants để debug
+            $debugSql = "SELECT * FROM product_variants WHERE product_id = :product_id";
+            $this->db->query($debugSql);
+            $this->db->bind(':product_id', $productId);
+            $allVariants = $this->db->resultSet();
+            error_log("Product #$productId has " . count($allVariants) . " variants");
+
+            // Query chính xác variant cần kiểm tra
+            $sql = "SELECT pv.*, p.name as product_name 
+                   FROM product_variants pv
+                   JOIN products p ON p.product_id = pv.product_id
+                   WHERE pv.product_id = :product_id 
+                   AND (pv.size = :size OR (:size IS NULL AND pv.size IS NULL))
+                   AND (pv.color = :color OR (:color IS NULL AND pv.color IS NULL))";
+
+            $this->db->query($sql);
+            $this->db->bind(':product_id', $productId);
+            $this->db->bind(':size', $size);
+            $this->db->bind(':color', $color);
+            
+            $variant = $this->db->single();
+            
+            // Log kết quả để debug
+            if (!$variant) {
+                error_log("No variant found for product #$productId with size: " . ($size ?? 'NULL') . ", color: " . ($color ?? 'NULL'));
+                return false;
+            }
+            
+            error_log("Found variant for '{$variant->product_name}' - Stock: {$variant->stock}, Requested: $quantity");
+            return $variant->stock >= $quantity;
+
+        } catch (Exception $e) {
+            error_log("Check Stock Error: " . $e->getMessage());
+            return false;
         }
-        
-        error_log("CheckStock Debug - Looking for Size: '$size' (hex: " . bin2hex($size) . "), Color: '$color' (hex: " . bin2hex($color) . ")");
-        
-        $sql = "SELECT stock FROM product_variants 
-                WHERE product_id = :product_id 
-                AND BINARY size = BINARY :size  
-                AND BINARY color = BINARY :color";
-        $this->db->query($sql);
-        $this->db->bind(':product_id', $productId);
-        $this->db->bind(':size', $size);
-        $this->db->bind(':color', $color);
-        $result = $this->db->single();
-        
-        // Debug logging
-        error_log("CheckStock Debug - Found stock: " . ($result ? $result->stock : 'NULL'));
-        
-        return $result && $result->stock >= $quantity;
     }
     
     /**
@@ -232,6 +242,23 @@ class Product extends BaseModel {
         $this->db->query($sql);
         $this->db->bind(':product_id', $productId);
         return $this->db->resultSet();
+    }
+
+    /**
+     * Lấy một variant cụ thể theo product_id, size và color
+     * Trả về object variant hoặc null
+     */
+    public function getVariant($productId, $size = null, $color = null) {
+        $sql = "SELECT pv.* FROM product_variants pv
+                WHERE pv.product_id = :product_id
+                AND (pv.size = :size OR (:size IS NULL AND pv.size IS NULL))
+                AND (pv.color = :color OR (:color IS NULL AND pv.color IS NULL))
+                LIMIT 1";
+        $this->db->query($sql);
+        $this->db->bind(':product_id', $productId);
+        $this->db->bind(':size', $size);
+        $this->db->bind(':color', $color);
+        return $this->db->single();
     }
     
     /**
@@ -343,6 +370,37 @@ class Product extends BaseModel {
                 ORDER BY count DESC";
         $this->db->query($sql);
         return $this->db->resultSet();
+    }
+
+    /**
+     * Giảm số lượng tồn kho cho sản phẩm
+     * @param int $productId
+     * @param string|null $size
+     * @param string|null $color 
+     * @param int $quantity
+     * @return bool
+     */
+    public function decrementStock($productId, $size, $color, $quantity) {
+        try {
+            $sql = "UPDATE product_variants 
+                    SET stock = stock - :quantity 
+                    WHERE product_id = :product_id 
+                    AND size = :size 
+                    AND color = :color 
+                    AND stock >= :quantity";
+
+            $this->db->query($sql);
+            $this->db->bind(':product_id', $productId);
+            $this->db->bind(':size', $size);
+            $this->db->bind(':color', $color);
+            $this->db->bind(':quantity', $quantity);
+            
+            $result = $this->db->execute();
+            return $result && $this->db->rowCount() > 0;
+        } catch (Exception $e) {
+            error_log("Decrement Stock Error: " . $e->getMessage());
+            return false;
+        }
     }
 
     /**

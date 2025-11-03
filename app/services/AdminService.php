@@ -36,9 +36,37 @@ class AdminService {
      * Lấy dữ liệu cho dashboard
      */
     public function getDashboardData() {
+        $stats = $this->getDashboardStats();
+        $recentOrders = $this->orderModel->getRecentOrders(5);
+
+        // Enrich recent orders with product names for view (keep logic in service layer)
+        if (!empty($recentOrders)) {
+            foreach ($recentOrders as $idx => $order) {
+                $items = $this->orderModel->getOrderItems($order->order_id);
+                if (!empty($items)) {
+                    $names = array_map(function($it) {
+                        return $it->product_name ?? ($it->name ?? '');
+                    }, $items);
+                    // Join unique names, limit display length
+                    $uniqueNames = array_values(array_unique($names));
+                    $productNamesStr = implode(', ', $uniqueNames);
+                    if (strlen($productNamesStr) > 80) {
+                        $productNamesStr = substr($productNamesStr, 0, 77) . '...';
+                    }
+                    $order->product_names = $productNamesStr;
+                } else {
+                    $order->product_names = 'Chưa có sản phẩm';
+                }
+                // also ensure customer_name/email exist for view
+                $order->customer_name = $order->customer_name ?? ($order->full_name ?? null);
+                $order->customer_email = $order->customer_email ?? ($order->email ?? null);
+                $recentOrders[$idx] = $order;
+            }
+        }
+
         return [
-            'stats' => $this->getDashboardStats(),
-            'recentOrders' => $this->orderModel->getRecentOrders(5),
+            'stats' => $stats,
+            'recentOrders' => $recentOrders,
             'bestSellers' => $this->productModel->getBestSellers(3)
         ];
     }

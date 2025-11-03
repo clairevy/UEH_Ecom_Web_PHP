@@ -24,6 +24,21 @@
 
             <!-- Content -->
             <main class="content">
+                <?php if (isset($_SESSION['success'])): ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <?= htmlspecialchars($_SESSION['success']) ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <?php unset($_SESSION['success']); ?>
+                <?php endif; ?>
+                <?php if (isset($_SESSION['error'])): ?>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <?= htmlspecialchars($_SESSION['error']) ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <?php unset($_SESSION['error']); ?>
+                <?php endif; ?>
+
                 <div class="row">
                     <!-- Customer Form -->
                     <div class="col-lg-8 col-md-12 mb-4">
@@ -34,7 +49,7 @@
                                     <h4 class="fw-bold mb-0">Thêm Khách Hàng Mới</h4>
                                 </div>
 
-                                <form id="customerForm">
+                                <form id="customerForm" method="POST" action="<?= BASE_URL ?>/admin/index.php?url=customers&action=create">
                                     <!-- Profile Image -->
                                     <div class="row">
                                         <div class="col-12 mb-4">
@@ -62,21 +77,21 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="customerName" class="form-label">Họ và Tên <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" id="customerName" placeholder="Nhập họ và tên" required>
+                                                <input type="text" class="form-control" id="customerName" name="name" placeholder="Nhập họ và tên" required>
                                             </div>
                                         </div>
 
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="customerPhone" class="form-label">Số Điện Thoại <span class="text-danger">*</span></label>
-                                                <input type="tel" class="form-control" id="customerPhone" placeholder="0901234567" required>
+                                                <input type="tel" class="form-control" id="customerPhone" name="phone" placeholder="0901234567" required>
                                             </div>
                                         </div>
 
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label for="customerEmail" class="form-label">Email <span class="text-danger">*</span></label>
-                                                <input type="email" class="form-control" id="customerEmail" placeholder="example@gmail.com" required>
+                                                <input type="email" class="form-control" id="customerEmail" name="email" placeholder="example@gmail.com" required>
                                             </div>
                                         </div>
                                     </div>
@@ -104,7 +119,7 @@
                                             <div class="form-group">
                                                 <label for="customerPassword" class="form-label">Mật Khẩu <span class="text-danger">*</span></label>
                                                 <div class="position-relative">
-                                                    <input type="password" class="form-control" id="customerPassword" placeholder="Nhập mật khẩu" required>
+                                                    <input type="password" class="form-control" id="customerPassword" name="password" placeholder="Nhập mật khẩu" required>
                                                     <button type="button" class="btn btn-sm position-absolute end-0 top-50 translate-middle-y me-2" onclick="togglePassword('customerPassword')">
                                                         <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" alt="Show" width="16" height="16">
                                                     </button>
@@ -115,7 +130,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="isActive" checked>
+                                                    <input class="form-check-input" type="checkbox" id="isActive" name="is_active" checked>
                                                     <label class="form-check-label fw-bold" for="isActive">
                                                         Kích Hoạt Tài Khoản
                                                     </label>

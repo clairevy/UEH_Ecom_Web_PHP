@@ -11,6 +11,24 @@ class CustomersController extends BaseController {
     }
 
     /**
+     * Show add customer form
+     */
+    public function showAddForm() {
+        try {
+            $data = [
+                'title' => 'Thêm Khách Hàng',
+                'pageTitle' => 'Thêm Khách Hàng',
+                'breadcrumb' => 'Home > Customers > Add New'
+            ];
+
+            // Render add-customer view inside admin layout
+            $this->renderAdminPage('admin/pages/add-customer', $data);
+        } catch (Exception $e) {
+            $this->view('admin/error', ['message' => 'Không thể hiển thị form thêm khách hàng: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
      * Hiển thị danh sách khách hàng
      */
     public function index() {
@@ -75,8 +93,16 @@ class CustomersController extends BaseController {
                 $_SESSION['error'] = 'Lỗi: ' . $e->getMessage();
             }
         }
-        
-        $this->index();
+
+        // Redirect back to add-customer page (keep controller responsible for navigation)
+        // Use BASE_URL so path is consistent with app configuration
+        if (!headers_sent()) {
+            header('Location: ' . BASE_URL . '/admin/index.php?url=add-customer');
+            exit;
+        } else {
+            // Fallback: render index if headers already sent
+            $this->index();
+        }
     }
 
     /**

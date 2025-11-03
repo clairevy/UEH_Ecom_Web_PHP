@@ -5,27 +5,93 @@ class Order extends BaseModel {
     protected $primaryKey = 'order_id';
 
     public function createOrder($data) {
+        try {
+            // Start transaction
+            $this->db->beginTransaction();
+
+            // Create cart service for stock validation
+            $cartService = new CartService();
+            
+            // Validate order items stock
+            $stockErrors = $cartService->validateCartStock($data['items']);
+            if (!empty($stockErrors)) {
+                throw new Exception(implode("\n", $stockErrors));
+            }
+
+        // Create order (include payment_method column)
         $this->db->query("INSERT INTO " . $this->table . " 
-                         (user_id, full_name, email, phone, street, ward, province, country, 
-                          order_status, shipping_fee, total_amount, discount_code, discount_amount, created_at, updated_at) 
-                         VALUES (:user_id, :full_name, :email, :phone, :street, :ward, :province, :country, 
-                                 :order_status, :shipping_fee, :total_amount, :discount_code, :discount_amount, NOW(), NOW())");
-        
-        $this->db->bind(':user_id', $data['user_id'] ?? null);
-        $this->db->bind(':full_name', $data['full_name']);
-        $this->db->bind(':email', $data['email']);
-        $this->db->bind(':phone', $data['phone']);
-        $this->db->bind(':street', $data['street']);
-        $this->db->bind(':ward', $data['ward']);
-        $this->db->bind(':province', $data['province']);
-        $this->db->bind(':country', $data['country'] ?? 'Vietnam');
-        $this->db->bind(':order_status', $data['order_status'] ?? 'pending');
-        $this->db->bind(':shipping_fee', $data['shipping_fee'] ?? 0);
-        $this->db->bind(':total_amount', $data['total_amount']);
-        $this->db->bind(':discount_code', $data['discount_code'] ?? null);
-        $this->db->bind(':discount_amount', $data['discount_amount'] ?? 0);
-        
-        return $this->db->execute();
+             (user_id, full_name, email, phone, street, ward, province, country, 
+              payment_method, order_status, shipping_fee, total_amount, discount_code, discount_amount, created_at, updated_at) 
+             VALUES (:user_id, :full_name, :email, :phone, :street, :ward, :province, :country, 
+                 :payment_method, :order_status, :shipping_fee, :total_amount, :discount_code, :discount_amount, NOW(), NOW())");
+            
+            $this->db->bind(':user_id', $data['user_id'] ?? null);
+            $this->db->bind(':full_name', $data['full_name']);
+            $this->db->bind(':email', $data['email']);
+            $this->db->bind(':phone', $data['phone']);
+            $this->db->bind(':street', $data['street']);
+            $this->db->bind(':ward', $data['ward']);
+            $this->db->bind(':province', $data['province']);
+            $this->db->bind(':country', $data['country'] ?? 'Vietnam');
+            $this->db->bind(':order_status', $data['order_status'] ?? 'pending');
+            $this->db->bind(':payment_method', $data['payment_method'] ?? 'cod');
+            $this->db->bind(':shipping_fee', $data['shipping_fee'] ?? 0);
+            $this->db->bind(':total_amount', $data['total_amount']);
+            $this->db->bind(':discount_code', $data['discount_code'] ?? null);
+            $this->db->bind(':discount_amount', $data['discount_amount'] ?? 0);
+            
+            $orderCreated = $this->db->execute();
+            
+            if (!$orderCreated) {
+                throw new Exception("Lỗi khi tạo đơn hàng");
+            }
+
+            $orderId = $this->db->lastInsertId();
+
+            // Insert order items and decrement stock per item (variant-aware)
+            $product = new Product();
+            foreach ($data['items'] as $item) {
+                $productId = $item['product_id'];
+                $quantity = (int)($item['quantity'] ?? 1);
+                $size = $item['size'] ?? null;
+                $color = $item['color'] ?? null;
+
+                // Resolve variant and unit price
+                $variant = $product->getVariant($productId, $size, $color);
+                $variantId = $variant->variant_id ?? null;
+                $unitPrice = $variant->variant_price ?? $variant->price ?? ($item['unit_price'] ?? 0);
+                $totalPrice = $unitPrice * $quantity;
+
+                // Insert order_items
+                $this->db->query("INSERT INTO order_items (order_id, product_id, variant_id, quantity, unit_price_snapshot, total_price)
+                                 VALUES (:order_id, :product_id, :variant_id, :quantity, :unit_price, :total_price)");
+                $this->db->bind(':order_id', $orderId);
+                $this->db->bind(':product_id', $productId);
+                $this->db->bind(':variant_id', $variantId);
+                $this->db->bind(':quantity', $quantity);
+                $this->db->bind(':unit_price', $unitPrice);
+                $this->db->bind(':total_price', $totalPrice);
+
+                if (!$this->db->execute()) {
+                    throw new Exception("Lỗi khi tạo order item cho sản phẩm #{$productId}");
+                }
+
+                // Decrement stock for the variant
+                if (!$product->decrementStock($productId, $size, $color, $quantity)) {
+                    throw new Exception("Không thể cập nhật tồn kho cho sản phẩm {$productId}");
+                }
+            }
+
+            // Commit transaction
+            $this->db->commit();
+            return $orderId;
+
+        } catch (Exception $e) {
+            // Rollback on error
+            $this->db->rollBack();
+            error_log("Create Order Error: " . $e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -146,13 +212,36 @@ class Order extends BaseModel {
 
     // Get order items
     public function getOrderItems($orderId) {
-        $this->db->query("SELECT oi.*, p.name as product_name, p.base_price, pv.variant_name, pv.variant_price 
+        $this->db->query("SELECT oi.*, p.name as product_name, p.base_price, pv.size AS variant_size, pv.color AS variant_color, pv.price AS variant_price 
                          FROM order_items oi 
                          JOIN products p ON oi.product_id = p.product_id 
                          LEFT JOIN product_variants pv ON oi.variant_id = pv.variant_id 
                          WHERE oi.order_id = :order_id");
         $this->db->bind(':order_id', $orderId);
-        return $this->db->resultSet();
+        $items = $this->db->resultSet();
+
+        // Normalize variant display name for views (keep presentation data out of controllers)
+        if (!empty($items)) {
+            foreach ($items as $idx => $it) {
+                $variantParts = [];
+                if (!empty($it->variant_size)) {
+                    $variantParts[] = 'Size: ' . $it->variant_size;
+                }
+                if (!empty($it->variant_color)) {
+                    $variantParts[] = 'Color: ' . $it->variant_color;
+                }
+
+                $it->variant_name = !empty($variantParts) ? implode(' / ', $variantParts) : null;
+                // Provide a unit_price_snapshot fallback if missing
+                if (empty($it->unit_price_snapshot) && !empty($it->variant_price)) {
+                    $it->unit_price_snapshot = $it->variant_price;
+                }
+
+                $items[$idx] = $it;
+            }
+        }
+
+        return $items;
     }
 
     // Add item to order

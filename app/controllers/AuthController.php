@@ -1,7 +1,11 @@
+
+
 <?php
+require_once __DIR__ . '/../../core/BaseController.php';
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../../helpers/email_helper.php';
 require_once __DIR__ . '/../../helpers/session_helper.php';
+
 
 class AuthController extends BaseController {
     private $userModel;
@@ -89,9 +93,9 @@ class AuthController extends BaseController {
             error_log("User created and email sent successfully");
             $this->jsonResponse(true, 'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.');
 
-        } catch (Exception $e) {
+        }catch (Exception $e) {
             error_log("SignUp Error: " . $e->getMessage());
-            $this->jsonResponse(false, 'Có lỗi hệ thống xảy ra');
+            $this->jsonResponse(false, 'Có lỗi hệ thống xảy ra: ' . $e->getMessage());
         }
     }
 
@@ -138,8 +142,8 @@ class AuthController extends BaseController {
             ]);
 
         } catch (Exception $e) {
-            error_log("SignIn Error: " . $e->getMessage());
-            $this->jsonResponse(false, 'Có lỗi hệ thống xảy ra');
+            error_log("SignUp Error: " . $e->getMessage());
+            $this->jsonResponse(false, 'Có lỗi hệ thống xảy ra: ' . $e->getMessage());
         }
     }
 

@@ -31,6 +31,7 @@
                         <input type="checkbox" class="form-check-input">
                     </th>
                     <th>Mã Đơn Hàng</th>
+                    <th>Phương Thức</th>
                     <th>Khách Hàng</th>
                     <th>Ngày Đặt</th>
                     <th>Trạng Thái Thanh Toán</th>
@@ -48,6 +49,13 @@
                                 <a href="index.php?url=order-details&id=<?= $order->order_id ?>" class="text-decoration-none fw-bold text-primary">
                                     #<?= $order->order_id ?? $order->order_id ?>
                                 </a>
+                            </td>
+                            <td>
+                                <?php
+                                $paymentMethod = $order->payment_method ?? 'cod';
+                                $pmText = ['cod' => 'Tiền mặt (COD)', 'bank_transfer' => 'Chuyển khoản', 'momo' => 'MoMo', 'vnpay' => 'VNPAY', 'qr_code' => 'QR'];
+                                ?>
+                                <div><?= htmlspecialchars($pmText[$paymentMethod] ?? $paymentMethod) ?></div>
                             </td>
                             <td>
                                 <div class="d-flex align-items-center">

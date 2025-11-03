@@ -12,8 +12,8 @@ try {
     
     $db = Database::getInstance();
     
-    // Tạo order test đơn giản
-    $sql = "INSERT INTO orders (user_id, full_name, email, phone, street, ward, province, country, order_status, payment_status, shipping_fee, total_amount, created_at, updated_at) VALUES (NULL, 'Test User', 'test@test.com', '0901234567', '123 Test St', 'Test Ward', 'Test City', 'Vietnam', 'pending', 'unpaid', 30000, 500000, NOW(), NOW())";
+    // Tạo order test đơn giản (bao gồm payment_method)
+    $sql = "INSERT INTO orders (user_id, full_name, email, phone, street, ward, province, country, payment_method, order_status, payment_status, shipping_fee, total_amount, created_at, updated_at) VALUES (NULL, 'Test User', 'test@test.com', '0901234567', '123 Test St', 'Test Ward', 'Test City', 'Vietnam', 'cod', 'pending', 'unpaid', 30000, 500000, NOW(), NOW())";
     
     $db->query($sql);
     $db->execute();

@@ -3,9 +3,11 @@
 
 class CartController extends BaseController {
     private $productModel;
+    private $cartService;
 
     public function __construct() {
         $this->productModel = new Product();
+        $this->cartService = new CartService();
         SessionHelper::start();
     }
 
@@ -415,6 +417,35 @@ class CartController extends BaseController {
             
         } catch (Exception $e) {
             $this->jsonResponse(false, 'Lỗi khi lấy thông tin giỏ hàng: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Validate stock levels for all items in cart
+     * Returns array of errors if any products are out of stock
+     */
+    public function validateCartStock() {
+        try {
+            $cartItems = $this->getCartItems();
+            if (empty($cartItems)) {
+                return [];
+            }
+
+            // Format cart items for service
+            $items = array_map(function($item) {
+                return [
+                    'product_id' => $item['product']->product_id,
+                    'quantity' => $item['quantity'],
+                    'size' => $item['size'],
+                    'color' => $item['color']
+                ];
+            }, $cartItems);
+
+            return $this->cartService->validateCartStock($items);
+            
+        } catch (Exception $e) {
+            error_log("Validate Cart Stock Error in Controller: " . $e->getMessage());
+            throw new Exception('Lỗi khi kiểm tra tồn kho: ' . $e->getMessage());
         }
     }
 }

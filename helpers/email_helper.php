@@ -174,6 +174,47 @@ class EmailHelper {
         
         return self::sendEmail($email, $subject, $message);
     }
+
+    /**
+     * Gửi email xác nhận thanh toán (dùng khi admin mark payment_status = paid)
+     * @param object|array $order Order object or associative array containing at least order_id, customer_name/email, total_amount
+     * @return bool
+     */
+    public static function sendPaymentConfirmationEmail($order) {
+        $to = $order->customer_email ?? $order['customer_email'] ?? $order->email ?? null;
+        $name = $order->customer_name ?? $order['customer_name'] ?? $order->full_name ?? 'Khách hàng';
+        $orderId = $order->order_id ?? $order['order_id'] ?? null;
+        $total = $order->total_amount ?? $order['total_amount'] ?? 0;
+
+        if (!$to || !$orderId) {
+            error_log('sendPaymentConfirmationEmail: missing recipient or order id');
+            return false;
+        }
+
+        $subject = "Xác nhận thanh toán cho đơn hàng #$orderId";
+
+        $message = "
+        <html>
+        <head><meta charset='UTF-8'></head>
+        <body style='font-family: Arial, sans-serif; color:#333;'>
+            <div style='max-width:600px;margin:0 auto;padding:20px;background:#f9f9f9;'>
+                <div style='background:#fff;padding:20px;border-radius:8px;'>
+                    <h2 style='color:#28a745;'>Thanh toán đơn hàng thành công</h2>
+                    <p>Xin chào <strong>" . htmlspecialchars($name) . "</strong>,</p>
+                    <p>Chúng tôi đã ghi nhận thanh toán cho đơn hàng <strong>#$orderId</strong>.</p>
+                    <p>Tổng thanh toán: <strong>" . number_format($total, 0, ',', '.') . " VND</strong></p>
+                    <p>Chúng tôi sẽ xử lý đơn hàng và gửi thông tin vận chuyển sớm nhất có thể.</p>
+                    <p>Xin cảm ơn bạn đã mua hàng!</p>
+                    <hr>
+                    <small>Nếu bạn không thực hiện giao dịch này, vui lòng liên hệ ngay với bộ phận hỗ trợ.</small>
+                </div>
+            </div>
+        </body>
+        </html>
+        ";
+
+        return self::sendEmail($to, $subject, $message);
+    }
     
     /**
      * Tạo token reset password
