@@ -5,22 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $title ?? 'Giỏ hàng'; ?> - Jewelry Store</title>
     
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <html xmlns:th="http://www.thymeleaf.org">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="<?= asset('css/css.css?v=' . time()) ?>" rel="stylesheet">
     
     <style>
+        :root {
+            --gold: #d4af37;
+            --dark-gold: #b8941f;
+            --light-gold: #f0e68c;
+            --cream: #f8f6f0;
+            --dark-brown: #3a2f28;
+            --light-gray: #f5f5f5;
+        }
+
+        body {
+            background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.7)),
+                        url("https://images.unsplash.com/photo-1608042314453-ae338d80c427") center/cover fixed;
+        }
+        
         .cart-container {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 25px rgba(212, 175, 55, 0.2);
+            border: 1px solid rgba(212, 175, 55, 0.1);
             padding: 30px;
             margin-bottom: 30px;
         }
         
         .cart-item {
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--cream);
             padding: 20px 0;
             transition: all 0.3s ease;
         }
@@ -30,7 +48,7 @@
         }
         
         .cart-item:hover {
-            background-color: #f8f9fa;
+            background-color: var(--cream);
             border-radius: 10px;
             padding: 20px 15px;
         }
@@ -40,6 +58,13 @@
             height: 100px;
             object-fit: cover;
             border-radius: 10px;
+            border: 2px solid var(--light-gold);
+            transition: all 0.3s ease;
+        }
+        
+        .cart-item:hover .product-image {
+            border-color: var(--gold);
+            transform: scale(1.05);
         }
         
         .quantity-controls {
@@ -51,7 +76,7 @@
         .quantity-btn {
             width: 35px;
             height: 35px;
-            border: 2px solid #667eea;
+            border: 2px solid var(--gold);
             background: white;
             border-radius: 50%;
             display: flex;
@@ -59,34 +84,47 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
+            color: var(--gold);
         }
         
         .quantity-btn:hover {
-            background: #667eea;
+            background: var(--gold);
             color: white;
+            transform: translateY(-2px);
         }
         
         .quantity-input {
             width: 60px;
             text-align: center;
-            border: 2px solid #e9ecef;
+            border: 2px solid var(--cream);
             border-radius: 8px;
             padding: 5px;
+            font-weight: 600;
+            color: var(--dark-brown);
+            transition: all 0.3s ease;
+        }
+        
+        .quantity-input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+            outline: none;
         }
         
         .price-text {
-            font-size: 1.1rem;
+            /* font-size: 1.1rem; */
             font-weight: bold;
-            color: #667eea;
+            color: var(--gold);
         }
         
         .summary-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--dark-brown);
             color: white;
             border-radius: 15px;
             padding: 25px;
             position: sticky;
             top: 100px;
+            border: 1px solid var(--gold);
+            box-shadow: 0 5px 25px rgba(212, 175, 55, 0.2);
         }
         
         .summary-row {
@@ -94,42 +132,82 @@
             justify-content: space-between;
             margin-bottom: 10px;
             padding-bottom: 8px;
+            color: var(--cream);
         }
         
         .summary-row.total {
-            border-top: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid var(--gold);
             margin-top: 15px;
             padding-top: 15px;
             font-size: 1.2rem;
             font-weight: bold;
+            color: var(--gold);
         }
         
         .btn-primary {
-            background: white;
-            color: #667eea;
+            background: var(--gold);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 35px 15px;
+            font-weight: 300;
+            /* width: 300px; */
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-gopayment {
+            background: var(--gold);
+            color: white;
             border: none;
             border-radius: 10px;
             padding: 15px 30px;
             font-weight: 600;
-            width: 100%;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            width: inherit;
+            text-align: center;
+        }
+        
+        .btn-primary, .btn-gopayment:hover {
+            background: var(--dark-gold);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+        }
+        
+        .btn-outline-light {
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
             transition: all 0.3s ease;
         }
         
-        .btn-primary:hover {
-            background: #f8f9fa;
-            color: #5a67d8;
+        .btn-outline-light:hover {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: white;
             transform: translateY(-2px);
         }
         
         .empty-cart {
             text-align: center;
             padding: 60px 20px;
+        }      
+      
+        
+        .empty-cart h4 {
+            color: var(--dark-brown);
         }
         
-        .empty-cart i {
-            font-size: 4rem;
-            color: #dee2e6;
-            margin-bottom: 20px;
+        .empty-cart p {
+            color: var(--dark-brown);
+            opacity: 0.7;
         }
         
         .remove-btn {
@@ -138,11 +216,43 @@
             border: none;
             font-size: 1.2rem;
             cursor: pointer;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
+            opacity: 0.7;
         }
         
         .remove-btn:hover {
             color: #c82333;
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .text-primary {
+            color: var(--gold) !important;
+        }
+
+        .fw-bold {
+            color: var(--dark-brown);
+        }
+
+        .btn-outline-danger {
+            border-color: #dc3545;
+            color: #dc3545;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .alert {
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
     </style>
 </head>
@@ -193,10 +303,15 @@
                                 <div class="cart-item" data-cart-key="<?php echo $item['cart_key']; ?>">
                                     <div class="row align-items-center">
                                         <div class="col-md-2">
-                                            <img src="<?php echo isset($item['product']->primary_image) ? asset($item['product']->primary_image->file_path) : asset('images/placeholder.jpg'); ?>" 
-                                                 alt="<?php echo htmlspecialchars($item['product']->name); ?>" 
-                                                 class="product-image">
-                                        </div>
+                            <?php 
+                                // Get primary image URL using the Product model method
+                                $productModel = new Product();
+                                $imageUrl = $productModel->getPrimaryImageUrl($item['product']->product_id);
+                            ?>
+                            <img src="<?php echo $imageUrl; ?>" 
+                                 alt="<?php echo htmlspecialchars($item['product']->name); ?>" 
+                                 class="product-image">
+                        </div>                                       
                                         
                                         <div class="col-md-4">
                                             <h6 class="fw-semibold mb-1"><?php echo htmlspecialchars($item['product']->name); ?></h6>
@@ -292,7 +407,7 @@
                         
                         <hr style="border-color: rgba(255,255,255,0.3);">
                         
-                        <a href="/Ecom_website/checkout" class="btn btn-primary mb-3">
+                        <a href="/Ecom_website/checkout" class="btn btn-gopayment mb-3">
                             <i class="fas fa-credit-card me-2"></i>
                             Tiến hành thanh toán
                         </a>

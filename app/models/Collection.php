@@ -50,17 +50,59 @@ class Collection extends BaseModel {
         return $this->db->resultSet();
     }
 
-    public function getAll($onlyActive = true) {
-        return $this->getAllCollections($onlyActive);
+
+    /**
+     * Get products in a collection with images
+     */
+    public function getCollectionProductsWithImages($collectionId, $limit = null, $offset = 0) {
+        $limitClause = $limit ? "LIMIT $limit OFFSET $offset" : "";
+        
+        try {
+            $query = "SELECT p.*, 
+                             COALESCE(GROUP_CONCAT(DISTINCT i.file_path ORDER BY COALESCE(iu.is_primary, 0) DESC, iu.created_at ASC SEPARATOR ','), '') as images,
+                             COALESCE(GROUP_CONCAT(DISTINCT c.name SEPARATOR ', '), 'Uncategorized') as category_name
+                      FROM products p
+                      LEFT JOIN image_usages iu ON p.product_id = iu.ref_id AND iu.ref_type = 'product'
+                      LEFT JOIN images i ON iu.image_id = i.image_id
+                      LEFT JOIN product_categories pc ON p.product_id = pc.product_id
+                      LEFT JOIN categories c ON pc.category_id = c.category_id
+                      WHERE p.collection_id = :collection_id 
+                      AND p.is_active = 1
+                      GROUP BY p.product_id
+                      ORDER BY p.created_at DESC
+                      $limitClause";
+            
+            $this->db->query($query);
+            $this->db->bind(':collection_id', $collectionId);
+            
+            return $this->db->resultSet();
+        } catch (Exception $e) {
+            error_log("Collection products query error: " . $e->getMessage());
+            
+            // Fallback to simple query without images
+            $query = "SELECT p.*, 
+                             '' as images,
+                             COALESCE(GROUP_CONCAT(DISTINCT c.name SEPARATOR ', '), 'Uncategorized') as category_name
+                      FROM products p
+                      LEFT JOIN product_categories pc ON p.product_id = pc.product_id
+                      LEFT JOIN categories c ON pc.category_id = c.category_id
+                      WHERE p.collection_id = :collection_id 
+                      AND p.is_active = 1
+                      GROUP BY p.product_id
+                      ORDER BY p.created_at DESC
+                      $limitClause";
+            
+            $this->db->query($query);
+            $this->db->bind(':collection_id', $collectionId);
+            
+            return $this->db->resultSet();
+        }
     }
 
-    // Get all products in a collection
-    public function getProductsInCollection($collectionId) {
-        $this->db->query("SELECT p.* FROM products p WHERE p.collection_id = :collection_id AND p.is_active = 1 ORDER BY p.name ASC");
-        $this->db->bind(':collection_id', $collectionId);
-        return $this->db->resultSet();
-    }
-
+    /**
+     * Count products in a collection
+     */
+    
     private function generateSlug($name) {
         $slug = strtolower(trim($name));
         $slug = preg_replace('/[^a-z0-9-]/', '-', $slug);
@@ -95,33 +137,8 @@ class Collection extends BaseModel {
         return $images ? $images[0] : null;
     }
     
-    /**
-     * Add cover to collection (replaces existing)
-     */
-    public function addCollectionCover($collectionId, $imagePath) {
-        // Delete existing cover first
-        $this->deleteAllCollectionImages($collectionId);
-        
-        // Insert into images table first
-        $this->db->query("INSERT INTO images (file_path, file_name, alt_text, created_at) VALUES (:path, :name, :alt, NOW())");
-        $this->db->bind(':path', $imagePath);
-        $this->db->bind(':name', basename($imagePath));
-        $this->db->bind(':alt', basename($imagePath));
-        
-        if (!$this->db->execute()) {
-            return false;
-        }
-        
-        $imageId = $this->db->lastInsertId();
-        
-        // Insert into image_usages table
-        $this->db->query("INSERT INTO image_usages (image_id, ref_type, ref_id, is_primary, created_at) 
-                         VALUES (:image_id, 'collection', :ref_id, 1, NOW())");
-        $this->db->bind(':image_id', $imageId);
-        $this->db->bind(':ref_id', $collectionId);
-        
-        return $this->db->execute() ? $imageId : false;
-    }
+
+   
     
     /**
      * Delete a specific collection image by usage_id
@@ -181,17 +198,6 @@ class Collection extends BaseModel {
         }
         
         return $collections;
-    }
-    
-    /**
-     * Get single collection with cover
-     */
-    public function getCollectionWithCover($collectionId) {
-        $collection = $this->findById($collectionId);
-        if ($collection) {
-            $collection->cover_image = $this->getCollectionCover($collectionId);
-        }
-        return $collection;
     }
     
     /**

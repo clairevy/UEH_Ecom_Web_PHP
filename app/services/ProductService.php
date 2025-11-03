@@ -6,7 +6,6 @@ require_once __DIR__ . '/../models/Product.php';
 require_once __DIR__ . '/../models/Category.php';
 require_once __DIR__ . '/../models/Collection.php';
 require_once __DIR__ . '/../models/Review.php';
-require_once __DIR__ . '/../models/SiteAssets.php';
 require_once __DIR__ . '/ReviewService.php';
 
 /**
@@ -18,7 +17,6 @@ class ProductService extends BaseModel {
     private $productModel;
     private $categoryModel;
     private $collectionModel;
-    private $siteAssetsModel;
     private $reviewModel;
     private $reviewService;
     
@@ -30,7 +28,6 @@ class ProductService extends BaseModel {
         $this->categoryModel = new Category();
         $this->collectionModel = new Collection(); 
         $this->reviewModel = new Review();
-        $this->siteAssetsModel = new SiteAssets();
         $this->reviewService = new ReviewService();
 
     }
@@ -118,18 +115,36 @@ class ProductService extends BaseModel {
         }
         
         // Sorting
-        switch ($filters['sort_by'] ?? 'newest') {
-            case 'price_low':
+        switch ($filters['sort_by'] ?? 'popular') {
+            case 'price_asc':
                 $sql .= " ORDER BY p.base_price ASC";
                 break;
-            case 'price_high':
+            case 'price_desc':
                 $sql .= " ORDER BY p.base_price DESC";
                 break;
-            case 'name':
+            case 'name_asc':
                 $sql .= " ORDER BY p.name ASC";
                 break;
-            default:
+            case 'name_desc':
+                $sql .= " ORDER BY p.name DESC";
+                break;
+            case 'rating':
+                $sql .= " ORDER BY p.created_at DESC"; // Placeholder for rating sort
+                break;
+            case 'newest':
                 $sql .= " ORDER BY p.created_at DESC";
+                break;
+            case 'popular':
+            default:
+                // Sort by most sold products - use subquery to maintain filter logic
+                $sql .= " ORDER BY (
+                    SELECT COALESCE(SUM(oi.quantity), 0) 
+                    FROM order_items oi 
+                    JOIN orders o ON oi.order_id = o.order_id 
+                    WHERE oi.product_id = p.product_id 
+                    AND o.order_status IN ('paid', 'shipped', 'delivered')
+                ) DESC, p.created_at DESC";
+                break;
         }
         
         // Pagination

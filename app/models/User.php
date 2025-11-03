@@ -224,28 +224,41 @@ class User extends BaseModel {
      */
 
     public function updateProfile($userId, $data) {
-        $fields = [];
-        $params = [':user_id' => $userId];
-        
-        foreach ($data as $key => $value) {
-            if ($value !== null && $value !== '') {
-                $fields[] = "$key = :$key";
-                $params[":$key"] = $value;
+        try {
+            error_log("UpdateProfile - User ID: $userId");
+            error_log("UpdateProfile - Data: " . json_encode($data));
+            
+            $fields = [];
+            $params = [':user_id' => $userId];
+            
+            foreach ($data as $key => $value) {
+                if ($value !== null && $value !== '') {
+                    $fields[] = "$key = :$key";
+                    $params[":$key"] = $value;
+                }
             }
-        }
-        
-        if (empty($fields)) {
+            
+            if (empty($fields)) {
+                error_log("UpdateProfile - No fields to update");
+                return false;
+            }
+            
+            $query = "UPDATE users SET " . implode(', ', $fields) . " WHERE user_id = :user_id";
+            error_log("UpdateProfile - Query: $query");
+            error_log("UpdateProfile - Params: " . json_encode($params));
+            
+            $this->db->query($query);
+            foreach ($params as $param => $value) {
+                $this->db->bind($param, $value);
+            }
+            
+            $result = $this->db->execute();
+            error_log("UpdateProfile - Result: " . ($result ? 'SUCCESS' : 'FAILED'));
+            return $result;
+        } catch (Exception $e) {
+            error_log("UpdateProfile - Exception: " . $e->getMessage());
             return false;
         }
-        
-        $query = "UPDATE users SET " . implode(', ', $fields) . " WHERE user_id = :user_id";
-        
-        $this->db->query($query);
-        foreach ($params as $param => $value) {
-            $this->db->bind($param, $value);
-        }
-        
-        return $this->db->execute();
     }
     
     /**
@@ -291,6 +304,105 @@ class User extends BaseModel {
      */
     public function isTokenValid($expires) {
         return strtotime($expires) >= time();
+    }
+    
+    /**
+     * Get user's default address
+     */
+    public function getDefaultAddress($userId) {
+        $query = "SELECT * FROM user_addresses WHERE user_id = :user_id AND is_default = 1 LIMIT 1";
+        
+        $this->db->query($query);
+        $this->db->bind(':user_id', $userId);
+        
+        return $this->db->single();
+    }
+    
+    /**
+     * Get all user addresses
+     */
+    public function getUserAddresses($userId) {
+        $query = "SELECT * FROM user_addresses WHERE user_id = :user_id ORDER BY is_default DESC, created_at DESC";
+        
+        $this->db->query($query);
+        $this->db->bind(':user_id', $userId);
+        
+        return $this->db->resultSet();
+    }
+    
+    /**
+     * Add or update user address
+     */
+    public function saveUserAddress($userId, $addressData) {
+        try {
+            error_log("SaveUserAddress - User ID: $userId");
+            error_log("SaveUserAddress - Address data: " . json_encode($addressData));
+            
+            // If this is set as default, remove default from other addresses
+            if (isset($addressData['is_default']) && $addressData['is_default'] == 1) {
+                $clearDefaultQuery = "UPDATE user_addresses SET is_default = 0 WHERE user_id = :user_id";
+                $this->db->query($clearDefaultQuery);
+                $this->db->bind(':user_id', $userId);
+                $this->db->execute();
+                error_log("SaveUserAddress - Cleared other default addresses");
+            }
+            
+            // Check if address already exists (by street + province combination)
+            $checkQuery = "SELECT user_address_id FROM user_addresses 
+                           WHERE user_id = :user_id AND street = :street AND province = :province LIMIT 1";
+            $this->db->query($checkQuery);
+            $this->db->bind(':user_id', $userId);
+            $this->db->bind(':street', $addressData['street']);
+            $this->db->bind(':province', $addressData['province']);
+            $existingAddress = $this->db->single();
+            
+            if ($existingAddress) {
+                error_log("SaveUserAddress - Updating existing address ID: " . $existingAddress->user_address_id);
+            // Update existing address (no district column in table)
+            $updateQuery = "UPDATE user_addresses SET 
+                           full_name = :full_name,
+                           phone = :phone,
+                           ward = :ward,
+                           country = :country,
+                           postal_code = :postal_code,
+                           is_default = :is_default
+                           WHERE user_address_id = :address_id";
+            
+            $this->db->query($updateQuery);
+            $this->db->bind(':full_name', $addressData['full_name']);
+            $this->db->bind(':phone', $addressData['phone']);
+            $this->db->bind(':ward', $addressData['ward'] ?? '');
+            $this->db->bind(':country', $addressData['country'] ?? 'Vietnam');
+            $this->db->bind(':postal_code', $addressData['postal_code'] ?? null);
+            $this->db->bind(':is_default', $addressData['is_default'] ?? 0);
+            $this->db->bind(':address_id', $existingAddress->user_address_id);                $result = $this->db->execute();
+                error_log("SaveUserAddress - Update result: " . ($result ? 'SUCCESS' : 'FAILED'));
+                return $result;
+            } else {
+                error_log("SaveUserAddress - Inserting new address");
+            // Insert new address (no district column in table)
+            $insertQuery = "INSERT INTO user_addresses 
+                           (user_id, full_name, phone, street, ward, province, country, postal_code, is_default) 
+                           VALUES (:user_id, :full_name, :phone, :street, :ward, :province, :country, :postal_code, :is_default)";
+            
+            $this->db->query($insertQuery);
+            $this->db->bind(':user_id', $userId);
+            $this->db->bind(':full_name', $addressData['full_name']);
+            $this->db->bind(':phone', $addressData['phone']);
+            $this->db->bind(':street', $addressData['street']);
+            $this->db->bind(':ward', $addressData['ward'] ?? '');
+            $this->db->bind(':province', $addressData['province']);
+            $this->db->bind(':country', $addressData['country'] ?? 'Vietnam');
+            $this->db->bind(':postal_code', $addressData['postal_code'] ?? null);
+            $this->db->bind(':is_default', $addressData['is_default'] ?? 0);                $result = $this->db->execute();
+                error_log("SaveUserAddress - Insert result: " . ($result ? 'SUCCESS' : 'FAILED'));
+                return $result;
+            }
+        } catch (Exception $e) {
+            error_log("SaveUserAddress - Exception: " . $e->getMessage());
+            error_log("SaveUserAddress - Stack trace: " . $e->getTraceAsString());
+            return false;
+        }
     }
 
     /**

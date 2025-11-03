@@ -27,9 +27,29 @@ class ProfileController extends BaseController {
             exit;
         }
 
+        // Update session with latest user data if missing fields
+        $sessionUser = SessionHelper::getUser();
+        if (empty($sessionUser->phone) || empty($sessionUser->date_of_birth) || empty($sessionUser->gender)) {
+            SessionHelper::updateUserData([
+                'name' => $user->name,
+                'phone' => $user->phone,
+                'date_of_birth' => $user->date_of_birth,
+                'gender' => $user->gender
+            ]);
+        }
+
+        // Get user's default address
+        $defaultAddress = $this->userModel->getDefaultAddress($userId);
+        
+        // Debug: Log user and address data
+        error_log("Profile Index - User ID: $userId");
+        error_log("Profile Index - User data: " . json_encode($user));
+        error_log("Profile Index - Default address: " . json_encode($defaultAddress));
+
         $this->view('customer/pages/profile', [
             'title' => 'Thông tin cá nhân',
-            'user' => $user
+            'user' => $user,
+            'defaultAddress' => $defaultAddress
         ]);
     }
 
@@ -40,26 +60,52 @@ class ProfileController extends BaseController {
         try {
             $userId = SessionHelper::getUserId();
             
+            // Debug: Log received data
+            error_log("Profile Update - User ID: $userId");
+            error_log("Profile Update - POST data: " . json_encode($_POST));
+            
             // Validate input
             $errors = $this->validateProfileData($_POST);
             if (!empty($errors)) {
+                error_log("Profile Update - Validation errors: " . json_encode($errors));
                 $this->jsonResponse(false, 'Dữ liệu không hợp lệ', $errors);
                 return;
             }
 
-            $updateData = [
+            // Update basic user info (exclude address)
+            $userUpdateData = [
                 'name' => trim($_POST['name']),
                 'phone' => trim($_POST['phone'] ?? ''),
-                'address' => trim($_POST['address'] ?? ''),
                 'date_of_birth' => $_POST['date_of_birth'] ?? null,
                 'gender' => $_POST['gender'] ?? null
             ];
+            
+            error_log("Profile Update - User data to update: " . json_encode($userUpdateData));
 
-            $updated = $this->userModel->updateProfile($userId, $updateData);
+            $updated = $this->userModel->updateProfile($userId, $userUpdateData);
+            error_log("Profile Update - User update result: " . ($updated ? 'SUCCESS' : 'FAILED'));
+            
+            // Handle address separately if provided  
+            if (!empty($_POST['street']) && !empty($_POST['province']) && !empty($_POST['ward'])) {
+                $addressData = [
+                    'full_name' => trim($_POST['name']),
+                    'phone' => trim($_POST['phone'] ?? ''),
+                    'street' => trim($_POST['street']),
+                    'ward' => trim($_POST['ward']),
+                    'district' => '', // Modern Vietnam structure doesn't use district
+                    'province' => trim($_POST['province']),
+                    'country' => 'Vietnam',
+                    'is_default' => 1 // Set as default address
+                ];
+                
+                error_log("Profile Update - Address data to save: " . json_encode($addressData));
+                $addressResult = $this->userModel->saveUserAddress($userId, $addressData);
+                error_log("Profile Update - Address save result: " . ($addressResult ? 'SUCCESS' : 'FAILED'));
+            }
             
             if ($updated) {
                 // Update session data
-                SessionHelper::updateUserData($updateData);
+                SessionHelper::updateUserData($userUpdateData);
                 $this->jsonResponse(true, 'Cập nhật thông tin thành công!');
             } else {
                 $this->jsonResponse(false, 'Có lỗi xảy ra khi cập nhật thông tin');
@@ -67,7 +113,8 @@ class ProfileController extends BaseController {
 
         } catch (Exception $e) {
             error_log("Profile Update Error: " . $e->getMessage());
-            $this->jsonResponse(false, 'Có lỗi hệ thống xảy ra');
+            error_log("Profile Update Stack Trace: " . $e->getTraceAsString());
+            $this->jsonResponse(false, 'Có lỗi hệ thống xảy ra: ' . $e->getMessage());
         }
     }
 

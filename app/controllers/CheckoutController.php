@@ -21,18 +21,27 @@ class CheckoutController extends BaseController {
         $cartItems = [];
         $cartSummary = [];
         
-        // Check if this is buy now checkout
-        if (isset($_SESSION['buy_now_item'])) {
+        // Check if this is a buy now checkout (via URL parameter or specific session)
+        $isCartCheckout = isset($_GET['cart']);
+        $isBuyNow = isset($_GET['buy_now']) || (!$isCartCheckout && isset($_SESSION['buy_now_item']) && empty($_SESSION['cart']));
+        
+        if ($isBuyNow && isset($_SESSION['buy_now_item'])) {
+            // Buy now checkout
             $cartItems = [$this->getBuyNowItem()];
             $cartSummary = $this->calculateBuyNowSummary($_SESSION['buy_now_item']);
         } else {
-            // Regular cart checkout
+            // Regular cart checkout - prioritize cart over buy_now_item
             if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
                 header('Location: /Ecom_website/cart');
                 exit;
             }
             $cartItems = $this->getCartItems();
             $cartSummary = $this->calculateCartSummary($cartItems);
+            
+            // Clear buy_now_item if we're doing cart checkout
+            if (isset($_SESSION['buy_now_item'])) {
+                unset($_SESSION['buy_now_item']);
+            }
         }
 
         // Get user info if logged in
@@ -65,27 +74,35 @@ class CheckoutController extends BaseController {
                 return;
             }
 
-            // Validate form data
-            $errors = $this->validateCheckoutData($_POST);
-            if (!empty($errors)) {
-                $this->jsonResponse(false, 'Dữ liệu không hợp lệ', $errors);
-                return;
-            }
+        // Validate form data
+        $errors = $this->validateCheckoutData($_POST);
+        if (!empty($errors)) {
+            $this->jsonResponse(false, 'Dữ liệu không hợp lệ', $errors);
+            return;
+        }
 
-            // Get customer info
-            $customerInfo = [
-                'name' => trim($_POST['name']),
-                'email' => trim($_POST['email']),
-                'phone' => trim($_POST['phone']),
-                'address' => trim($_POST['address']),
-                'province' => trim($_POST['province']),
-                'notes' => trim($_POST['notes'] ?? '')
-            ];
+        // Get payment delivery method
+        $paymentDeliveryMethod = $_POST['payment_delivery_method'] ?? 'bank_transfer_home';
+        
+        // Get customer info
+        $customerInfo = [
+            'name' => trim($_POST['name']),
+            'email' => trim($_POST['email']),
+            'phone' => trim($_POST['phone']),
+            'notes' => trim($_POST['notes'] ?? '')
+        ];
 
-            // Get payment method
-            $paymentMethod = $_POST['payment_method'] ?? 'cod';
-
-            // Calculate order totals
+        // Add address info only for home delivery
+        if ($paymentDeliveryMethod === 'bank_transfer_home') {
+            $customerInfo['address'] = trim($_POST['address'] ?? '');
+            $customerInfo['ward'] = trim($_POST['ward'] ?? '');
+            $customerInfo['province'] = trim($_POST['province'] ?? '');
+        } else {
+            // Store pickup - no address needed
+            $customerInfo['address'] = null;
+            $customerInfo['ward'] = null;
+            $customerInfo['province'] = null;
+        }            // Calculate order totals
             if (isset($_SESSION['buy_now_item'])) {
                 // Buy now checkout
                 $cartItems = [$this->getBuyNowItem()];
@@ -104,37 +121,8 @@ class CheckoutController extends BaseController {
                 }
             }
 
-            // Create order (pass items and payment method to model which will handle items & stock)
-            $itemsForOrder = [];
-            foreach ($cartItems as $item) {
-                $itemsForOrder[] = [
-                    'product_id' => $item['product_id'] ?? ($item['product']->product_id ?? null),
-                    'quantity' => $item['quantity'],
-                    'size' => $item['size'] ?? null,
-                    'color' => $item['color'] ?? null,
-                    'unit_price' => $item['price'] ?? ($item['product']->base_price ?? 0)
-                ];
-            }
-
-            $orderData = [
-                'user_id' => SessionHelper::isLoggedIn() ? SessionHelper::getUserId() : null,
-                'full_name' => $customerInfo['name'],
-                'email' => $customerInfo['email'],
-                'phone' => $customerInfo['phone'],
-                'street' => $customerInfo['address'],
-                'ward' => '',
-                'province' => $customerInfo['province'],
-                'country' => 'Vietnam',
-                'payment_method' => $paymentMethod,
-                'order_status' => 'pending',
-                'shipping_fee' => $cartSummary['shipping'],
-                'total_amount' => $cartSummary['total'],
-                'discount_code' => null,
-                'discount_amount' => 0,
-                'items' => $itemsForOrder
-            ];
-
-            $orderId = $this->orderModel->createOrder($orderData);
+            // Create order
+            $orderId = $this->createOrder($customerInfo, $cartItems, $cartSummary, $paymentDeliveryMethod);
 
             if ($orderId) {
                 // Clear appropriate session data after successful order
@@ -179,26 +167,24 @@ class CheckoutController extends BaseController {
     /**
      * Create order in database
      */
-    private function createOrder($customerInfo, $cartItems, $cartSummary, $paymentMethod) {
+    private function createOrder($customerInfo, $cartItems, $cartSummary, $paymentDeliveryMethod) {
         try {
-            // Generate order ID
-            $orderId = 'ORD' . date('Ymd') . rand(1000, 9999);
-
             // Prepare order data to match database structure
             $orderData = [
                 'user_id' => SessionHelper::isLoggedIn() ? SessionHelper::getUserId() : null,
                 'full_name' => $customerInfo['name'],
                 'email' => $customerInfo['email'],
                 'phone' => $customerInfo['phone'],
-                'street' => $customerInfo['address'], // For now, put full address in street
-                'ward' => '', // Would need separate fields in form
-                'province' => $customerInfo['province'],
+                'street' => $customerInfo['address'], // Null for store pickup
+                'ward' => $customerInfo['ward'], // Null for store pickup
+                'province' => $customerInfo['province'], // Null for store pickup
                 'country' => 'Vietnam',
-                'order_status' => 'pending',
+                'order_status' => 'pending', // Always pending, admin will change manually
                 'shipping_fee' => $cartSummary['shipping'],
                 'total_amount' => $cartSummary['total'],
                 'discount_code' => null,
-                'discount_amount' => 0
+                'discount_amount' => 0,
+                'notes' => $customerInfo['notes']
             ];
 
             // Create order using proper database method
@@ -227,10 +213,36 @@ class CheckoutController extends BaseController {
                     error_log("Order item creation result: " . ($itemCreated ? 'SUCCESS' : 'FAILED'));
                 }
 
-                // Update product stock (simplified)
+                // Create payment record
+                $paymentData = [
+                    'order_id' => $actualOrderId,
+                    'payment_method' => strtoupper($paymentDeliveryMethod), // BANK_TRANSFER_HOME or CASH_STORE
+                    'payment_status' => 'pending', // Always pending, admin will change manually
+                    'amount' => $cartSummary['total']
+                ];
+                
+                error_log("Creating payment record: " . json_encode($paymentData));
+                $paymentCreated = $this->orderModel->createPayment($paymentData);
+                error_log("Payment creation result: " . ($paymentCreated ? 'SUCCESS' : 'FAILED'));
+
+                // Update product stock - Trừ stock ngay khi đặt hàng thành công
                 foreach ($cartItems as $item) {
-                    $newStock = $item['product']->stock_quantity - $item['quantity'];
-                    // In real app: $this->productModel->updateStock($item['product']->product_id, $newStock);
+                    if (isset($item['size']) && isset($item['color']) && 
+                        !empty($item['size']) && !empty($item['color'])) {
+                        // Sản phẩm có variant (size + color) - sử dụng stored procedure
+                        $stockUpdated = $this->productModel->updateStock(
+                            $item['product']->product_id, 
+                            $item['size'], 
+                            $item['color'], 
+                            $item['quantity'] // SỐ DƯƠNG - SP sẽ tự trừ (stock - quantity)
+                        );
+                        error_log("Stock update for variant product {$item['product']->product_id}: " . ($stockUpdated ? 'SUCCESS' : 'FAILED'));
+                    } else {
+                        // Sản phẩm không có variant - tạo method updateSimpleProductStock
+                        $newStock = max(0, $item['product']->stock_quantity - $item['quantity']); // Không cho âm
+                        $stockUpdated = $this->updateSimpleProductStock($item['product']->product_id, $newStock);
+                        error_log("Stock update for simple product {$item['product']->product_id}: " . ($stockUpdated ? 'SUCCESS' : 'FAILED'));
+                    }
                 }
 
                 return $actualOrderId;
@@ -266,17 +278,22 @@ class CheckoutController extends BaseController {
             $errors['phone'] = 'Số điện thoại không hợp lệ';
         }
 
-        if (empty($data['address'])) {
-            $errors['address'] = 'Địa chỉ giao hàng là bắt buộc';
+        // Validate payment delivery method
+        $paymentDeliveryMethod = $data['payment_delivery_method'] ?? '';
+        $allowedMethods = ['bank_transfer_home', 'cash_store'];
+        
+        if (empty($paymentDeliveryMethod) || !in_array($paymentDeliveryMethod, $allowedMethods)) {
+            $errors['payment_delivery_method'] = 'Phương thức thanh toán và nhận hàng không hợp lệ';
         }
 
-        if (empty($data['province'])) {
-            $errors['province'] = 'Tỉnh/Thành phố là bắt buộc';
-        }
-
-    $allowedPaymentMethods = ['cod', 'bank_transfer', 'momo', 'vnpay', 'qr_code'];
-        if (empty($data['payment_method']) || !in_array($data['payment_method'], $allowedPaymentMethods)) {
-            $errors['payment_method'] = 'Phương thức thanh toán không hợp lệ';
+        // Validate address only for home delivery
+        if ($paymentDeliveryMethod === 'bank_transfer_home') {
+            if (empty($data['address'])) {
+                $errors['address'] = 'Địa chỉ giao hàng là bắt buộc khi chọn giao hàng tận nơi';
+            }
+            if (empty($data['province'])) {
+                $errors['province'] = 'Tỉnh/Thành phố là bắt buộc khi chọn giao hàng tận nơi';
+            }
         }
 
         return $errors;
@@ -367,6 +384,19 @@ class CheckoutController extends BaseController {
             'total' => $total,
             'totalQuantity' => $buyNowItem['quantity']
         ];
+    }
+
+    /**
+     * Update stock for simple products (without variants)
+     */
+    private function updateSimpleProductStock($productId, $newStock) {
+        try {
+            // Sử dụng method có sẵn trong Product model
+            return $this->productModel->updateSimpleStock($productId, $newStock);
+        } catch (Exception $e) {
+            error_log("Update Simple Product Stock Error: " . $e->getMessage());
+            return false;
+        }
     }
 
     /**

@@ -5,7 +5,7 @@ $user = SessionHelper::getUser();
 ?>
 
 <!-- Navigation -->
-<nav th:fragment="header" class="navbar navbar-expand-lg fixed-top">
+<nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
         <!-- Logo - Link về trang chủ -->
         <a class="navbar-brand" href="<?= url('/') ?>">
@@ -96,16 +96,7 @@ $user = SessionHelper::getUser();
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="<?= url('/profile') ?>">
-                                <i class="fas fa-user me-2"></i>Thông tin cá nhân
-                            </a></li>
-                            <li><a class="dropdown-item" href="<?= url('/orders') ?>">
-                                <i class="fas fa-shopping-bag me-2"></i>Đơn hàng của tôi
-                            </a></li>
-                            <li><a class="dropdown-item" href="<?= url('/wishlist') ?>">
-                                <i class="fas fa-heart me-2"></i>Danh sách yêu thích
-                            </a></li>
-                            <li><a class="dropdown-item" href="<?= url('/settings') ?>">
-                                <i class="fas fa-cog me-2"></i>Cài đặt
+                                <i class="fas fa-user me-2"></i>Hồ sơ cá nhân
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item text-danger" href="#" onclick="logout()">
@@ -130,44 +121,6 @@ $user = SessionHelper::getUser();
         </div>
     </div>
 </nav>
-
-<!-- Additional Styles for User Navigation -->
-<style>
-/* .navbar {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-} */
-
-/* .navbar-brand {
-    font-weight: bold;
-    font-size: 1.5rem;
-   
-} */
-
-/* .navbar-nav .nav-link {
-    font-weight: 500;
-    margin: 0 5px;
-    transition: color 0.3s ease;
-} */
-
-/* .navbar-nav .nav-link:hover {
-    color: #667eea !important;
-} */
-
-/* .search-input {
-    border-radius: 20px 0 0 20px;
-    border-right: none;
-} */
-
-/* .search-input:focus {
-    box-shadow: none;
-    border-color: #667eea;
-} */
-
-
-</style>
 
 <!-- JavaScript for User Actions -->
 <script>
@@ -243,15 +196,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     
     // Load collections
-    fetch('<?= url('/api/collections') ?>')
+    fetch('<?= url('/api/collections/list') ?>')
         .then(response => response.json())
         .then(data => {
             if (data.success && data.data) {
                 const collectionsDiv = document.getElementById('collectionsDropdown');
                 collectionsDiv.innerHTML = '';
+                
+                // Add "All Collections" link
+                const allLi = document.createElement('li');
+                allLi.innerHTML = `<a class="dropdown-item" href="<?= url('/collections') ?>">All Collections</a>`;
+                collectionsDiv.appendChild(allLi);
+                
+                const dividerLi = document.createElement('li');
+                dividerLi.innerHTML = '<hr class="dropdown-divider">';
+                collectionsDiv.appendChild(dividerLi);
+                
                 data.data.forEach(collection => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<a class="dropdown-item" href="<?= url('/products') ?>?collection=${collection.collection_id}">${collection.name}</a>`;
+                    li.innerHTML = `<a class="dropdown-item" href="<?= url('/collection/') ?>${collection.slug}">${collection.collection_name}</a>`;
                     collectionsDiv.appendChild(li);
                 });
             }

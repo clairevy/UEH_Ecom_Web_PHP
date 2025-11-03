@@ -54,39 +54,6 @@ class ReviewService extends BaseModel {
     }
     
     /**
-     * Thêm đánh giá mới
-     */
-    public function addReview($productId, $userId, $rating, $title, $comment) {
-        $sql = "INSERT INTO product_reviews (product_id, user_id, rating, title, comment, status, created_at) 
-                VALUES (:product_id, :user_id, :rating, :title, :comment, 'pending', NOW())";
-        
-        $this->db->query($sql);
-        $this->db->bind(':product_id', $productId);
-        $this->db->bind(':user_id', $userId);
-        $this->db->bind(':rating', $rating);
-        $this->db->bind(':title', $title);
-        $this->db->bind(':comment', $comment);
-        
-        return $this->db->execute();
-    }
-    
-    /**
-     * Kiểm tra user đã đánh giá sản phẩm chưa
-     */
-    public function hasUserReviewed($productId, $userId) {
-        $sql = "SELECT COUNT(*) as count FROM product_reviews 
-                WHERE product_id = :product_id 
-                AND user_id = :user_id";
-        
-        $this->db->query($sql);
-        $this->db->bind(':product_id', $productId);
-        $this->db->bind(':user_id', $userId);
-        
-        $result = $this->db->single();
-        return $result->count > 0;
-    }
-    
-    /**
      * Tạo HTML stars cho hiển thị rating
      */
     public function renderStars($rating, $maxStars = 5) {

@@ -9,7 +9,7 @@ const _DRIVER = 'mysql';
 // Base URL configuration
 // For localhost/Ecom_website
 define('BASE_URL', '/Ecom_website');
-define('FULL_BASE_URL', 'http://' . $_SERVER['HTTP_HOST'] . BASE_URL);
+define('FULL_BASE_URL', 'http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . BASE_URL);
 
 // Define root paths
 define('ROOT', __DIR__ . '/../app/views/admin/');

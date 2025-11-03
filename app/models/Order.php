@@ -20,78 +20,27 @@ class Order extends BaseModel {
 
         // Create order (include payment_method column)
         $this->db->query("INSERT INTO " . $this->table . " 
-             (user_id, full_name, email, phone, street, ward, province, country, 
-              payment_method, order_status, shipping_fee, total_amount, discount_code, discount_amount, created_at, updated_at) 
-             VALUES (:user_id, :full_name, :email, :phone, :street, :ward, :province, :country, 
-                 :payment_method, :order_status, :shipping_fee, :total_amount, :discount_code, :discount_amount, NOW(), NOW())");
-            
-            $this->db->bind(':user_id', $data['user_id'] ?? null);
-            $this->db->bind(':full_name', $data['full_name']);
-            $this->db->bind(':email', $data['email']);
-            $this->db->bind(':phone', $data['phone']);
-            $this->db->bind(':street', $data['street']);
-            $this->db->bind(':ward', $data['ward']);
-            $this->db->bind(':province', $data['province']);
-            $this->db->bind(':country', $data['country'] ?? 'Vietnam');
-            $this->db->bind(':order_status', $data['order_status'] ?? 'pending');
-            $this->db->bind(':payment_method', $data['payment_method'] ?? 'cod');
-            $this->db->bind(':shipping_fee', $data['shipping_fee'] ?? 0);
-            $this->db->bind(':total_amount', $data['total_amount']);
-            $this->db->bind(':discount_code', $data['discount_code'] ?? null);
-            $this->db->bind(':discount_amount', $data['discount_amount'] ?? 0);
-            
-            $orderCreated = $this->db->execute();
-            
-            if (!$orderCreated) {
-                throw new Exception("Lỗi khi tạo đơn hàng");
-            }
-
-            $orderId = $this->db->lastInsertId();
-
-            // Insert order items and decrement stock per item (variant-aware)
-            $product = new Product();
-            foreach ($data['items'] as $item) {
-                $productId = $item['product_id'];
-                $quantity = (int)($item['quantity'] ?? 1);
-                $size = $item['size'] ?? null;
-                $color = $item['color'] ?? null;
-
-                // Resolve variant and unit price
-                $variant = $product->getVariant($productId, $size, $color);
-                $variantId = $variant->variant_id ?? null;
-                $unitPrice = $variant->variant_price ?? $variant->price ?? ($item['unit_price'] ?? 0);
-                $totalPrice = $unitPrice * $quantity;
-
-                // Insert order_items
-                $this->db->query("INSERT INTO order_items (order_id, product_id, variant_id, quantity, unit_price_snapshot, total_price)
-                                 VALUES (:order_id, :product_id, :variant_id, :quantity, :unit_price, :total_price)");
-                $this->db->bind(':order_id', $orderId);
-                $this->db->bind(':product_id', $productId);
-                $this->db->bind(':variant_id', $variantId);
-                $this->db->bind(':quantity', $quantity);
-                $this->db->bind(':unit_price', $unitPrice);
-                $this->db->bind(':total_price', $totalPrice);
-
-                if (!$this->db->execute()) {
-                    throw new Exception("Lỗi khi tạo order item cho sản phẩm #{$productId}");
-                }
-
-                // Decrement stock for the variant
-                if (!$product->decrementStock($productId, $size, $color, $quantity)) {
-                    throw new Exception("Không thể cập nhật tồn kho cho sản phẩm {$productId}");
-                }
-            }
-
-            // Commit transaction
-            $this->db->commit();
-            return $orderId;
-
-        } catch (Exception $e) {
-            // Rollback on error
-            $this->db->rollBack();
-            error_log("Create Order Error: " . $e->getMessage());
-            throw $e;
-        }
+                         (user_id, full_name, email, phone, street, ward, province, country, 
+                          order_status, shipping_fee, total_amount, discount_code, discount_amount, notes, created_at, updated_at) 
+                         VALUES (:user_id, :full_name, :email, :phone, :street, :ward, :province, :country, 
+                                 :order_status, :shipping_fee, :total_amount, :discount_code, :discount_amount, :notes, NOW(), NOW())");
+        
+        $this->db->bind(':user_id', $data['user_id'] ?? null);
+        $this->db->bind(':full_name', $data['full_name']);
+        $this->db->bind(':email', $data['email']);
+        $this->db->bind(':phone', $data['phone']);
+        $this->db->bind(':street', $data['street'] ?? null);
+        $this->db->bind(':ward', $data['ward'] ?? null);
+        $this->db->bind(':province', $data['province'] ?? null);
+        $this->db->bind(':country', $data['country'] ?? 'Vietnam');
+        $this->db->bind(':order_status', $data['order_status'] ?? 'pending');
+        $this->db->bind(':shipping_fee', $data['shipping_fee'] ?? 0);
+        $this->db->bind(':total_amount', $data['total_amount']);
+        $this->db->bind(':discount_code', $data['discount_code'] ?? null);
+        $this->db->bind(':discount_amount', $data['discount_amount'] ?? 0);
+        $this->db->bind(':notes', $data['notes'] ?? null);
+        
+        return $this->db->execute();
     }
 
     /**
@@ -104,38 +53,38 @@ class Order extends BaseModel {
     /**
      * Create new order (simplified version for checkout)
      */
-    public function create($data) {
-        try {
-            $this->db->query("INSERT INTO " . $this->table . " 
-                             (order_id, user_id, customer_name, customer_email, customer_phone,
-                              shipping_address, payment_method, order_status, subtotal,
-                              shipping_fee, tax_amount, total_amount, notes, created_at) 
-                             VALUES (:order_id, :user_id, :customer_name, :customer_email, :customer_phone,
-                                     :shipping_address, :payment_method, :order_status, :subtotal,
-                                     :shipping_fee, :tax_amount, :total_amount, :notes, :created_at)");
+    // public function create($data) {
+    //     try {
+    //         $this->db->query("INSERT INTO " . $this->table . " 
+    //                          (order_id, user_id, customer_name, customer_email, customer_phone,
+    //                           shipping_address, payment_method, order_status, subtotal,
+    //                           shipping_fee, tax_amount, total_amount, notes, created_at) 
+    //                          VALUES (:order_id, :user_id, :customer_name, :customer_email, :customer_phone,
+    //                                  :shipping_address, :payment_method, :order_status, :subtotal,
+    //                                  :shipping_fee, :tax_amount, :total_amount, :notes, :created_at)");
 
-            $this->db->bind(':order_id', $data['order_id']);
-            $this->db->bind(':user_id', $data['user_id']);
-            $this->db->bind(':customer_name', $data['customer_name']);
-            $this->db->bind(':customer_email', $data['customer_email']);
-            $this->db->bind(':customer_phone', $data['customer_phone']);
-            $this->db->bind(':shipping_address', $data['shipping_address']);
-            $this->db->bind(':payment_method', $data['payment_method']);
-            $this->db->bind(':order_status', $data['order_status']);
-            $this->db->bind(':subtotal', $data['subtotal']);
-            $this->db->bind(':shipping_fee', $data['shipping_fee']);
-            $this->db->bind(':tax_amount', $data['tax_amount']);
-            $this->db->bind(':total_amount', $data['total_amount']);
-            $this->db->bind(':notes', $data['notes']);
-            $this->db->bind(':created_at', $data['created_at']);
+    //         $this->db->bind(':order_id', $data['order_id']);
+    //         $this->db->bind(':user_id', $data['user_id']);
+    //         $this->db->bind(':customer_name', $data['customer_name']);
+    //         $this->db->bind(':customer_email', $data['customer_email']);
+    //         $this->db->bind(':customer_phone', $data['customer_phone']);
+    //         $this->db->bind(':shipping_address', $data['shipping_address']);
+    //         $this->db->bind(':payment_method', $data['payment_method']);
+    //         $this->db->bind(':order_status', $data['order_status']);
+    //         $this->db->bind(':subtotal', $data['subtotal']);
+    //         $this->db->bind(':shipping_fee', $data['shipping_fee']);
+    //         $this->db->bind(':tax_amount', $data['tax_amount']);
+    //         $this->db->bind(':total_amount', $data['total_amount']);
+    //         $this->db->bind(':notes', $data['notes']);
+    //         $this->db->bind(':created_at', $data['created_at']);
 
-            return $this->db->execute();
+    //         return $this->db->execute();
 
-        } catch (Exception $e) {
-            error_log("Create Order Error: " . $e->getMessage());
-            return false;
-        }
-    }
+    //     } catch (Exception $e) {
+    //         error_log("Create Order Error: " . $e->getMessage());
+    //         return false;
+    //     }
+    // }
 
     /**
      * Find order by order ID
@@ -261,6 +210,27 @@ class Order extends BaseModel {
         $this->db->bind(':total_price', $orderData['total_price']);
         
         return $this->db->execute();
+    }
+
+    /**
+     * Create payment record for order
+     */
+    public function createPayment($paymentData) {
+        try {
+            $this->db->query("INSERT INTO payments 
+                             (order_id, payment_method, payment_status, amount, created_at) 
+                             VALUES (:order_id, :payment_method, :payment_status, :amount, NOW())");
+            
+            $this->db->bind(':order_id', $paymentData['order_id']);
+            $this->db->bind(':payment_method', $paymentData['payment_method']);
+            $this->db->bind(':payment_status', $paymentData['payment_status']);
+            $this->db->bind(':amount', $paymentData['amount']);
+            
+            return $this->db->execute();
+        } catch (Exception $e) {
+            error_log("Create Payment Error: " . $e->getMessage());
+            return false;
+        }
     }
 
     // Get orders with pagination

@@ -31,6 +31,9 @@ class SessionHelper {
                 'user_id' => $_SESSION['user_id'] ?? null,
                 'email' => $_SESSION['user_email'] ?? null,
                 'name' => $_SESSION['user_name'] ?? null,
+                'phone' => $_SESSION['user_phone'] ?? '',
+                'date_of_birth' => $_SESSION['user_date_of_birth'] ?? null,
+                'gender' => $_SESSION['user_gender'] ?? null,
                 'role_id' => $_SESSION['role_id'] ?? null
             ];
         }
@@ -69,6 +72,9 @@ class SessionHelper {
         $_SESSION['user_id'] = $userData->user_id;
         $_SESSION['user_email'] = $userData->email;
         $_SESSION['user_name'] = $userData->name ?? '';
+        $_SESSION['user_phone'] = $userData->phone ?? '';
+        $_SESSION['user_date_of_birth'] = $userData->date_of_birth ?? null;
+        $_SESSION['user_gender'] = $userData->gender ?? null;
         $_SESSION['role_id'] = $userData->role_id ?? 1;
         $_SESSION['logged_in'] = true;
         $_SESSION['login_time'] = time();
@@ -79,15 +85,20 @@ class SessionHelper {
      */
     public static function destroyUserSession() {
         self::start();
+        
+        // Chỉ xóa thông tin user, giữ lại cart và other session data
         unset($_SESSION['user_id']);
         unset($_SESSION['user_email']);
         unset($_SESSION['user_name']);
+        unset($_SESSION['user_phone']);
+        unset($_SESSION['user_date_of_birth']);
+        unset($_SESSION['user_gender']);
         unset($_SESSION['role_id']);
         unset($_SESSION['logged_in']);
         unset($_SESSION['login_time']);
+        unset($_SESSION['last_activity']);
         
-        // Xóa toàn bộ session
-        session_destroy();
+        // Không xóa cart - cart vẫn được bảo toàn cho guest user
     }
     
     /**
@@ -121,15 +132,18 @@ class SessionHelper {
     public static function updateUserData($data) {
         self::start();
         if (self::isLoggedIn()) {
-            foreach ($data as $key => $value) {
-                if (isset($_SESSION['user_' . $key])) {
-                    $_SESSION['user_' . $key] = $value;
-                }
-            }
-            
-            // Update user_name specifically if name is updated
+            // Update specific fields
             if (isset($data['name'])) {
                 $_SESSION['user_name'] = $data['name'];
+            }
+            if (isset($data['phone'])) {
+                $_SESSION['user_phone'] = $data['phone'];
+            }
+            if (isset($data['date_of_birth'])) {
+                $_SESSION['user_date_of_birth'] = $data['date_of_birth'];
+            }
+            if (isset($data['gender'])) {
+                $_SESSION['user_gender'] = $data['gender'];
             }
         }
     }

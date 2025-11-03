@@ -12,21 +12,29 @@ $userInfo = $data['userInfo'] ?? null;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?> - Jewelry Store</title>
     
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <html xmlns:th="http://www.thymeleaf.org">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="<?= asset('css/css.css?v=' . time()) ?>" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">  
+    
     
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: var(--cream);
+            background-image: linear-gradient(rgb(255, 255, 255), rgba(255, 255, 255, 0.755)),
+                url("https://images.unsplash.com/photo-1608042314453-ae338d80c427?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjR8fGpld2Vscnl8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600");
+            background-size: cover;
+            background-attachment: fixed;
         }
         
         .checkout-header {
-            background: white;
-            border-bottom: 1px solid #dee2e6;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             padding: 1.5rem 0;
         }
         
@@ -41,89 +49,131 @@ $userInfo = $data['userInfo'] ?? null;
             display: flex;
             align-items: center;
             margin: 0 1rem;
+            position: relative;
+        }
+        
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: -2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2rem;
+            height: 2px;
+            background: var(--light-gold);
         }
         
         .step-number {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: #dee2e6;
-            color: #6c757d;
+            background: var(--light-gray);
+            color: var(--dark-brown);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            margin-right: 0.5rem;
+            margin-right: 0.8rem;
+            border: 2px solid var(--light-gold);
+            transition: all 0.3s ease;
         }
         
         .step.active .step-number {
-            background: #0d6efd;
+            background: var(--gold);
             color: white;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+            transform: scale(1.1);
         }
         
         .step.completed .step-number {
-            background: #198754;
+            background: var(--dark-gold);
             color: white;
+            border-color: var(--dark-gold);
         }
         
         .checkout-card {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.2);
             margin-bottom: 1.5rem;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+        
+        .checkout-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(212, 175, 55, 0.15);
         }
         
         .checkout-card .card-header {
-            background: white;
-            border-bottom: 1px solid #dee2e6;
+            background: linear-gradient(45deg, var(--cream), white);
+            border-bottom: 2px solid var(--light-gold);
             border-radius: 15px 15px 0 0 !important;
-            padding: 1.25rem;
-        }
-        
-        .checkout-card .card-body {
             padding: 1.5rem;
         }
         
+        .checkout-card .card-body {
+            padding: 1.8rem;
+        }
+        
         .section-title {
-            color: #495057;
+            color: var(--dark-brown);
             font-weight: 600;
             margin-bottom: 0;
             display: flex;
             align-items: center;
+            font-size: 16px;
+            letter-spacing: 0.5px;
         }
         
         .section-title i {
-            width: 20px;
-            margin-right: 0.5rem;
-            color: #0d6efd;
+            width: 24px;
+            margin-right: 0.8rem;
+            color: var(--gold);
         }
         
         .payment-option {
             transition: all 0.3s ease;
             cursor: pointer;
+            background: white;
+            border: 2px solid rgba(212, 175, 55, 0.2) !important;
         }
         
         .payment-option:hover {
-            border-color: #0d6efd !important;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+            border-color: var(--gold) !important;
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.15);
+            transform: translateY(-2px);
         }
         
         .form-check-input:checked + .form-check-label .payment-option {
-            border-color: #0d6efd !important;
-            background-color: rgba(13, 110, 253, 0.1);
+            border-color: var(--gold) !important;
+            background: linear-gradient(45deg, var(--cream), white);
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--gold);
+            border-color: var(--gold);
+        }
+        
+        #bank_info, #store_info, #addressFields {
+            transition: all 0.3s ease;
         }
         
         .summary-card {
             position: sticky;
             top: 100px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.98));
+            border: 1px solid var(--light-gold);
         }
         
         .summary-row {
             display: flex;
             justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #f1f3f4;
+            padding: 0.9rem 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+            color: var(--dark-brown);
+            font-size: 0.95rem;
         }
         
         .summary-row:last-child {
@@ -131,18 +181,29 @@ $userInfo = $data['userInfo'] ?? null;
         }
         
         .summary-row.total {
-            font-weight: bold;
-            font-size: 1.1rem;
-            border-top: 2px solid #dee2e6;
+            font-weight: 700;
+            font-size: 1.2rem;
+            border-top: 2px solid var(--light-gold);
             margin-top: 1rem;
-            padding-top: 1rem;
+            padding-top: 1.2rem;
+            color: var(--dark-brown);
+        }
+        
+        .summary-row.total span:last-child {
+            color: var(--gold);
         }
         
         .product-item {
             display: flex;
             align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid #f1f3f4;
+            padding: 1.2rem 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .product-item:hover {
+            transform: translateX(5px);
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.05));
         }
         
         .product-item:last-child {
@@ -150,44 +211,90 @@ $userInfo = $data['userInfo'] ?? null;
         }
         
         .product-image {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             object-fit: cover;
-            border-radius: 8px;
-            margin-right: 1rem;
+            border-radius: 10px;
+            margin-right: 1.2rem;
+            border: 2px solid var(--light-gold);
+            transition: all 0.3s ease;
+        }
+        
+        .product-item:hover .product-image {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2);
         }
         
         .btn-checkout {
-            background: #0d6efd;
+            background: var(--gold);
             border: none;
-            padding: 1rem 2rem;
+            padding: 1.2rem 2rem;
             border-radius: 10px;
             font-weight: 600;
             font-size: 1.1rem;
             width: 100%;
             transition: all 0.3s ease;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-checkout::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
         }
         
         .btn-checkout:hover {
-            background: #0b5ed7;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+            background: var(--dark-gold);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+        }
+        
+        .btn-checkout:hover::before {
+            left: 100%;
         }
         
         .form-control, .form-select {
-            border: 2px solid #e9ecef;
+            border: 2px solid rgba(212, 175, 55, 0.2);
             border-radius: 8px;
-            padding: 0.75rem;
-            transition: border-color 0.3s ease;
+            padding: 0.85rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--dark-brown);
+            font-size: 0.95rem;
         }
         
         .form-control:focus, .form-select:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+            border-color: var(--gold);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+            background: white;
+        }
+        
+        .form-control::placeholder {
+            color: #999;
+            font-style: italic;
+        }
+        
+        .form-label {
+            color: var(--dark-brown);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
         }
         
         .invalid-feedback {
             display: block;
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 0.4rem;
         }
         
         @media (max-width: 768px) {
@@ -249,6 +356,104 @@ $userInfo = $data['userInfo'] ?? null;
             <!-- Checkout Form -->
             <div class="col-lg-8">
                 <form id="checkoutForm" class="needs-validation" novalidate>
+                    <!-- Payment and Delivery Method -->
+                    <div class="checkout-card mb-4">
+                        <div class="card-header">
+                            <h5 class="section-title">
+                                <i class="fas fa-credit-card"></i>
+                                Thanh toán và nhận hàng
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="payment-option p-3 rounded border mb-3">
+                                        <input class="form-check-input" type="radio" name="payment_delivery_method" 
+                                               id="bank_transfer_home" value="bank_transfer_home" checked>
+                                        <label class="form-check-label w-100" for="bank_transfer_home">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-money-check-alt text-success me-3 fs-4"></i>
+                                                <div>
+                                                    <strong>Chuyển khoản ngân hàng</strong>
+                                                    <small class="text-muted d-block">Nhận hàng tại nhà</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="payment-option p-3 rounded border mb-3">
+                                        <input class="form-check-input" type="radio" name="payment_delivery_method" 
+                                               id="cash_store" value="cash_store">
+                                        <label class="form-check-label w-100" for="cash_store">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-store text-warning me-3 fs-4"></i>
+                                                <div>
+                                                    <strong>Thanh toán tại cửa hàng</strong>
+                                                    <small class="text-muted d-block">Nhận hàng tại cửa hàng</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bank Information -->
+                            <div id="bank_info" class="mt-4">
+                                <div class="alert alert-info">
+                                    <h6 class="mb-3"><i class="fas fa-university me-2"></i>Thông tin chuyển khoản:</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="mb-1"><strong>Ngân hàng:</strong> Vietcombank</p>
+                                            <p class="mb-1"><strong>Số tài khoản:</strong> 1234567890</p>
+                                            <p class="mb-1"><strong>Chủ tài khoản:</strong> JEWELRY STORE</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-1"><strong>Nội dung chuyển khoản:</strong></p>
+                                            <code id="transfer_content">DH[MÃ ĐƠN HÀNG] [SỐ ĐIỆN THOẠI]</code>
+                                            <br><small class="text-muted">Ví dụ: DH001 0987654321</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Store Information -->
+                            <div id="store_info" class="mt-4" style="display: none;">
+                                <div class="alert alert-warning">
+                                    <h6 class="mb-3"><i class="fas fa-store me-2"></i>Thông tin cửa hàng:</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <p class="mb-1"><strong><i class="fas fa-map-marker-alt me-2"></i>Địa chỉ:</strong></p>
+                                                <p class="mb-1">123 Nguyễn Huệ, Phường Bến Nghé</p>
+                                                <p class="mb-1">Quận 1, TP. Hồ Chí Minh</p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <p class="mb-1"><strong><i class="fas fa-phone me-2"></i>Hotline:</strong> 1900 1234</p>
+                                                <p class="mb-1"><strong><i class="fas fa-clock me-2"></i>Giờ mở cửa:</strong> 8:00 - 22:00 (T2-CN)</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="bg-light p-3 rounded">
+                                                <h6 class="text-success mb-2"><i class="fas fa-info-circle me-2"></i>Hướng dẫn nhận hàng:</h6>
+                                                <ul class="list-unstyled mb-0">
+                                                    <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Mang theo CMND/CCCD</li>
+                                                    <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Cung cấp <strong>số điện thoại</strong> hoặc <strong>email</strong> đã đặt hàng</li>
+                                                    <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Xuất trình mã đơn hàng (nếu có)</li>
+                                                    <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Kiểm tra sản phẩm trước khi thanh toán</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-info mt-3 mb-0">
+                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                        <strong>Lưu ý:</strong> Đơn hàng sẽ được giữ trong <strong>3 ngày</strong>. Vui lòng đến nhận hàng trong thời gian này.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Customer Information -->
                     <div class="checkout-card">
                         <div class="card-header">
@@ -280,24 +485,28 @@ $userInfo = $data['userInfo'] ?? null;
                                            placeholder="0123456789" required>
                                     <div class="invalid-feedback">Vui lòng nhập số điện thoại</div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold">Tỉnh/Thành phố <span class="text-danger">*</span></label>
-                                    <select class="form-select" name="province" required>
-                                        <option value="">Chọn tỉnh/thành phố</option>
-                                        <option value="hanoi">Hà Nội</option>
-                                        <option value="hcm">TP. Hồ Chí Minh</option>
-                                        <option value="danang">Đà Nẵng</option>
-                                        <option value="haiphong">Hải Phòng</option>
-                                        <option value="cantho">Cần Thơ</option>
-                                    </select>
-                                    <div class="invalid-feedback">Vui lòng chọn tỉnh/thành phố</div>
-                                </div>
-                                <div class="col-12 mb-3">
-                                    <label class="form-label fw-semibold">Địa chỉ giao hàng <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" name="address" rows="3" 
-                                              placeholder="Số nhà, tên đường, phường/xã, quận/huyện" 
-                                              required><?= $userInfo ? htmlspecialchars($userInfo->address ?? '') : '' ?></textarea>
-                                    <div class="invalid-feedback">Vui lòng nhập địa chỉ giao hàng</div>
+                                <!-- Address Fields - Will be shown/hidden based on delivery method -->
+                                <div id="addressFields">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-semibold">Tỉnh/Thành phố <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="province" name="province" required>
+                                            <option value="">Chọn tỉnh/thành phố...</option>
+                                        </select>
+                                        <div class="invalid-feedback">Vui lòng chọn tỉnh/thành phố</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-semibold">Phường/Xã <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="ward" name="ward" required>
+                                            <option value="">Chọn phường/xã...</option>
+                                        </select>
+                                        <div class="invalid-feedback">Vui lòng chọn phường/xã</div>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label fw-semibold">Địa chỉ chi tiết <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="address" 
+                                               placeholder="Ví dụ: 123 Nguyễn Du" required>
+                                        <div class="invalid-feedback">Vui lòng nhập địa chỉ chi tiết</div>
+                                    </div>
                                 </div>
                                 <div class="col-12 mb-3">
                                     <label class="form-label fw-semibold">Ghi chú đơn hàng</label>
@@ -308,52 +517,7 @@ $userInfo = $data['userInfo'] ?? null;
                         </div>
                     </div>
 
-                    <!-- Payment Method -->
-                    <div class="checkout-card">
-                        <div class="card-header">
-                            <h5 class="section-title">
-                                <i class="fas fa-credit-card"></i>
-                                Phương thức thanh toán
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <div class="form-check payment-method">
-                                        <input class="form-check-input" type="radio" name="payment_method" id="cod" value="cod" checked>
-                                        <label class="form-check-label w-100" for="cod">
-                                            <div class="payment-option p-3 border rounded-3">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="fas fa-truck text-success fs-4 me-3"></i>
-                                                    <div>
-                                                        <div class="fw-bold">Thanh toán khi nhận hàng</div>
-                                                        <small class="text-muted">Trả tiền mặt khi nhận hàng</small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <div class="form-check payment-method">
-                                        <input class="form-check-input" type="radio" name="payment_method" id="bank_transfer" value="bank_transfer">
-                                        <label class="form-check-label w-100" for="bank_transfer">
-                                            <div class="payment-option p-3 border rounded-3">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="fas fa-university text-primary fs-4 me-3"></i>
-                                                    <div>
-                                                        <div class="fw-bold">Chuyển khoản ngân hàng</div>
-                                                        <small class="text-muted">Chuyển khoản trước khi giao hàng</small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
 
                     <!-- Order Notes -->
                     <div class="checkout-card">
@@ -401,8 +565,13 @@ $userInfo = $data['userInfo'] ?? null;
                             <?php if (!empty($cartItems)): ?>
                                 <?php foreach ($cartItems as $item): ?>
                                     <div class="product-item">
-                                        <img src="<?= isset($item['product']->primary_image) ? asset($item['product']->primary_image->file_path) : asset('images/placeholder.jpg') ?>" 
-                                             alt="<?= htmlspecialchars($item['product']->name) ?>"
+                                          <?php 
+                                // Get primary image URL using the Product model method
+                                           $productModel = new Product();
+                                            $imageUrl = $productModel->getPrimaryImageUrl($item['product']->product_id);
+                                        ?>
+                                             <img src="<?php echo $imageUrl; ?>" 
+                                              alt="<?php echo htmlspecialchars($item['product']->name); ?>" 
                                              class="product-image">
                                         <div class="flex-grow-1">
                                             <div class="fw-semibold mb-1"><?= htmlspecialchars($item['product']->name) ?></div>
@@ -487,11 +656,6 @@ $userInfo = $data['userInfo'] ?? null;
             </div>
         <?php endif; ?>
     </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- Loading Modal -->
@@ -507,7 +671,6 @@ $userInfo = $data['userInfo'] ?? null;
         </div>
     </div>
 </div>
-</body>
 <style>
 .payment-method .form-check-input:checked + .form-check-label .payment-option {
     border-color: #0d6efd !important;
@@ -546,104 +709,279 @@ $userInfo = $data['userInfo'] ?? null;
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('checkoutForm');
-    const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
-    const bankDetails = document.getElementById('bank-details');
-    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    const deliveryMethods = document.querySelectorAll('input[name="payment_delivery_method"]');
+    const bankInfo = document.getElementById('bank_info');
+    const storeInfo = document.getElementById('store_info');
+    const addressFields = document.getElementById('addressFields');
+    const loadingModalEl = document.getElementById('loadingModal');
+    const loadingModal = loadingModalEl ? new bootstrap.Modal(loadingModalEl) : null;
 
-    // Payment method change handler
-    paymentMethods.forEach(method => {
-        method.addEventListener('change', function() {
-            // Hide all payment details
-            bankDetails.classList.add('d-none');
-            qrDetails.classList.add('d-none');
+    // Province and Ward selects
+    const provinceSelect = document.getElementById('province');
+    const wardSelect = document.getElementById('ward');
+    const phoneInput = document.querySelector('input[name="phone"]');
+    const transferContent = document.getElementById('transfer_content');
 
-            // Show relevant payment details
-            if (this.value === 'bank_transfer') {
-                bankDetails.classList.remove('d-none');
-            } else if (this.value === 'qr_code') {
-                qrDetails.classList.remove('d-none');
+    // Load provinces on page load
+    loadProvinces();
+
+    // Province change handler
+    if (provinceSelect && wardSelect) {
+        provinceSelect.addEventListener('change', function() {
+            const provinceCode = this.value;
+            
+            // Reset ward selection
+            wardSelect.innerHTML = '<option value="">Chọn phường/xã...</option>';
+            wardSelect.disabled = !provinceCode;
+            
+            if (provinceCode) {
+                loadWards(provinceCode);
             }
+        });
+    }
+
+    // Phone input change handler - update transfer content
+    if (phoneInput && transferContent) {
+        phoneInput.addEventListener('input', function() {
+            const phone = this.value.trim();
+            if (phone) {
+                transferContent.textContent = `DH[MÃ ĐƠN HÀNG] ${phone}`;
+            } else {
+                transferContent.textContent = 'DH[MÃ ĐƠN HÀNG] [SỐ ĐIỆN THOẠI]';
+            }
+        });
+    }
+
+    // Delivery method change handler
+    deliveryMethods.forEach(method => {
+        method.addEventListener('change', function() {
+            console.log('Payment method changed to:', this.value);
+            toggleDeliveryMethod(this.value);
         });
     });
 
-    // Form submission handler
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
+    // Initialize with default selection
+    const checkedMethod = document.querySelector('input[name="payment_delivery_method"]:checked');
+    if (checkedMethod) {
+        toggleDeliveryMethod(checkedMethod.value);
+    }
 
-        // Validate form
-        if (!form.checkValidity()) {
-            e.stopPropagation();
-            form.classList.add('was-validated');
-            return;
-        }
-
-        // Show loading modal
-        loadingModal.show();
-
-        // Prepare form data
-        const formData = new FormData(form);
-
-        // Submit checkout
-        fetch('/Ecom_website/checkout/process', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+    function toggleDeliveryMethod(method) {
+        console.log('Toggling delivery method:', method);
+        console.log('Bank info element:', bankInfo);
+        console.log('Store info element:', storeInfo);
+        console.log('Address fields element:', addressFields);
+        
+        if (method === 'bank_transfer_home') {
+            // Show bank info and address fields, hide store info
+            if (bankInfo) {
+                bankInfo.style.display = 'block';
+                console.log('Showing bank info');
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            loadingModal.hide();
-            
-            if (data.success) {
-                // Show success message and redirect
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Đặt hàng thành công!',
-                    text: 'Cảm ơn bạn đã đặt hàng. Chúng tôi sẽ liên hệ với bạn sớm nhất.',
-                    confirmButtonText: 'Xem đơn hàng',
-                    confirmButtonColor: '#28a745'
-                }).then((result) => {
-                    if (data.data && data.data.redirect) {
-                        window.location.href = data.data.redirect;
-                    } else {
-                        window.location.href = '/Ecom_website/';
-                    }
+            if (storeInfo) {
+                storeInfo.style.display = 'none';
+                console.log('Hiding store info');
+            }
+            if (addressFields) {
+                addressFields.style.display = 'block';
+                console.log('Showing address fields');
+                // Make address fields required
+                addressFields.querySelectorAll('input, select').forEach(field => {
+                    field.required = true;
                 });
+            }
+        } else if (method === 'cash_store') {
+            // Show store info, hide bank info and address fields
+            if (bankInfo) {
+                bankInfo.style.display = 'none';
+                console.log('Hiding bank info');
+            }
+            if (storeInfo) {
+                storeInfo.style.display = 'block';
+                console.log('Showing store info');
+            }
+            if (addressFields) {
+                addressFields.style.display = 'none';
+                console.log('Hiding address fields');
+                // Remove required from address fields
+                addressFields.querySelectorAll('input, select').forEach(field => {
+                    field.required = false;
+                });
+            }
+        }
+    }
+
+    async function loadProvinces() {
+        try {
+            const response = await fetch('<?= url('api/locations/provinces') ?>');
+            const data = await response.json();
+            
+            if (data.success && data.data) {
+                provinceSelect.innerHTML = '<option value="">Chọn tỉnh/thành phố...</option>';
+                data.data.forEach(province => {
+                    const option = document.createElement('option');
+                    option.value = province.code;
+                    option.textContent = province.name;
+                    provinceSelect.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Error loading provinces:', error);
+            showNotification('Không thể tải danh sách tỉnh/thành phố', 'error');
+        }
+    }
+
+    async function loadWards(provinceCode) {
+        if (!provinceCode) return;
+        
+        try {
+            wardSelect.innerHTML = '<option value="">Đang tải...</option>';
+            wardSelect.disabled = true;
+            
+            const wardUrl = `<?= url('api/locations/wards') ?>?province=${provinceCode}`;
+            const response = await fetch(wardUrl);
+            const data = await response.json();
+            
+            if (data.success && data.data && data.data.length > 0) {
+                wardSelect.innerHTML = '<option value="">Chọn phường/xã...</option>';
+                data.data.forEach(ward => {
+                    const option = document.createElement('option');
+                    option.value = ward.code;
+                    option.textContent = ward.district_name ? `${ward.name} (${ward.district_name})` : ward.name;
+                    option.dataset.fullName = ward.full_name || ward.name;
+                    option.dataset.districtName = ward.district_name || '';
+                    wardSelect.appendChild(option);
+                });
+                wardSelect.disabled = false;
             } else {
-                // Show error message
-                let errorMessage = data.message || 'Có lỗi xảy ra khi đặt hàng';
-                
-                if (data.data && typeof data.data === 'object') {
-                    errorMessage += ':\n';
-                    Object.values(data.data).forEach(error => {
-                        errorMessage += '• ' + error + '\n';
+                wardSelect.innerHTML = '<option value="">Không có dữ liệu</option>';
+            }
+        } catch (error) {
+            console.error('Error loading wards:', error);
+            wardSelect.innerHTML = '<option value="">Lỗi tải dữ liệu</option>';
+            showNotification('Không thể tải danh sách phường/xã', 'error');
+        }
+    }
+
+    // Form submission handler
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Custom validation for dynamic fields
+            const paymentMethod = document.querySelector('input[name="payment_delivery_method"]:checked');
+            if (!paymentMethod) {
+                showNotification('Vui lòng chọn phương thức thanh toán và nhận hàng', 'error');
+                e.stopPropagation();
+                return;
+            }
+
+            // Validate address fields only for bank_transfer_home
+            if (paymentMethod.value === 'bank_transfer_home') {
+                const province = document.getElementById('province')?.value;
+                const ward = document.getElementById('ward')?.value;
+                const address = document.querySelector('input[name="address"]')?.value;
+
+                if (!province || !ward || !address?.trim()) {
+                    showNotification('Vui lòng điền đầy đủ thông tin địa chỉ giao hàng', 'error');
+                    e.stopPropagation();
+                    form.classList.add('was-validated');
+                    return;
+                }
+            }
+
+            // Validate form
+            if (!form.checkValidity()) {
+                e.stopPropagation();
+                form.classList.add('was-validated');
+                return;
+            }
+
+            // Show loading modal if available
+            if (loadingModal) loadingModal.show();
+
+            // Prepare form data
+            const formData = new FormData(form);
+
+            // Submit checkout
+            fetch('<?= url('/checkout/process') ?>', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (loadingModal) loadingModal.hide();
+
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đặt hàng thành công!',
+                        text: 'Cảm ơn bạn đã đặt hàng. Chúng tôi sẽ liên hệ với bạn sớm nhất.',
+                        confirmButtonText: 'Xem đơn hàng',
+                        confirmButtonColor: '#0d6efd',
+                        allowOutsideClick: false
+                    }).then(() => {
+                        if (data.data && data.data.redirect) {
+                            window.location.href = data.data.redirect;
+                        } else {
+                            window.location.href = '<?= url('/') ?>';
+                        }
+                    });
+                } else {
+                    let errorMessage = data.message || 'Có lỗi xảy ra khi đặt hàng';
+                    if (data.data && typeof data.data === 'object') {
+                        errorMessage = 'Vui lòng kiểm tra lại thông tin:\n';
+                        Object.values(data.data).forEach(error => {
+                            errorMessage += '• ' + error + '\n';
+                        });
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi đặt hàng',
+                        text: errorMessage,
+                        confirmButtonText: 'Thử lại',
+                        confirmButtonColor: '#dc3545'
                     });
                 }
-                
+            })
+            .catch(error => {
+                if (loadingModal) loadingModal.hide();
+                console.error('Error:', error);
                 Swal.fire({
                     icon: 'error',
-                    title: 'Lỗi đặt hàng',
-                    text: errorMessage,
+                    title: 'Lỗi kết nối',
+                    text: 'Không thể kết nối đến máy chủ. Vui lòng thử lại.',
                     confirmButtonText: 'Thử lại',
                     confirmButtonColor: '#dc3545'
                 });
-            }
-        })
-        .catch(error => {
-            loadingModal.hide();
-            console.error('Error:', error);
-            
-            Swal.fire({
-                icon: 'error',
-                title: 'Lỗi kết nối',
-                text: 'Không thể kết nối đến máy chủ. Vui lòng thử lại.',
-                confirmButtonText: 'Thử lại',
-                confirmButtonColor: '#dc3545'
             });
-    //Footer
         });
-    }); 
+    }
+
+    // Helper function for notifications
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'error' ? 'danger' : 'info'} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+});
 </script>
     <footer class="bg-dark text-white py-5 mt-5">
         <div class="container">
@@ -672,141 +1010,10 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </footer>
 
-</html>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('checkoutForm');
-            
-            // Form submission
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                if (!form.checkValidity()) {
-                    e.stopPropagation();
-                    form.classList.add('was-validated');
-                    
-                    // Scroll to first invalid field
-                    const firstInvalid = form.querySelector(':invalid');
-                    if (firstInvalid) {
-                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        firstInvalid.focus();
-                    }
-                    return;
-                }
-                
-                // Show loading
-                Swal.fire({
-                    title: 'Đang xử lý đơn hàng...',
-                    text: 'Vui lòng không tắt trang web',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    showConfirmButton: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-                
-                // Submit form
-                const formData = new FormData(form);
-                
-                fetch('<?= url('/checkout/process') ?>', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Show success message and redirect
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Đặt hàng thành công!',
-                            text: 'Cảm ơn bạn đã đặt hàng. Chúng tôi sẽ liên hệ với bạn sớm nhất.',
-                            confirmButtonText: 'Xem đơn hàng',
-                            confirmButtonColor: '#0d6efd',
-                            allowOutsideClick: false
-                        }).then((result) => {
-                            if (data.data && data.data.redirect) {
-                                window.location.href = data.data.redirect;
-                            } else {
-                                window.location.href = '<?= url('/') ?>';
-                            }
-                        });
-                    } else {
-                        // Show error message
-                        let errorMessage = data.message || 'Có lỗi xảy ra khi đặt hàng';
-                        
-                        if (data.data && typeof data.data === 'object') {
-                            errorMessage = 'Vui lòng kiểm tra lại thông tin:\n';
-                            Object.values(data.data).forEach(error => {
-                                errorMessage += '• ' + error + '\n';
-                            });
-                        }
-                        
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Lỗi đặt hàng',
-                            text: errorMessage,
-                            confirmButtonText: 'Thử lại',
-                            confirmButtonColor: '#dc3545'
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Lỗi kết nối',
-                        text: 'Không thể kết nối đến máy chủ. Vui lòng thử lại.',
-                        confirmButtonText: 'Thử lại',
-                        confirmButtonColor: '#dc3545'
-                    });
-                });
-            });
-
-            // Form validation styling
-            const inputs = form.querySelectorAll('input, textarea, select');
-            inputs.forEach(input => {
-                input.addEventListener('blur', function() {
-                    if (this.checkValidity()) {
-                        this.classList.remove('is-invalid');
-                        this.classList.add('is-valid');
-                    } else {
-                        this.classList.remove('is-valid');
-                        this.classList.add('is-invalid');
-                    }
-                });
-                
-                input.addEventListener('input', function() {
-                    if (this.classList.contains('is-invalid') && this.checkValidity()) {
-                        this.classList.remove('is-invalid');
-                        this.classList.add('is-valid');
-                    }
-                });
-            });
-            
-            // Payment method selection animation
-            const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
-            paymentMethods.forEach(method => {
-                method.addEventListener('change', function() {
-                    // Remove active state from all
-                    document.querySelectorAll('.payment-option').forEach(option => {
-                        option.style.transform = 'scale(1)';
-                    });
-                    
-                    // Add active state to selected
-                    if (this.checked) {
-                        const selectedOption = this.parentElement.querySelector('.payment-option');
-                        selectedOption.style.transform = 'scale(1.02)';
-                        selectedOption.style.transition = 'transform 0.2s ease';
-                    }
-                });
-            });
-        });
-    </script>
+</body>
+</html>

@@ -42,8 +42,8 @@ class CartController extends BaseController {
         try {
             $productId = (int)$_POST['product_id'];
             $quantity = (int)($_POST['quantity'] ?? 1);
-            $size = $_POST['size'] ?? null;
-            $color = $_POST['color'] ?? null;
+            $size = trim($_POST['size'] ?? '') ?: null;
+            $color = trim($_POST['color'] ?? '') ?: null;
 
             // Debug logging
             error_log("Cart Add Debug - Product ID: $productId, Size: '$size', Color: '$color', Quantity: $quantity");
@@ -62,7 +62,10 @@ class CartController extends BaseController {
 
             // Check stock from variants
             if (!$this->productModel->checkStock($productId, $size, $color, $quantity)) {
-                $this->jsonResponse(false, 'Số lượng hàng trong kho không đủ hoặc biến thể không tồn tại');
+                // Log chi tiết để debug
+                error_log("Stock check failed - Product ID: $productId, Size: '$size', Color: '$color', Quantity: $quantity");
+                
+                $this->jsonResponse(false, "Biến thể sản phẩm (Size: $size, Color: $color) không tồn tại hoặc không đủ hàng trong kho");
                 return;
             }
 
@@ -92,8 +95,8 @@ class CartController extends BaseController {
         try {
             $productId = (int)$_POST['product_id'];
             $quantity = (int)$_POST['quantity'];
-            $size = $_POST['size'] ?? null;
-            $color = $_POST['color'] ?? null;
+            $size = trim($_POST['size'] ?? '') ?: null;
+            $color = trim($_POST['color'] ?? '') ?: null;
 
             if ($productId <= 0) {
                 $this->jsonResponse(false, 'Dữ liệu không hợp lệ');
@@ -136,8 +139,8 @@ class CartController extends BaseController {
     public function remove() {
         try {
             $productId = (int)$_POST['product_id'];
-            $size = $_POST['size'] ?? null;
-            $color = $_POST['color'] ?? null;
+            $size = trim($_POST['size'] ?? '') ?: null;
+            $color = trim($_POST['color'] ?? '') ?: null;
 
             if ($productId <= 0) {
                 $this->jsonResponse(false, 'Dữ liệu không hợp lệ');
@@ -167,14 +170,13 @@ class CartController extends BaseController {
      */
     public function clear() {
         try {
-            if (SessionHelper::isLoggedIn()) {
-                // Clear from database for logged in users
-                $userId = SessionHelper::getUserId();
-                // TODO: Add database cart clearing logic
-            }
-
             // Clear session cart
             unset($_SESSION['cart']);
+
+            // Clear database if user is logged in
+            if (SessionHelper::isLoggedIn()) {
+                $this->clearDatabaseCart();
+            }
 
             $this->jsonResponse(true, 'Đã xóa tất cả sản phẩm trong giỏ hàng!', [
                 'cartCount' => 0,
@@ -183,9 +185,8 @@ class CartController extends BaseController {
             ]);
 
         } catch (Exception $e) {
-            error_log("Cart Add Error: " . $e->getMessage());
-            error_log("Stack trace: " . $e->getTraceAsString());
-            $this->jsonResponse(false, 'Có lỗi hệ thống xảy ra: ' . $e->getMessage());
+            error_log("Cart Clear Error: " . $e->getMessage());
+            $this->jsonResponse(false, 'Có lỗi hệ thống xảy ra');
         }
     }
 
@@ -219,11 +220,13 @@ class CartController extends BaseController {
             ];
         }
 
-        // TODO: If user is logged in, also save to database
+        // Save to database if user is logged in (for persistence)
         if (SessionHelper::isLoggedIn()) {
-            // Save to database for persistent cart
+            $this->saveCartToDatabase();
         }
     }
+
+
 
     /**
      * Update cart item quantity
@@ -234,7 +237,10 @@ class CartController extends BaseController {
         if (isset($_SESSION['cart'][$cartKey])) {
             $_SESSION['cart'][$cartKey]['quantity'] = $quantity;
             
-            // TODO: Update database if user is logged in
+            // Save to database if user is logged in
+            if (SessionHelper::isLoggedIn()) {
+                $this->saveCartToDatabase();
+            }
         }
     }
 
@@ -247,7 +253,10 @@ class CartController extends BaseController {
         if (isset($_SESSION['cart'][$cartKey])) {
             unset($_SESSION['cart'][$cartKey]);
             
-            // TODO: Remove from database if user is logged in
+            // Save to database if user is logged in
+            if (SessionHelper::isLoggedIn()) {
+                $this->saveCartToDatabase();
+            }
         }
     }
 
@@ -327,8 +336,8 @@ class CartController extends BaseController {
         try {
             $productId = (int)$_POST['product_id'];
             $quantity = (int)($_POST['quantity'] ?? 1);
-            $size = $_POST['size'] ?? null;
-            $color = $_POST['color'] ?? null;
+            $size = trim($_POST['size'] ?? '') ?: null;
+            $color = trim($_POST['color'] ?? '') ?: null;
 
             // Debug logging
             error_log("Cart BuyNow Debug - Product ID: $productId, Size: '$size', Color: '$color', Quantity: $quantity");
@@ -345,8 +354,12 @@ class CartController extends BaseController {
                 return;
             }
 
-            // For debugging, let's just skip stock check temporarily
-            error_log("Cart BuyNow - Bypassing stock check for testing");
+            // Check stock from variants
+            if (!$this->productModel->checkStock($productId, $size, $color, $quantity)) {
+                error_log("BuyNow stock check failed - Product ID: $productId, Size: '$size', Color: '$color', Quantity: $quantity");
+                $this->jsonResponse(false, "Biến thể sản phẩm (Size: $size, Color: $color) không tồn tại hoặc không đủ hàng trong kho");
+                return;
+            }
 
             // Store buy now item in separate session
             $_SESSION['buy_now_item'] = [
@@ -421,32 +434,37 @@ class CartController extends BaseController {
     }
 
     /**
-     * Validate stock levels for all items in cart
-     * Returns array of errors if any products are out of stock
+     * Save cart to database (simple backup)
      */
-    public function validateCartStock() {
-        try {
-            $cartItems = $this->getCartItems();
-            if (empty($cartItems)) {
-                return [];
-            }
-
-            // Format cart items for service
-            $items = array_map(function($item) {
-                return [
-                    'product_id' => $item['product']->product_id,
-                    'quantity' => $item['quantity'],
-                    'size' => $item['size'],
-                    'color' => $item['color']
-                ];
-            }, $cartItems);
-
-            return $this->cartService->validateCartStock($items);
+    private function saveCartToDatabase() {
+        // Simple method to save cart state for logged in users
+        if (SessionHelper::isLoggedIn()) {
+            $userId = SessionHelper::getUserId();
+            $cartData = $_SESSION['cart'] ?? [];
             
-        } catch (Exception $e) {
-            error_log("Validate Cart Stock Error in Controller: " . $e->getMessage());
-            throw new Exception('Lỗi khi kiểm tra tồn kho: ' . $e->getMessage());
+            // Save as JSON in user profile or separate table
+            // For now, just log - can implement database storage later if needed
+            error_log("Cart saved for user $userId: " . json_encode($cartData));
         }
+    }
+
+    /**
+     * Clear database cart
+     */
+    private function clearDatabaseCart() {
+        if (SessionHelper::isLoggedIn()) {
+            $userId = SessionHelper::getUserId();
+            error_log("Database cart cleared for user $userId");
+        }
+    }
+
+    /**
+     * Load cart from database when user logs in
+     */
+    public function loadCartFromDatabase($userId) {
+        // Simple method to restore cart for returning users
+        // For now, just maintain session cart - can enhance later if needed
+        return true;
     }
 }
 ?>

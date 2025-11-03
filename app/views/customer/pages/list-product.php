@@ -10,17 +10,14 @@ if (!function_exists('url')) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JEWELRY - Danh sách sản phẩm</title>
-    <link href="<?= asset('css/css.css?v=' . time()) ?>" rel="stylesheet">
+   
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Custom CSS --> 
-        <title>Danh sách sản phẩm</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">   
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <html xmlns:th="http://www.thymeleaf.org">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="<?= asset('css/css.css?v=' . time()) ?>" rel="stylesheet">  
     
 </head>
 <body>
@@ -160,10 +157,8 @@ if (!function_exists('url')) {
             <div class="col-lg-9 col-md-8">
                 <!-- Product Header -->
                 <div class="product-header">
+                   
                     <div class="row align-items-center mb-3">
-                        <!-- <div class="col-md-6">
-                            <h3 class="mb-0">Sản phẩm trang sức</h3>
-                        </div> -->
                         <div class="results-info col-md-6">
                             <strong id="resultsCount"><?= isset($total) ? $total : 0 ?></strong> sản phẩm được tìm thấy
                             <!-- Active Filters Display -->
@@ -181,6 +176,8 @@ if (!function_exists('url')) {
                                 <option value="price_desc">Price: High to Low</option>
                                 <option value="newest">Newest</option>
                                 <option value="rating">Best Rating</option>
+                                <option value="name_asc">Name: A-Z</option>
+                                <option value="name_desc">Name: Z-A</option>
                             </select>
                         </div>
                     </div>
@@ -405,21 +402,87 @@ if (!function_exists('url')) {
         /**
          * Toggle wishlist
          */
-        function toggleWishlist(productId) {
+        async function toggleWishlist(productId) {
             const button = event.target.closest('button');
             const icon = button.querySelector('i');
+            const originalColor = button.style.color;
+            const wasInWishlist = icon.classList.contains('fa-solid');
             
-            // Toggle heart icon
-            if (icon.classList.contains('fa-regular')) {
-                icon.classList.remove('fa-regular');
-                icon.classList.add('fa-solid');
-                button.style.color = '#dc3545';
-                showToast('success', 'Đã thêm vào danh sách yêu thích!');
-            } else {
-                icon.classList.remove('fa-solid');
-                icon.classList.add('fa-regular');
-                button.style.color = '';
-                showToast('info', 'Đã xóa khỏi danh sách yêu thích!');
+            try {
+                // Temporarily update UI for immediate feedback
+                if (wasInWishlist) {
+                    icon.classList.remove('fa-solid');
+                    icon.classList.add('fa-regular');
+                    button.style.color = '';
+                } else {
+                    icon.classList.remove('fa-regular');
+                    icon.classList.add('fa-solid');
+                    button.style.color = '#dc3545';
+                }
+                
+                // Call API
+                const response = await fetch('/Ecom_website/wishlist/toggle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: `product_id=${productId}`
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update UI based on server response
+                    if (data.data.action === 'added') {
+                        icon.classList.remove('fa-regular');
+                        icon.classList.add('fa-solid');
+                        button.style.color = '#dc3545';
+                        showToast('success', 'Đã thêm vào danh sách yêu thích!');
+                    } else {
+                        icon.classList.remove('fa-solid');
+                        icon.classList.add('fa-regular');
+                        button.style.color = '';
+                        showToast('info', 'Đã xóa khỏi danh sách yêu thích!');
+                    }
+                    
+                    // Update wishlist count in header
+                    updateWishlistCount(data.data.wishlist_count);
+                } else {
+                    // Revert UI changes on error
+                    if (wasInWishlist) {
+                        icon.classList.remove('fa-regular');
+                        icon.classList.add('fa-solid');
+                        button.style.color = '#dc3545';
+                    } else {
+                        icon.classList.remove('fa-solid');
+                        icon.classList.add('fa-regular');
+                        button.style.color = originalColor;
+                    }
+                    
+                    if (data.message === 'Vui lòng đăng nhập để sử dụng danh sách yêu thích') {
+                        showToast('warning', data.message);
+                        // Optionally redirect to login page
+                        setTimeout(() => {
+                            window.location.href = '/Ecom_website/signin';
+                        }, 2000);
+                    } else {
+                        showToast('error', data.message || 'Có lỗi xảy ra!');
+                    }
+                }
+            } catch (error) {
+                console.error('Wishlist toggle error:', error);
+                // Revert UI changes on error
+                if (wasInWishlist) {
+                    icon.classList.remove('fa-regular');
+                    icon.classList.add('fa-solid');
+                    button.style.color = '#dc3545';
+                } else {
+                    icon.classList.remove('fa-solid');
+                    icon.classList.add('fa-regular');
+                    button.style.color = originalColor;
+                }
+                showToast('error', 'Lỗi kết nối!');
             }
         }
 
@@ -451,9 +514,88 @@ if (!function_exists('url')) {
             }
         }
 
+        /**
+         * Update wishlist count in header
+         */
+        function updateWishlistCount(count) {
+            const wishlistBadge = document.querySelector('.wishlist-count');
+            if (wishlistBadge) {
+                wishlistBadge.textContent = count;
+                wishlistBadge.style.display = count > 0 ? 'inline' : 'none';
+            }
+        }
+
+        /**
+         * Load wishlist status for products when page loads
+         */
+        async function loadWishlistStatus() {
+            try {
+                const response = await fetch('/Ecom_website/wishlist/status', {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.data.wishlist_items) {
+                        // Update UI for products in wishlist
+                        data.data.wishlist_items.forEach(productId => {
+                            // Find wishlist buttons for this product
+                            const buttons = document.querySelectorAll(`button[onclick*="toggleWishlist(${productId}"]`);
+                            buttons.forEach(button => {
+                                const icon = button.querySelector('i');
+                                if (icon) {
+                                    icon.classList.remove('fa-regular');
+                                    icon.classList.add('fa-solid');
+                                    button.style.color = '#dc3545';
+                                }
+                            });
+                        });
+                    }
+                }
+            } catch (error) {
+                console.log('Could not load wishlist status:', error);
+            }
+        }
+
+        // Handle sorting change
+        function handleSortChange() {
+            const sortSelect = document.getElementById('sortSelect');
+            const selectedSort = sortSelect.value;
+            
+            // Get current URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Update sort parameter
+            urlParams.set('sort', selectedSort);
+            
+            // Reload page with new sort parameter
+            window.location.href = window.location.pathname + '?' + urlParams.toString();
+        }
+
+        // Set current sort value from URL
+        function setCurrentSort() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentSort = urlParams.get('sort') || 'popular';
+            const sortSelect = document.getElementById('sortSelect');
+            if (sortSelect) {
+                sortSelect.value = currentSort;
+            }
+        }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             loadCurrentFilters();
+            loadWishlistStatus();
+            setCurrentSort();
+            
+            // Add event listener to sort select
+            const sortSelect = document.getElementById('sortSelect');
+            if (sortSelect) {
+                sortSelect.addEventListener('change', handleSortChange);
+            }
         });
     </script>
 </body>
