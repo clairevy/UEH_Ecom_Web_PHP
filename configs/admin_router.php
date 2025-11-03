@@ -23,7 +23,24 @@ class AdminRouter {
                     
                 case 'products':
                     $this->controller = 'ProductsController';
-                    $this->method = 'index';
+                    // Check for action parameter
+                    if (isset($_GET['action'])) {
+                        switch ($_GET['action']) {
+                            case 'create':
+                                $this->method = 'create';
+                                break;
+                            case 'update':
+                                $this->method = 'update';
+                                break;
+                            case 'delete':
+                                $this->method = 'delete';
+                                break;
+                            default:
+                                $this->method = 'index';
+                        }
+                    } else {
+                        $this->method = 'index';
+                    }
                     unset($url[0]);
                     break;
                     

@@ -146,6 +146,99 @@ unset($_SESSION['old_input']);
                                         </select>
                                     </div>
 
+                                    <!-- Product Variants Section -->
+                                    <div class="card mt-4">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Biến Thể Sản Phẩm</h5>
+                                            <small class="text-muted">Thêm các size và màu sắc cho sản phẩm</small>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="variantsContainer">
+                                                <!-- Default variant -->
+                                                <div class="variant-item border rounded p-3 mb-3" data-index="0">
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <h6 class="mb-0">Biến thể #1</h6>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger remove-variant" onclick="removeVariant(0)" style="display: none;">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-3">
+                                                            <div class="form-group mb-3">
+                                                                <label class="form-label">Size <span class="text-danger">*</span></label>
+                                                                <select class="form-control variant-size" name="variants[0][size]" required>
+                                                                    <option value="">Chọn size</option>
+                                                                    <option value="XS">XS</option>
+                                                                    <option value="S">S</option>
+                                                                    <option value="M">M</option>
+                                                                    <option value="L">L</option>
+                                                                    <option value="XL">XL</option>
+                                                                    <option value="XXL">XXL</option>
+                                                                    <option value="35">35</option>
+                                                                    <option value="36">36</option>
+                                                                    <option value="37">37</option>
+                                                                    <option value="38">38</option>
+                                                                    <option value="39">39</option>
+                                                                    <option value="40">40</option>
+                                                                    <option value="41">41</option>
+                                                                    <option value="42">42</option>
+                                                                    <option value="43">43</option>
+                                                                    <option value="44">44</option>
+                                                                    <option value="45">45</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="form-group mb-3">
+                                                                <label class="form-label">Màu sắc <span class="text-danger">*</span></label>
+                                                                <select class="form-control variant-color" name="variants[0][color]" required>
+                                                                    <option value="">Chọn màu</option>
+                                                                    <option value="Đỏ">Đỏ</option>
+                                                                    <option value="Xanh">Xanh</option>
+                                                                    <option value="Vàng">Vàng</option>
+                                                                    <option value="Đen">Đen</option>
+                                                                    <option value="Trắng">Trắng</option>
+                                                                    <option value="Hồng">Hồng</option>
+                                                                    <option value="Tím">Tím</option>
+                                                                    <option value="Cam">Cam</option>
+                                                                    <option value="Xám">Xám</option>
+                                                                    <option value="Nâu">Nâu</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="form-group mb-3">
+                                                                <label class="form-label">Giá <span class="text-danger">*</span></label>
+                                                                <input type="number" 
+                                                                       class="form-control variant-price" 
+                                                                       name="variants[0][price]" 
+                                                                       placeholder="0" 
+                                                                       min="0" 
+                                                                       step="1000"
+                                                                       required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="form-group mb-3">
+                                                                <label class="form-label">Số lượng <span class="text-danger">*</span></label>
+                                                                <input type="number" 
+                                                                       class="form-control variant-stock" 
+                                                                       name="variants[0][stock]" 
+                                                                       placeholder="0" 
+                                                                       min="0"
+                                                                       required>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addVariant()">
+                                                <i class="fas fa-plus"></i> Thêm biến thể
+                                            </button>
+                                        </div>
+                                    </div>
+
                                     <!-- SKU and Price -->
                                     <div class="row">
                                         <div class="col-md-6">
@@ -176,17 +269,7 @@ unset($_SESSION['old_input']);
                                         </div>
                                     </div>
 
-                                    <!-- Stock Quantity (Optional) -->
-                                    <div class="form-group mb-3">
-                                        <label for="stock" class="form-label">Số Lượng Tồn Kho</label>
-                                        <input type="number" 
-                                               class="form-control" 
-                                               id="stock" 
-                                               name="stock" 
-                                               placeholder="0" 
-                                               min="0"
-                                               value="<?= htmlspecialchars($oldInput['stock'] ?? '0') ?>">
-                                    </div>
+
 
                                     <!-- Is Active -->
                                     <div class="form-check mb-3">
@@ -239,8 +322,7 @@ unset($_SESSION['old_input']);
                                                name="product_images[]" 
                                                multiple 
                                                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" 
-                                               style="display: none;" 
-                                               onchange="handleFileSelect(this)">
+                                               style="display: none;">
                                     </div>
 
                                     <!-- Preview Images Container -->
@@ -315,7 +397,140 @@ unset($_SESSION['old_input']);
     <!-- Main JS -->
     <script src="app/views/admin/assets/js/main.js"></script>
     
+    <!-- Variants Management JS -->
+    <script>
+        let variantIndex = 1;
+
+        // Add new variant
+        function addVariant() {
+            const container = document.getElementById('variantsContainer');
+            const newVariant = document.createElement('div');
+            newVariant.className = 'variant-item border rounded p-3 mb-3';
+            newVariant.setAttribute('data-index', variantIndex);
+            
+            newVariant.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0">Biến thể #${variantIndex + 1}</h6>
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-variant" onclick="removeVariant(${variantIndex})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Size <span class="text-danger">*</span></label>
+                            <select class="form-control variant-size" name="variants[${variantIndex}][size]" required>
+                                <option value="">Chọn size</option>
+                                <option value="XS">XS</option>
+                                <option value="S">S</option>
+                                <option value="M">M</option>
+                                <option value="L">L</option>
+                                <option value="XL">XL</option>
+                                <option value="XXL">XXL</option>
+                                <option value="35">35</option>
+                                <option value="36">36</option>
+                                <option value="37">37</option>
+                                <option value="38">38</option>
+                                <option value="39">39</option>
+                                <option value="40">40</option>
+                                <option value="41">41</option>
+                                <option value="42">42</option>
+                                <option value="43">43</option>
+                                <option value="44">44</option>
+                                <option value="45">45</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Màu sắc <span class="text-danger">*</span></label>
+                            <select class="form-control variant-color" name="variants[${variantIndex}][color]" required>
+                                <option value="">Chọn màu</option>
+                                <option value="Đỏ">Đỏ</option>
+                                <option value="Xanh">Xanh</option>
+                                <option value="Vàng">Vàng</option>
+                                <option value="Đen">Đen</option>
+                                <option value="Trắng">Trắng</option>
+                                <option value="Hồng">Hồng</option>
+                                <option value="Tím">Tím</option>
+                                <option value="Cam">Cam</option>
+                                <option value="Xám">Xám</option>
+                                <option value="Nâu">Nâu</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Giá <span class="text-danger">*</span></label>
+                            <input type="number" 
+                                   class="form-control variant-price" 
+                                   name="variants[${variantIndex}][price]" 
+                                   placeholder="0" 
+                                   min="0" 
+                                   step="1000"
+                                   required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Số lượng <span class="text-danger">*</span></label>
+                            <input type="number" 
+                                   class="form-control variant-stock" 
+                                   name="variants[${variantIndex}][stock]" 
+                                   placeholder="0" 
+                                   min="0"
+                                   required>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(newVariant);
+            variantIndex++;
+            
+            // Show remove button for first variant if there are multiple variants
+            updateRemoveButtons();
+        }
+
+        // Remove variant
+        function removeVariant(index) {
+            const variantItem = document.querySelector(`[data-index="${index}"]`);
+            if (variantItem) {
+                variantItem.remove();
+                updateRemoveButtons();
+            }
+        }
+
+        // Update remove buttons visibility
+        function updateRemoveButtons() {
+            const variants = document.querySelectorAll('.variant-item');
+            const removeButtons = document.querySelectorAll('.remove-variant');
+            
+            removeButtons.forEach((button, index) => {
+                // Show remove button if there's more than 1 variant
+                button.style.display = variants.length > 1 ? 'inline-block' : 'none';
+            });
+        }
+
+        // Auto-fill price from base price
+        document.addEventListener('DOMContentLoaded', function() {
+            const basePriceInput = document.getElementById('base_price');
+            if (basePriceInput) {
+                basePriceInput.addEventListener('input', function() {
+                    const basePrice = this.value;
+                    if (basePrice) {
+                        // Auto-fill first variant price if empty
+                        const firstVariantPrice = document.querySelector('input[name="variants[0][price]"]');
+                        if (firstVariantPrice && !firstVariantPrice.value) {
+                            firstVariantPrice.value = basePrice;
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+
     <!-- Add Product JS -->
-    <script src="app/views/admin/assets/js/add-product.js"></script>
+    <script src="/Ecom_website/app/views/admin/assets/js/add-product-production.js"></script>
 </body>
 </html>

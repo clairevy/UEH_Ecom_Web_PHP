@@ -401,7 +401,7 @@ $userInfo = $data['userInfo'] ?? null;
                             <?php if (!empty($cartItems)): ?>
                                 <?php foreach ($cartItems as $item): ?>
                                     <div class="product-item">
-                                        <img src="<?= $item['product']->primary_image->file_path ?? '/public/assets/images/placeholder.jpg' ?>" 
+                                        <img src="<?= isset($item['product']->primary_image) ? asset($item['product']->primary_image->file_path) : asset('images/placeholder.jpg') ?>" 
                                              alt="<?= htmlspecialchars($item['product']->name) ?>"
                                              class="product-image">
                                         <div class="flex-grow-1">

@@ -222,12 +222,8 @@ class CustomerController extends BaseController {
         header('Content-Type: application/json');
         
         try {
-            error_log("getNewArrivals API called");
             $limit = $_GET['limit'] ?? 8;
-            error_log("Limit: " . $limit);
-            
             $products = $this->productService->getNewArrivals($limit);
-            error_log("Products count: " . count($products));
             
             echo json_encode([
                 'success' => true,
@@ -237,8 +233,7 @@ class CustomerController extends BaseController {
             ]);
             
         } catch (Exception $e) {
-            error_log("getNewArrivals Error: " . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
     }
     
