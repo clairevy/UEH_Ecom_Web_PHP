@@ -728,7 +728,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Province change handler
     if (provinceSelect && wardSelect) {
         provinceSelect.addEventListener('change', function() {
-            const provinceCode = this.value;
+            const selectedOption = this.options[this.selectedIndex];
+            const provinceCode = selectedOption ? selectedOption.dataset.code : null; // Lấy code từ dataset
             
             // Reset ward selection
             wardSelect.innerHTML = '<option value="">Chọn phường/xã...</option>';
@@ -820,8 +821,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 provinceSelect.innerHTML = '<option value="">Chọn tỉnh/thành phố...</option>';
                 data.data.forEach(province => {
                     const option = document.createElement('option');
-                    option.value = province.code;
+                    option.value = province.name; // Thay đổi: lưu tên thay vì code
                     option.textContent = province.name;
+                    option.dataset.code = province.code; // Giữ lại code để load wards
                     provinceSelect.appendChild(option);
                 });
             }
@@ -846,8 +848,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 wardSelect.innerHTML = '<option value="">Chọn phường/xã...</option>';
                 data.data.forEach(ward => {
                     const option = document.createElement('option');
-                    option.value = ward.code;
-                    option.textContent = ward.district_name ? `${ward.name} (${ward.district_name})` : ward.name;
+                    const wardName = ward.district_name ? `${ward.name} (${ward.district_name})` : ward.name;
+                    option.value = wardName; // Thay đổi: lưu tên thay vì code
+                    option.textContent = wardName;
+                    option.dataset.code = ward.code; // Giữ lại code nếu cần
                     option.dataset.fullName = ward.full_name || ward.name;
                     option.dataset.districtName = ward.district_name || '';
                     wardSelect.appendChild(option);

@@ -869,8 +869,9 @@
                     
                     result.data.forEach(province => {
                         const option = document.createElement('option');
-                        option.value = province.code;
+                        option.value = province.name; // Thay đổi: lưu tên thay vì code
                         option.textContent = province.name;
+                        option.dataset.code = province.code; // Giữ lại code để load wards
                         option.dataset.fullName = province.full_name || province.name;
                         provinceSelect.appendChild(option);
                     });
@@ -898,7 +899,8 @@
         
         // Province change handler
         document.getElementById('provinceSelect').addEventListener('change', function() {
-            const provinceCode = this.value;
+            const selectedOption = this.options[this.selectedIndex];
+            const provinceCode = selectedOption ? selectedOption.dataset.code : null; // Lấy code từ dataset
             const wardSelect = document.getElementById('wardSelect');
             
             // Reset wards
@@ -924,8 +926,10 @@
                     
                     result.data.forEach(ward => {
                         const option = document.createElement('option');
-                        option.value = ward.code;
-                        option.textContent = ward.district_name ? `${ward.name} (${ward.district_name})` : ward.name;
+                        const wardName = ward.district_name ? `${ward.name} (${ward.district_name})` : ward.name;
+                        option.value = wardName; // Thay đổi: lưu tên thay vì code
+                        option.textContent = wardName;
+                        option.dataset.code = ward.code; // Giữ lại code nếu cần
                         option.dataset.fullName = ward.full_name || ward.name;
                         option.dataset.districtName = ward.district_name || '';
                         wardSelect.appendChild(option);
