@@ -1,61 +1,42 @@
 /**
- * Add Product JavaScript - Client-side functionality
- * Tuân thủ nguyên tắc Separation of Concerns
- * - Chỉ xử lý UI/UX và client-side validation
- * - Business logic ở Server-side (Controller/Model)
+ * Add Product JavaScript - Production Ready
  */
 
 // Class để quản lý Product Form
 class ProductFormManager {
   constructor() {
-    console.log("ProductFormManager constructor called");
-
+    // DOM elements
     this.form = document.getElementById("addProductForm");
     this.fileInput = document.getElementById("product_images");
+    this.imageList = document.getElementById("imageList");
     this.imagePreviewContainer = document.getElementById(
       "imagePreviewContainer"
     );
-    this.imageList = document.getElementById("imageList");
-    this.uploadArea = document.querySelector(".upload-area");
-    this.selectedFiles = null;
-
-    console.log("Elements found:");
-    console.log("- form:", this.form);
-    console.log("- fileInput:", this.fileInput);
-    console.log("- imagePreviewContainer:", this.imagePreviewContainer);
-    console.log("- imageList:", this.imageList);
-    console.log("- uploadArea:", this.uploadArea);
+    this.uploadArea = document.getElementById("uploadArea");
 
     this.init();
   }
 
   init() {
     if (this.form) {
-      // Form submit validation (client-side only, server sẽ validate lại)
       this.form.addEventListener("submit", (e) => this.handleFormSubmit(e));
     }
 
-    // Setup file input change listener
     if (this.fileInput) {
-      console.log("Setting up file input listener");
       this.fileInput.addEventListener("change", (e) => {
-        console.log("File input change event fired");
         this.handleFileSelect(e.target);
       });
     }
 
-    // Auto-generate SKU from product name
     this.setupSKUGenerator();
   }
 
   /**
-   * Xử lý form submit - Client-side validation only
+   * Handle form submit - Client-side validation
    */
   handleFormSubmit(e) {
-    // Basic client-side validation
     const name = document.getElementById("name").value.trim();
     const basePrice = document.getElementById("base_price").value;
-    const sku = document.getElementById("sku").value.trim();
 
     let errors = [];
 
@@ -67,17 +48,12 @@ class ProductFormManager {
       errors.push("Giá sản phẩm phải lớn hơn 0");
     }
 
-    if (!sku) {
-      errors.push("SKU không được để trống");
-    }
-
     if (errors.length > 0) {
       e.preventDefault();
-      alert("Vui lòng kiểm tra lại:\n" + errors.join("\n"));
+      alert("Lỗi:\n" + errors.join("\n"));
       return false;
     }
 
-    // Hiển thị loading indicator
     const submitBtn = this.form.querySelector('button[type="submit"]');
     if (submitBtn) {
       submitBtn.disabled = true;
@@ -85,7 +61,6 @@ class ProductFormManager {
         '<span class="spinner-border spinner-border-sm me-2"></span>Đang lưu...';
     }
 
-    // Let form submit naturally to server
     return true;
   }
 
@@ -98,7 +73,6 @@ class ProductFormManager {
 
     if (nameInput && skuInput) {
       nameInput.addEventListener("input", function () {
-        // Only generate if SKU is empty
         if (!skuInput.value) {
           const name = this.value.trim();
           if (name) {
@@ -111,50 +85,30 @@ class ProductFormManager {
   }
 
   /**
-   * Handle file selection (as class method)
+   * Handle file selection
    */
   handleFileSelect(input) {
-    console.log("handleFileSelect called");
-    console.log("Input files:", input.files);
-
     const files = input.files;
     const imageList = this.imageList;
     const previewContainer = this.imagePreviewContainer;
 
-    console.log("imageList element:", imageList);
-    console.log("previewContainer element:", previewContainer);
-
     if (!files || files.length === 0) {
-      console.log("No files selected");
       if (previewContainer) previewContainer.style.display = "none";
       return;
     }
 
-    // Clear previous previews
     if (imageList) imageList.innerHTML = "";
     if (previewContainer) previewContainer.style.display = "block";
-    console.log("Preview container shown");
 
-    // Preview each file
     Array.from(files).forEach((file, index) => {
-      console.log(
-        `Processing file ${index + 1}:`,
-        file.name,
-        "Type:",
-        file.type
-      );
-
       if (file.type.startsWith("image/")) {
-        // Validate file size (5MB)
         if (file.size > 5242880) {
           alert(`File ${file.name} quá lớn. Kích thước tối đa: 5MB`);
           return;
         }
 
-        console.log(`Creating preview for: ${file.name}`);
         const reader = new FileReader();
         reader.onload = (e) => {
-          console.log(`FileReader loaded for: ${file.name}`);
           const imageItem = createImagePreviewItem(
             e.target.result,
             file.name,
@@ -162,21 +116,18 @@ class ProductFormManager {
           );
           if (imageList) {
             imageList.appendChild(imageItem);
-            console.log("Image preview added to DOM");
           }
         };
         reader.onerror = (e) => {
           console.error("FileReader error:", e);
         };
         reader.readAsDataURL(file);
-      } else {
-        console.log(`Skipping non-image file: ${file.name}`);
       }
     });
   }
 }
 
-// =================== FILE UPLOAD HANDLING ===================
+// =================== HELPER FUNCTIONS ===================
 
 /**
  * Create image preview item
@@ -184,7 +135,7 @@ class ProductFormManager {
 function createImagePreviewItem(imageSrc, fileName, index) {
   const div = document.createElement("div");
   div.className =
-    "d-flex align-items-center justify-content-between mb-2 p-2 border rounded-custom";
+    "d-flex align-items-center justify-content-between mb-2 p-2 border rounded";
   div.setAttribute("data-index", index);
 
   div.innerHTML = `
@@ -203,7 +154,7 @@ function createImagePreviewItem(imageSrc, fileName, index) {
             </div>
         </div>
         <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeImagePreview(this)">
-            <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png" alt="Remove" width="12" height="12">
+            <i class="fas fa-times"></i>
         </button>
     `;
 
@@ -214,79 +165,31 @@ function createImagePreviewItem(imageSrc, fileName, index) {
  * Remove image preview
  */
 function removeImagePreview(button) {
-  const imageItem = button.closest(".d-flex");
-  const imageList = document.getElementById("imageList");
-  const previewContainer = document.getElementById("imagePreviewContainer");
-  const fileInput = document.getElementById("product_images");
+  const imageItem = button.closest("[data-index]");
+  if (imageItem) {
+    imageItem.remove();
 
-  imageItem.remove();
-
-  // If no more images, hide preview container and clear file input
-  if (imageList.children.length === 0) {
-    previewContainer.style.display = "none";
-    fileInput.value = "";
+    const container = document.getElementById("imagePreviewContainer");
+    const imageList = document.getElementById("imageList");
+    if (container && imageList && imageList.children.length === 0) {
+      container.style.display = "none";
+    }
   }
 }
-
-// =================== DRAG & DROP HANDLING ===================
-
-/**
- * Handle drag over
- */
-function handleDragOver(event) {
-  event.preventDefault();
-  event.currentTarget.style.borderColor = "var(--accent-color, #28a745)";
-  event.currentTarget.style.backgroundColor = "rgba(40, 167, 69, 0.1)";
-}
-
-/**
- * Handle drag leave
- */
-function handleDragLeave(event) {
-  event.currentTarget.style.borderColor = "var(--border-color, #ddd)";
-  event.currentTarget.style.backgroundColor = "transparent";
-}
-
-/**
- * Handle drop
- */
-function handleDrop(event) {
-  event.preventDefault();
-  event.currentTarget.style.borderColor = "var(--border-color, #ddd)";
-  event.currentTarget.style.backgroundColor = "transparent";
-
-  const files = event.dataTransfer.files;
-  const fileInput = document.getElementById("product_images");
-
-  // Assign dropped files to file input
-  fileInput.files = files;
-  handleFileSelect(fileInput);
-}
-
-// =================== UTILITY FUNCTIONS ===================
 
 /**
  * Generate SKU from product name
  */
 function generateSKU(name) {
-  // Remove Vietnamese accents
-  const cleaned = name
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+  return name
     .toUpperCase()
-    .replace(/[^A-Z0-9]/g, "")
-    .substring(0, 6);
-
-  // Add random number
-  const random = Math.floor(Math.random() * 1000)
-    .toString()
-    .padStart(3, "0");
-
-  return cleaned + random;
+    .replace(/[^A-Z0-9\s]/g, "")
+    .replace(/\s+/g, "-")
+    .substring(0, 20);
 }
 
 /**
- * Truncate filename for display
+ * Truncate file name for display
  */
 function truncateFileName(fileName, maxLength) {
   if (fileName.length <= maxLength) {
@@ -307,8 +210,5 @@ function truncateFileName(fileName, maxLength) {
 // =================== INITIALIZE ===================
 
 document.addEventListener("DOMContentLoaded", function () {
-  // Initialize Product Form Manager
   const productFormManager = new ProductFormManager();
-
-  console.log("Add Product page initialized - MVC/OOP compliant");
 });

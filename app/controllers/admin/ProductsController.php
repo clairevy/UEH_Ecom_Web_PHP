@@ -9,7 +9,6 @@ class ProductsController extends BaseController {
     private $collectionModel;
     
     // Upload configuration
-    private $projectRoot;
     private $uploadPath;
     private $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
     private $maxFileSize = 5242880; // 5MB
@@ -19,14 +18,9 @@ class ProductsController extends BaseController {
         $this->productModel = $this->model('Product');
         $this->categoryModel = $this->model('Category');
         $this->collectionModel = $this->model('Collection');
-        
-        // Set absolute upload path - ensure we point to project root (not /app)
-        $this->projectRoot = dirname(__DIR__, 3);
-        $this->uploadPath = $this->projectRoot 
-            . DIRECTORY_SEPARATOR . 'public'
-            . DIRECTORY_SEPARATOR . 'uploads'
-            . DIRECTORY_SEPARATOR . 'products'
-            . DIRECTORY_SEPARATOR;
+                
+        // Set absolute upload path
+        $this->uploadPath = $_SERVER['DOCUMENT_ROOT'] . '/Ecom_website/public/uploads/products/';
     }
 
     /**
@@ -105,51 +99,19 @@ class ProductsController extends BaseController {
      * Method: POST
      */
     public function create() {
-        // ===== CRITICAL DEBUG START =====
-        $debugLog = "=== PRODUCT CREATE METHOD CALLED " . date('Y-m-d H:i:s') . " ===\n";
-        $debugLog .= "Request Method: " . $_SERVER['REQUEST_METHOD'] . "\n";
-        $debugLog .= "Request URI: " . ($_SERVER['REQUEST_URI'] ?? 'N/A') . "\n";
-        $debugLog .= "POST data: " . json_encode($_POST, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . "\n";
-        $debugLog .= "FILES data: " . json_encode($_FILES, JSON_PRETTY_PRINT) . "\n";
-        file_put_contents(__DIR__ . '/../../logs/controller_debug.log', $debugLog, FILE_APPEND);
-        error_log("🎯 ProductsController::create() METHOD CALLED!");
-        // ===== CRITICAL DEBUG END =====
-        
         // Chỉ chấp nhận POST request
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            error_log("❌ Not POST request: " . $_SERVER['REQUEST_METHOD']);
             $_SESSION['error'] = 'Invalid request method!';
             $this->redirect('index.php?url=products');
             return;
         }
 
-        // ===== DEBUG LOGGING START =====
-        error_log("=== PRODUCT CREATE DEBUG START ===");
-        error_log("POST data: " . json_encode($_POST, JSON_UNESCAPED_UNICODE));
-        error_log("FILES data: " . json_encode($_FILES));
-        error_log("Files count: " . (isset($_FILES['product_images']) ? count($_FILES['product_images']['name']) : 'NO FILES'));
-        
-        if (isset($_FILES['product_images'])) {
-            foreach ($_FILES['product_images']['name'] as $index => $name) {
-                if (!empty($name)) {
-                    error_log("File $index: $name, Size: " . $_FILES['product_images']['size'][$index] . ", Error: " . $_FILES['product_images']['error'][$index]);
-                }
-            }
-        }
-        error_log("Upload path: " . $this->uploadPath);
-        // ===== DEBUG LOGGING END =====
-
         try {
             // Validate input data
             $validationErrors = $this->validateProductData($_POST);
             
-            // Validate images - BẮT BUỘC phải có ảnh
-            if (empty($_FILES['product_images']['name'][0])) {
-                $validationErrors[] = 'Phải upload ít nhất 1 ảnh sản phẩm';
-            }
-            
             if (!empty($validationErrors)) {
-                $_SESSION['error'] = 'Lỗi validate: ' . implode('<br>', $validationErrors);
+                $_SESSION['error'] = implode('<br>', $validationErrors);
                 $_SESSION['old_input'] = $_POST; // Giữ lại dữ liệu cũ
                 $this->redirect('index.php?url=add-product');
                 return;
@@ -166,7 +128,8 @@ class ProductsController extends BaseController {
                 'is_active' => isset($_POST['is_active']) ? 1 : 0
             ];
 
-            // Prepare variants data
+            // Tạo sản phẩm trong database
+               // Prepare variants data
             $variants = [];
             if (isset($_POST['variants']) && is_array($_POST['variants'])) {
                 foreach ($_POST['variants'] as $variant) {
@@ -183,26 +146,20 @@ class ProductsController extends BaseController {
             }
 
             // Tạo sản phẩm với variants trong database (using transaction)
-            error_log("=== CREATING PRODUCT ===");
-            error_log("Product data: " . json_encode($data, JSON_UNESCAPED_UNICODE));
-            error_log("Variants count: " . count($variants));
-            
             $productId = $this->productModel->createWithVariants($data, $variants);
             
             if (!$productId) {
-                error_log("❌ CREATE PRODUCT FAILED");
-                throw new Exception('Không thể tạo sản phẩm trong database. Kiểm tra error log để biết chi tiết.');
+                throw new Exception('Không thể tạo sản phẩm trong database');
             }
-            
-            error_log("✅ Product created with ID: " . $productId);
 
-            // Xử lý upload images - BẮT BUỘC
-            $uploadResult = $this->handleProductImages($productId, $_FILES['product_images']);
-            
-            if (!$uploadResult['success']) {
-                // Nếu upload fail, XÓA sản phẩm đã tạo
-                $this->productModel->delete($productId);
-                throw new Exception('Không thể upload ảnh sản phẩm: ' . implode(', ', $uploadResult['errors']));
+            // Xử lý upload images
+            if (isset($_FILES['product_images']) && !empty($_FILES['product_images']['name'][0])) {
+                $uploadResult = $this->handleProductImages($productId, $_FILES['product_images']);
+                
+                if (!$uploadResult['success']) {
+                    // Nếu upload fail, log warning nhưng vẫn thành công
+                    error_log('Warning: Product created but image upload failed: ' . implode(', ', $uploadResult['errors']));
+                }
             }
 
             // Xử lý categories (many-to-many relationship)
@@ -214,7 +171,6 @@ class ProductsController extends BaseController {
             $this->redirect('index.php?url=products');
             
         } catch (Exception $e) {
-            error_log('ProductsController::create Exception: ' . $e->getMessage());
             $_SESSION['error'] = 'Lỗi: ' . $e->getMessage();
             $_SESSION['old_input'] = $_POST;
             $this->redirect('index.php?url=add-product');
@@ -427,37 +383,37 @@ class ProductsController extends BaseController {
             $errors[] = 'SKU không được để trống';
         }
 
-        // Validate categories
-        if (empty($data['category_ids']) || !is_array($data['category_ids'])) {
-            $errors[] = 'Phải chọn ít nhất 1 danh mục';
+        // Validate stock (nếu có)
+        if (isset($data['stock']) && (!is_numeric($data['stock']) || $data['stock'] < 0)) {
+            $errors[] = 'Số lượng tồn kho phải là số không âm';
         }
-
-        // Validate variants (nếu có)
-        if (isset($data['variants']) && is_array($data['variants']) && !empty($data['variants'])) {
-            foreach ($data['variants'] as $index => $variant) {
-                $variantNum = $index + 1;
-                
-                // Skip empty variants
-                if (empty($variant['size']) && empty($variant['color']) && empty($variant['price']) && empty($variant['stock'])) {
-                    continue;
-                }
-                
-                if (empty($variant['size'])) {
-                    $errors[] = "Biến thể #{$variantNum}: Size không được để trống";
-                }
-                
-                if (empty($variant['color'])) {
-                    $errors[] = "Biến thể #{$variantNum}: Màu sắc không được để trống";
-                }
-                
-                if (empty($variant['price']) || !is_numeric($variant['price']) || $variant['price'] <= 0) {
-                    $errors[] = "Biến thể #{$variantNum}: Giá phải là số dương";
-                }
-                
-                if (!isset($variant['stock']) || !is_numeric($variant['stock']) || $variant['stock'] < 0) {
-                    $errors[] = "Biến thể #{$variantNum}: Số lượng tồn kho phải là số không âm";
+             // Validate variants
+        if (isset($data['variants']) && is_array($data['variants'])) {
+            if (empty($data['variants'])) {
+                $errors[] = 'Phải có ít nhất 1 biến thể sản phẩm';
+            } else {
+                foreach ($data['variants'] as $index => $variant) {
+                    $variantNum = $index + 1;
+                    
+                    if (empty($variant['size'])) {
+                        $errors[] = "Biến thể #{$variantNum}: Size không được để trống";
+                    }
+                    
+                    if (empty($variant['color'])) {
+                        $errors[] = "Biến thể #{$variantNum}: Màu sắc không được để trống";
+                    }
+                    
+                    if (empty($variant['price']) || !is_numeric($variant['price']) || $variant['price'] <= 0) {
+                        $errors[] = "Biến thể #{$variantNum}: Giá phải là số dương";
+                    }
+                    
+                    if (!isset($variant['stock']) || !is_numeric($variant['stock']) || $variant['stock'] < 0) {
+                        $errors[] = "Biến thể #{$variantNum}: Số lượng tồn kho phải là số không âm";
+                    }
                 }
             }
+        } else {
+            $errors[] = 'Phải có ít nhất 1 biến thể sản phẩm';
         }
 
         return $errors;
@@ -469,34 +425,17 @@ class ProductsController extends BaseController {
      * @return array ['success' => bool, 'errors' => array]
      */
     private function handleProductImages($productId, $files) {
-        error_log("=== HANDLE PRODUCT IMAGES DEBUG ===");
-        error_log("Product ID: " . $productId);
-        error_log("Files parameter: " . json_encode($files));
-        
         $result = ['success' => true, 'errors' => []];
         
         try {
-            error_log('Upload base path: ' . $this->uploadPath);
             // Tạo thư mục upload nếu chưa tồn tại
-            $productUploadPath = $this->uploadPath . $productId . DIRECTORY_SEPARATOR;
-            error_log('Resolved product upload path: ' . $productUploadPath);
+            $productUploadPath = $this->uploadPath . $productId . '/';
             if (!is_dir($productUploadPath)) {
-                if (!mkdir($productUploadPath, 0777, true)) {
-                    throw new Exception("Không thể tạo thư mục upload: $productUploadPath");
-                }
-            }
-            
-            // Kiểm tra quyền ghi
-            if (!is_writable($productUploadPath)) {
-                throw new Exception("Thư mục upload không có quyền ghi: $productUploadPath");
+                mkdir($productUploadPath, 0777, true);
             }
 
             $uploadedFiles = [];
             $fileCount = count($files['name']);
-            
-            if ($fileCount === 0 || empty($files['name'][0])) {
-                throw new Exception('Không có file nào được upload');
-            }
 
             for ($i = 0; $i < $fileCount; $i++) {
                 if ($files['error'][$i] === UPLOAD_ERR_OK) {
@@ -523,19 +462,13 @@ class ProductsController extends BaseController {
 
                     // Move uploaded file
                     if (move_uploaded_file($fileTmpName, $destination)) {
-                        // Convert absolute path to relative path for web display
-                        $relativePath = 'public/uploads/products/' . $productId . '/' . $newFileName;
-                        
+                         $relativePath = 'public/uploads/products/' . $productId . '/' . $newFileName;
                         $uploadedFiles[] = [
-                            'path' => $relativePath, // Use relative path for database
+                             'path' => $relativePath, // Use relative path for database
                             'is_primary' => ($i === 0) // First image is primary
                         ];
                     } else {
-                        $result['errors'][] = "Không thể upload file {$fileName}. Tmp: {$fileTmpName}, Dest: {$destination}";
-                        error_log("Upload failed - Source: {$fileTmpName}, Destination: {$destination}");
-                        error_log("Source exists: " . (file_exists($fileTmpName) ? 'Yes' : 'No'));
-                        error_log("Destination dir exists: " . (is_dir(dirname($destination)) ? 'Yes' : 'No'));
-                        error_log("Destination dir writable: " . (is_writable(dirname($destination)) ? 'Yes' : 'No'));
+                        $result['errors'][] = "Không thể upload file {$fileName}";
                     }
                 }
             }
@@ -587,8 +520,8 @@ class ProductsController extends BaseController {
 
             // Thêm các liên kết mới
             foreach ($categoryIds as $categoryId) {
-                $sql = "INSERT INTO product_categories (product_id, category_id) 
-                        VALUES (:product_id, :category_id)";
+                $sql = "INSERT INTO product_categories (product_id, category_id, created_at) 
+                        VALUES (:product_id, :category_id, NOW())";
                 $db->query($sql);
                 $db->bind(':product_id', $productId);
                 $db->bind(':category_id', $categoryId);
@@ -603,13 +536,7 @@ class ProductsController extends BaseController {
      * Redirect helper method
      */
     private function redirect($url) {
-        if (!headers_sent()) {
-            header("Location: $url");
-            exit;
-        } else {
-            // Fallback for testing environment
-            echo "<script>window.location.href='$url';</script>";
-            exit;
-        }
+        header("Location: $url");
+        exit;
     }
 }

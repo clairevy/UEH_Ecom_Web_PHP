@@ -114,10 +114,26 @@
                                                     
                                                     if (!empty($product->primary_image) && isset($product->primary_image->file_path)) {
                                                         // Ưu tiên: primary_image từ image_usages
-                                                        $imageSrc = htmlspecialchars($product->primary_image->file_path);
+                                                        $imagePath = $product->primary_image->file_path;
+                                                        
+                                                        // Kiểm tra nếu là URL đầy đủ (http/https) thì dùng trực tiếp
+                                                        if (preg_match('/^https?:\/\//', $imagePath)) {
+                                                            $imageSrc = htmlspecialchars($imagePath);
+                                                        } else {
+                                                            // Nếu là đường dẫn tương đối, thêm BASE_URL
+                                                            $imageSrc = htmlspecialchars('/Ecom_website/' . ltrim($imagePath, '/'));
+                                                        }
                                                     } elseif (!empty($product->main_image)) {
                                                         // Fallback: main_image column
-                                                        $imageSrc = htmlspecialchars($product->main_image);
+                                                        $imagePath = $product->main_image;
+                                                        
+                                                        // Kiểm tra nếu là URL đầy đủ (http/https) thì dùng trực tiếp
+                                                        if (preg_match('/^https?:\/\//', $imagePath)) {
+                                                            $imageSrc = htmlspecialchars($imagePath);
+                                                        } else {
+                                                            // Nếu là đường dẫn tương đối, thêm BASE_URL
+                                                            $imageSrc = htmlspecialchars('/Ecom_website/' . ltrim($imagePath, '/'));
+                                                        }
                                                     }
                                                     ?>
                                                     <img src="<?= $imageSrc ?>" 
