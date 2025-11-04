@@ -88,8 +88,6 @@ class ProfileController extends BaseController {
             // Handle address separately if provided  
             if (!empty($_POST['street']) && !empty($_POST['province']) && !empty($_POST['ward'])) {
                 $addressData = [
-                    'full_name' => trim($_POST['name']),
-                    'phone' => trim($_POST['phone'] ?? ''),
                     'street' => trim($_POST['street']),
                     'ward' => trim($_POST['ward']),
                     'district' => '', // Modern Vietnam structure doesn't use district

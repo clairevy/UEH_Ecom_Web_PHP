@@ -654,17 +654,49 @@
             const container = document.getElementById('wishlistContainer');
             
             try {
-                const response = await fetch('/Ecom_website/wishlist');
+                const response = await fetch('/Ecom_website/wishlist', {
+                    method: 'GET',
+                    credentials: 'same-origin',  // Include cookies/session
+                    headers: {
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+                
+                console.log('Response status:', response.status);
+                
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
                 // Get the HTML content
                 const html = await response.text();
                 
+                // DEBUG: Log response details
+                console.log('=== WISHLIST DEBUG ===');
+                console.log('Response status:', response.status);
+                console.log('HTML length:', html.length);
+                console.log('HTML contains "wishlist":', html.includes('wishlist'));
+                console.log('HTML contains "error":', html.includes('error'));
+                console.log('HTML first 500 chars:', html.substring(0, 500));
+                
                 // Parse the HTML to extract wishlist items
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
+                
+                // DEBUG: Check different selectors
+                console.log('Elements found:');
+                console.log('- #wishlistItemsContainer:', doc.querySelector('#wishlistItemsContainer') ? 'YES' : 'NO');
+                console.log('- #wishlistGrid:', doc.querySelector('#wishlistGrid') ? 'YES' : 'NO');
+                console.log('- .col-lg-3:', doc.querySelectorAll('.col-lg-3').length);
+                console.log('- .product-card:', doc.querySelectorAll('.product-card').length);
+                console.log('- .empty-wishlist:', doc.querySelector('.empty-wishlist') ? 'YES' : 'NO');
+                
+                // If response is redirect (login page), try API instead
+                if (html.includes('signin') || html.includes('login') || response.status === 302) {
+                    console.log('Detected redirect to login, trying API approach...');
+                    await loadWishlistViaAPI();
+                    return;
+                }
                 
                 // Find wishlist items in the response
                 const wishlistItemsContainer = doc.querySelector('#wishlistItemsContainer');
@@ -677,7 +709,7 @@
                     items.forEach(item => {
                         const name = item.querySelector('.product-name')?.textContent?.trim() || 'Sản phẩm';
                         const price = item.querySelector('.price')?.textContent?.trim() || '0₫';
-                        const img = item.querySelector('img')?.src || '<?= getBaseUrl() ?>/public/assets/images/placeholder.svg';
+                        const img = item.querySelector('img')?.src || '/Ecom_website/public/assets/images/placeholder.svg';
                         const productId = item.dataset.productId || '';
                         const href = item.querySelector('a')?.href || '#';
                         
@@ -702,6 +734,62 @@
                     wishlistHTML += '</div>';
                     container.innerHTML = wishlistHTML;
                 } else {
+                    // Try API approach if no items found in HTML
+                    console.log('No items found in HTML, trying API...');
+                    await loadWishlistViaAPI();
+                }
+                
+            } catch (error) {
+                console.error('Error loading wishlist:', error);
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                        <h6 class="text-muted">Có lỗi xảy ra khi tải danh sách yêu thích</h6>
+                        <button class="btn btn-outline-primary" onclick="loadWishlist()">
+                            <i class="fas fa-redo me-2"></i>
+                            Thử lại
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Alternative method using API endpoint
+        async function loadWishlistViaAPI() {
+            const container = document.getElementById('wishlistContainer');
+            
+            try {
+                console.log('Loading wishlist via API...');
+                const response = await fetch('/Ecom_website/api/wishlist/status', {
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                console.log('API Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('API Response data:', data);
+                
+                if (data.success && data.count > 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-5">
+                            <i class="fas fa-heart fa-3x text-primary mb-3"></i>
+                            <h6>Bạn có ${data.count} sản phẩm yêu thích</h6>
+                            <p class="text-muted">Đang tải chi tiết sản phẩm...</p>
+                            <a href="/Ecom_website/wishlist" class="btn btn-primary">
+                                <i class="fas fa-eye me-2"></i>
+                                Xem danh sách đầy đủ
+                            </a>
+                        </div>
+                    `;
+                } else {
                     // Empty wishlist
                     container.innerHTML = `
                         <div class="text-center py-5">
@@ -715,17 +803,21 @@
                         </div>
                     `;
                 }
-                
             } catch (error) {
-                console.error('Error loading wishlist:', error);
+                console.error('API Error loading wishlist:', error);
                 container.innerHTML = `
                     <div class="text-center py-5">
                         <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
-                        <h6 class="text-muted">Có lỗi xảy ra khi tải danh sách yêu thích</h6>
+                        <h6 class="text-muted">Không thể tải danh sách yêu thích</h6>
+                        <p class="text-muted">Vui lòng thử lại sau hoặc đăng nhập lại</p>
                         <button class="btn btn-outline-primary" onclick="loadWishlist()">
                             <i class="fas fa-redo me-2"></i>
                             Thử lại
                         </button>
+                        <a href="/Ecom_website/auth/signin" class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            Đăng nhập lại
+                        </a>
                     </div>
                 `;
             }
@@ -777,8 +869,9 @@
                     
                     result.data.forEach(province => {
                         const option = document.createElement('option');
-                        option.value = province.code;
+                        option.value = province.name; // Thay đổi: lưu tên thay vì code
                         option.textContent = province.name;
+                        option.dataset.code = province.code; // Giữ lại code để load wards
                         option.dataset.fullName = province.full_name || province.name;
                         provinceSelect.appendChild(option);
                     });
@@ -806,7 +899,8 @@
         
         // Province change handler
         document.getElementById('provinceSelect').addEventListener('change', function() {
-            const provinceCode = this.value;
+            const selectedOption = this.options[this.selectedIndex];
+            const provinceCode = selectedOption ? selectedOption.dataset.code : null; // Lấy code từ dataset
             const wardSelect = document.getElementById('wardSelect');
             
             // Reset wards
@@ -832,8 +926,10 @@
                     
                     result.data.forEach(ward => {
                         const option = document.createElement('option');
-                        option.value = ward.code;
-                        option.textContent = ward.district_name ? `${ward.name} (${ward.district_name})` : ward.name;
+                        const wardName = ward.district_name ? `${ward.name} (${ward.district_name})` : ward.name;
+                        option.value = wardName; // Thay đổi: lưu tên thay vì code
+                        option.textContent = wardName;
+                        option.dataset.code = ward.code; // Giữ lại code nếu cần
                         option.dataset.fullName = ward.full_name || ward.name;
                         option.dataset.districtName = ward.district_name || '';
                         wardSelect.appendChild(option);

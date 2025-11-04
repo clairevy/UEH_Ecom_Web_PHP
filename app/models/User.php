@@ -360,8 +360,6 @@ class User extends BaseModel {
                 error_log("SaveUserAddress - Updating existing address ID: " . $existingAddress->user_address_id);
             // Update existing address (no district column in table)
             $updateQuery = "UPDATE user_addresses SET 
-                           full_name = :full_name,
-                           phone = :phone,
                            ward = :ward,
                            country = :country,
                            postal_code = :postal_code,
@@ -382,13 +380,11 @@ class User extends BaseModel {
                 error_log("SaveUserAddress - Inserting new address");
             // Insert new address (no district column in table)
             $insertQuery = "INSERT INTO user_addresses 
-                           (user_id, full_name, phone, street, ward, province, country, postal_code, is_default) 
-                           VALUES (:user_id, :full_name, :phone, :street, :ward, :province, :country, :postal_code, :is_default)";
-            
+                           (user_id, street, ward, province, country, postal_code, is_default) 
+                           VALUES (:user_id, :street, :ward, :province, :country, :postal_code, :is_default)";
+
             $this->db->query($insertQuery);
             $this->db->bind(':user_id', $userId);
-            $this->db->bind(':full_name', $addressData['full_name']);
-            $this->db->bind(':phone', $addressData['phone']);
             $this->db->bind(':street', $addressData['street']);
             $this->db->bind(':ward', $addressData['ward'] ?? '');
             $this->db->bind(':province', $addressData['province']);

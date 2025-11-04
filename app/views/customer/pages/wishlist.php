@@ -164,7 +164,7 @@ $wishlist = $data['wishlist'] ?? null;
 </head>
 <body>
     <!-- Header -->
-    <?php include __DIR__ . '/../../components/header.php'; ?>
+    <?php include __DIR__ . '/../components/header.php'; ?>
     
     <!-- Wishlist Header -->
     <div class="wishlist-header">
