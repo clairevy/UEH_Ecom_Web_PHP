@@ -80,7 +80,7 @@
                 <!-- Product Management Table -->
                 <div class="table-card">
                     <div class="table-header flex-column flex-md-row align-items-start align-items-md-center">
-                        <h5 class="table-title mb-2 mb-md-0">Danh Sách Sản Phẩm</h5>
+                       
                         <div class="d-flex flex-wrap gap-2 w-100 w-md-auto">
                             <!-- Filters -->
                             <div class="dropdown">

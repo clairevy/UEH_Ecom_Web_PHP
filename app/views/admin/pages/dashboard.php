@@ -15,7 +15,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Trang Sức Admin</title>
+    <title>Biểu đồ - Trang Sức Admin</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -100,19 +100,19 @@
                 <div class="btn-group btn-group-sm" role="group">
                     <input type="radio" class="btn-check" name="period" id="weekly">
                     <label class="btn btn-outline-secondary btn-sm" for="weekly">
-                        <span class="d-none d-sm-inline">WEEKLY</span>
+                        <span class="d-none d-sm-inline">Theo tuần</span>
                         <span class="d-sm-none">W</span>
                     </label>
                     
                     <input type="radio" class="btn-check" name="period" id="monthly" checked>
                     <label class="btn btn-outline-secondary btn-sm" for="monthly">
-                        <span class="d-none d-sm-inline">MONTHLY</span>
+                        <span class="d-none d-sm-inline">Theo tháng</span>
                         <span class="d-sm-none">M</span>
                     </label>
                     
                     <input type="radio" class="btn-check" name="period" id="yearly">
                     <label class="btn btn-outline-secondary btn-sm" for="yearly">
-                        <span class="d-none d-sm-inline">YEARLY</span>
+                        <span class="d-none d-sm-inline">Theo năm</span>
                         <span class="d-sm-none">Y</span>
                     </label>
                 </div>
@@ -121,7 +121,7 @@
                 <!-- Placeholder for chart -->
                 <div class="text-center py-3 py-sm-5" style="height: 250px; min-height: 200px; border: 2px dashed #e9ecef; border-radius: var(--border-radius);">
                     <img src="https://cdn-icons-png.flaticon.com/512/2920/2920277.png" alt="Chart" width="48" height="48" class="mb-3 opacity-50">
-                    <p class="text-muted small">Chart will be rendered here with Chart.js</p>
+                   
                 </div>
             </div>
         </div>

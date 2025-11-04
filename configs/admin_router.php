@@ -15,6 +15,18 @@ class AdminRouter {
         if (isset($url[0])) {
             // Clean URL routing cho admin
             switch ($url[0]) {
+                case 'login':
+                    $this->controller = 'LoginController';
+                    $this->method = 'index';
+                    unset($url[0]);
+                    break;
+                    
+                case 'logout':
+                    $this->controller = 'LoginController';
+                    $this->method = 'logout';
+                    unset($url[0]);
+                    break;
+                    
                 case 'dashboard':
                     $this->controller = 'DashboardController';
                     $this->method = 'index';
