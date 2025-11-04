@@ -20,25 +20,33 @@ $products = $data['products'] ?? [];
             box-sizing: border-box;
         }
 
+        html, body {
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            position: fixed;
+        }
+
         body {
-            font-family: 'Georgia', serif;
-            width: 100%;
-            overflow-x: hidden;
+            font-family: "Inter", sans-serif;
         }
 
         .container-fluid {
             padding: 0;
             margin: 0;
             width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
 
         /* Hero Section */
         .hero-section {
-            background: linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.7)), 
-                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><rect fill="%23d4c5a9" width="1200" height="600"/><path fill="%23b8a584" d="M0 300 Q300 200 600 300 T1200 300 L1200 600 L0 600 Z"/></svg>');
+            
             background-size: cover;
             background-position: center;
-            min-height: 85vh;
+            min-height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -116,6 +124,8 @@ $products = $data['products'] ?? [];
             backdrop-filter: blur(10px);
             z-index: 10;
             width: 100%;
+            height: 100%;
+            overflow: visible;
         }
 
         .products-section.show {
@@ -131,6 +141,9 @@ $products = $data['products'] ?? [];
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 2rem;
+            overflow: visible;
+            position: relative;
+            z-index: 1;
         }
 
         .carousel-nav {
@@ -159,26 +172,36 @@ $products = $data['products'] ?? [];
             cursor: not-allowed;
         }
 
+        #collectionTitle {
+            text-transform: <?= $collection ? 'uppercase' : 'none' ?>;
+            text-decoration: none !important;
+            font-family: 'Times New Roman', Times, serif;
+        }
+
         .cards-container {
             display: flex;
             gap: 2rem;
-            overflow: hidden;
+            overflow: visible;
+            padding: 20px 10px;
+            margin: -20px -10px;
         }
 
         .product-card {
             background: white;
             border-radius: 10px;
-            overflow: hidden;
             box-shadow: 0 8px 24px rgba(212, 175, 55, 0.15);
             width: 280px;
             flex-shrink: 0;
             transition: all 0.3s ease;
             border: 1px solid rgba(212, 175, 55, 0.1);
+            position: relative;
+            z-index: 1;
         }
 
         .product-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 12px 32px rgba(212, 175, 55, 0.25);
+            z-index: 2;
         }
 
         .product-image {

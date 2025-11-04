@@ -60,7 +60,7 @@ body {
 }
 
 nav .container {
-  max-width: 80% !important;
+  max-width: 85% !important;
 }
 
 .navbar-brand {
@@ -83,7 +83,7 @@ body {
   color: #333 !important;
   font-weight: 200;
   font-size: 15px;
-  margin: 0 15px;
+  margin: 0 10px;
   transition: color 0.3s ease;
 }
 
@@ -301,7 +301,7 @@ body {
   color: white;
   margin-bottom: 10px;
   font-style: italic;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  /* text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); */
 }
 
 .hero-subtitle {
@@ -447,7 +447,7 @@ body {
   overflow: hidden;
   transition: all 0.3s ease;
   position: relative;
-  height: 680px !important;
+  /* height: 680px !important; */
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
