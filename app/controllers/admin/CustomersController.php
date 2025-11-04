@@ -145,8 +145,7 @@ class CustomersController extends BaseController {
             // Cập nhật địa chỉ (nếu có)
             if (!empty($_POST['address_street']) || !empty($_POST['province']) || !empty($_POST['ward'])) {
                 $addressData = [
-                    'full_name' => trim($_POST['name']),
-                    'phone' => trim($_POST['phone'] ?? ''),
+                    
                     'street' => trim($_POST['address_street'] ?? ''),
                     'ward' => trim($_POST['ward'] ?? ''),
                     'province' => trim($_POST['province'] ?? ''),

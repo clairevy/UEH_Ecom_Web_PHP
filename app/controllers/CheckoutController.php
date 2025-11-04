@@ -199,10 +199,24 @@ class CheckoutController extends BaseController {
                 
                 // Create order items
                 foreach ($cartItems as $item) {
+                    // Get variant_id if product has size and color
+                    $variantId = null;
+                    if (!empty($item['size']) && !empty($item['color'])) {
+                        $variant = $this->productModel->getVariant(
+                            $item['product']->product_id, 
+                            $item['size'], 
+                            $item['color']
+                        );
+                        if ($variant) {
+                            $variantId = $variant->variant_id;
+                        }
+                        error_log("Found variant ID: $variantId for product {$item['product']->product_id}, size: {$item['size']}, color: {$item['color']}");
+                    }
+                    
                     $itemData = [
                         'order_id' => $actualOrderId,
                         'product_id' => $item['product']->product_id,
-                        'variant_id' => null, // Set if using variants
+                        'variant_id' => $variantId, // Now properly set
                         'quantity' => $item['quantity'],
                         'unit_price' => $item['product']->base_price,
                         'total_price' => $item['subtotal'] ?? ($item['quantity'] * $item['product']->base_price)
@@ -391,8 +405,8 @@ class CheckoutController extends BaseController {
      */
     private function updateSimpleProductStock($productId, $newStock) {
         try {
-            // Sử dụng method có sẵn trong Product model
-            return $this->productModel->updateSimpleStock($productId, $newStock);
+            // Sử dụng update method để cập nhật stock_quantity
+            return $this->productModel->update($productId, ['stock_quantity' => $newStock]);
         } catch (Exception $e) {
             error_log("Update Simple Product Stock Error: " . $e->getMessage());
             return false;

@@ -50,22 +50,22 @@ class Cart extends BaseModel
     }
 
     // Gán user_id cho cart khi guest login
-    public function assignUserToCart($cartId, $userId)
-    {
-        try {
-            $sql = "UPDATE {$this->table} SET user_id = :user_id, session_id = NULL, updated_at = NOW() 
-                    WHERE cart_id = :cart_id";
+    // public function assignUserToCart($cartId, $userId)
+    // {
+    //     try {
+    //         $sql = "UPDATE {$this->table} SET user_id = :user_id, session_id = NULL, updated_at = NOW() 
+    //                 WHERE cart_id = :cart_id";
             
-            $this->db->query($sql);
-            $this->db->bind(':user_id', $userId);
-            $this->db->bind(':cart_id', $cartId);
+    //         $this->db->query($sql);
+    //         $this->db->bind(':user_id', $userId);
+    //         $this->db->bind(':cart_id', $cartId);
             
-            return $this->db->execute();
-        } catch (Exception $e) {
-            error_log("Error assigning user to cart: " . $e->getMessage());
-            return false;
-        }
-    }
+    //         return $this->db->execute();
+    //     } catch (Exception $e) {
+    //         error_log("Error assigning user to cart: " . $e->getMessage());
+    //         return false;
+    //     }
+    // }
 
     // Lấy tất cả items trong giỏ hàng
     public function getCartItems($cartId)
@@ -90,136 +90,136 @@ class Cart extends BaseModel
     }
 
     // Thêm sản phẩm vào giỏ hàng
-    public function addToCart($cartId, $productId, $price, $variantId = null, $quantity = 1)
-    {
-        try {
-            // Kiểm tra sản phẩm đã có trong giỏ chưa
-            $existingItem = $this->getCartItem($cartId, $productId, $variantId);
+    // public function addToCart($cartId, $productId, $price, $variantId = null, $quantity = 1)
+    // {
+    //     try {
+    //         // Kiểm tra sản phẩm đã có trong giỏ chưa
+    //         $existingItem = $this->getCartItem($cartId, $productId, $variantId);
             
-            if ($existingItem) {
-                // Cập nhật số lượng
-                return $this->updateCartItemQuantity($existingItem['cart_item_id'], 
-                                                   $existingItem['quantity'] + $quantity);
-            } else {
-                // Thêm item mới
-                $sql = "INSERT INTO cart_items (cart_id, product_id, variant_id, quantity, price, added_at, created_at, updated_at) 
-                        VALUES (:cart_id, :product_id, :variant_id, :quantity, :price, NOW(), NOW(), NOW())";
+    //         if ($existingItem) {
+    //             // Cập nhật số lượng
+    //             return $this->updateCartItemQuantity($existingItem['cart_item_id'], 
+    //                                                $existingItem['quantity'] + $quantity);
+    //         } else {
+    //             // Thêm item mới
+    //             $sql = "INSERT INTO cart_items (cart_id, product_id, variant_id, quantity, price, added_at, created_at, updated_at) 
+    //                     VALUES (:cart_id, :product_id, :variant_id, :quantity, :price, NOW(), NOW(), NOW())";
                 
-                $this->db->query($sql);
-                $this->db->bind(':cart_id', $cartId);
-                $this->db->bind(':product_id', $productId);
-                $this->db->bind(':variant_id', $variantId);
-                $this->db->bind(':quantity', $quantity);
-                $this->db->bind(':price', $price);
+    //             $this->db->query($sql);
+    //             $this->db->bind(':cart_id', $cartId);
+    //             $this->db->bind(':product_id', $productId);
+    //             $this->db->bind(':variant_id', $variantId);
+    //             $this->db->bind(':quantity', $quantity);
+    //             $this->db->bind(':price', $price);
                 
-                if ($this->db->execute()) {
-                    $this->updateCartTimestamp($cartId);
-                    return $this->db->lastInsertId();
-                }
-            }
-            return false;
-        } catch (Exception $e) {
-            error_log("Error adding to cart: " . $e->getMessage());
-            return false;
-        }
-    }
+    //             if ($this->db->execute()) {
+    //                 $this->updateCartTimestamp($cartId);
+    //                 return $this->db->lastInsertId();
+    //             }
+    //         }
+    //         return false;
+    //     } catch (Exception $e) {
+    //         error_log("Error adding to cart: " . $e->getMessage());
+    //         return false;
+    //     }
+    // }
 
     // Lấy một cart item cụ thể
-    private function getCartItem($cartId, $productId, $variantId = null)
-    {
-        try {
-            $sql = "SELECT * FROM cart_items 
-                    WHERE cart_id = :cart_id AND product_id = :product_id";
+    // private function getCartItem($cartId, $productId, $variantId = null)
+    // {
+    //     try {
+    //         $sql = "SELECT * FROM cart_items 
+    //                 WHERE cart_id = :cart_id AND product_id = :product_id";
             
-            if ($variantId) {
-                $sql .= " AND variant_id = :variant_id";
-            } else {
-                $sql .= " AND variant_id IS NULL";
-            }
+    //         if ($variantId) {
+    //             $sql .= " AND variant_id = :variant_id";
+    //         } else {
+    //             $sql .= " AND variant_id IS NULL";
+    //         }
             
-            $this->db->query($sql);
-            $this->db->bind(':cart_id', $cartId);
-            $this->db->bind(':product_id', $productId);
+    //         $this->db->query($sql);
+    //         $this->db->bind(':cart_id', $cartId);
+    //         $this->db->bind(':product_id', $productId);
             
-            if ($variantId) {
-                $this->db->bind(':variant_id', $variantId);
-            }
+    //         if ($variantId) {
+    //             $this->db->bind(':variant_id', $variantId);
+    //         }
             
-            return $this->db->single();
-        } catch (Exception $e) {
-            error_log("Error getting cart item: " . $e->getMessage());
-            return false;
-        }
-    }
+    //         return $this->db->single();
+    //     } catch (Exception $e) {
+    //         error_log("Error getting cart item: " . $e->getMessage());
+    //         return false;
+    //     }
+    // }
 
     // Cập nhật số lượng sản phẩm trong giỏ
-    public function updateCartItemQuantity($cartItemId, $quantity)
-    {
-        try {
-            if ($quantity <= 0) {
-                return $this->removeCartItem($cartItemId);
-            }
+    // public function updateCartItemQuantity($cartItemId, $quantity)
+    // {
+    //     try {
+    //         if ($quantity <= 0) {
+    //             return $this->removeCartItem($cartItemId);
+    //         }
             
-            $sql = "UPDATE cart_items SET quantity = :quantity, updated_at = NOW() 
-                    WHERE cart_item_id = :cart_item_id";
+    //         $sql = "UPDATE cart_items SET quantity = :quantity, updated_at = NOW() 
+    //                 WHERE cart_item_id = :cart_item_id";
             
-            $this->db->query($sql);
-            $this->db->bind(':quantity', $quantity);
-            $this->db->bind(':cart_item_id', $cartItemId);
+    //         $this->db->query($sql);
+    //         $this->db->bind(':quantity', $quantity);
+    //         $this->db->bind(':cart_item_id', $cartItemId);
             
-            if ($this->db->execute()) {
-                // Cập nhật timestamp của cart
-                $cartItem = $this->getCartItemById($cartItemId);
-                if ($cartItem) {
-                    $this->updateCartTimestamp($cartItem['cart_id']);
-                }
-                return true;
-            }
-            return false;
-        } catch (Exception $e) {
-            error_log("Error updating cart item quantity: " . $e->getMessage());
-            return false;
-        }
-    }
+    //         if ($this->db->execute()) {
+    //             // Cập nhật timestamp của cart
+    //             $cartItem = $this->getCartItemById($cartItemId);
+    //             if ($cartItem) {
+    //                 $this->updateCartTimestamp($cartItem['cart_id']);
+    //             }
+    //             return true;
+    //         }
+    //         return false;
+    //     } catch (Exception $e) {
+    //         error_log("Error updating cart item quantity: " . $e->getMessage());
+    //         return false;
+    //     }
+    // }
 
     // Xóa sản phẩm khỏi giỏ hàng
-    public function removeCartItem($cartItemId)
-    {
-        try {
-            // Lấy cart_id trước khi xóa
-            $cartItem = $this->getCartItemById($cartItemId);
+    // public function removeCartItem($cartItemId)
+    // {
+    //     try {
+    //         // Lấy cart_id trước khi xóa
+    //         $cartItem = $this->getCartItemById($cartItemId);
             
-            $sql = "DELETE FROM cart_items WHERE cart_item_id = :cart_item_id";
-            $this->db->query($sql);
-            $this->db->bind(':cart_item_id', $cartItemId);
+    //         $sql = "DELETE FROM cart_items WHERE cart_item_id = :cart_item_id";
+    //         $this->db->query($sql);
+    //         $this->db->bind(':cart_item_id', $cartItemId);
             
-            if ($this->db->execute()) {
-                if ($cartItem) {
-                    $this->updateCartTimestamp($cartItem['cart_id']);
-                }
-                return true;
-            }
-            return false;
-        } catch (Exception $e) {
-            error_log("Error removing cart item: " . $e->getMessage());
-            return false;
-        }
-    }
+    //         if ($this->db->execute()) {
+    //             if ($cartItem) {
+    //                 $this->updateCartTimestamp($cartItem['cart_id']);
+    //             }
+    //             return true;
+    //         }
+    //         return false;
+    //     } catch (Exception $e) {
+    //         error_log("Error removing cart item: " . $e->getMessage());
+    //         return false;
+    //     }
+    // }
 
     // Lấy cart item theo ID
-    private function getCartItemById($cartItemId)
-    {
-        try {
-            $sql = "SELECT * FROM cart_items WHERE cart_item_id = :cart_item_id";
-            $this->db->query($sql);
-            $this->db->bind(':cart_item_id', $cartItemId);
+    // private function getCartItemById($cartItemId)
+    // {
+    //     try {
+    //         $sql = "SELECT * FROM cart_items WHERE cart_item_id = :cart_item_id";
+    //         $this->db->query($sql);
+    //         $this->db->bind(':cart_item_id', $cartItemId);
             
-            return $this->db->single();
-        } catch (Exception $e) {
-            error_log("Error getting cart item by ID: " . $e->getMessage());
-            return false;
-        }
-    }
+    //         return $this->db->single();
+    //     } catch (Exception $e) {
+    //         error_log("Error getting cart item by ID: " . $e->getMessage());
+    //         return false;
+    //     }
+    // }
 
     // Xóa toàn bộ giỏ hàng
     public function clearCart($cartId)
@@ -318,22 +318,22 @@ class Cart extends BaseModel
     // }
 
     // Xóa cart hoàn toàn
-    public function deleteCart($cartId)
-    {
-        try {
-            // Xóa cart items trước
-            $this->clearCart($cartId);
+    // public function deleteCart($cartId)
+    // {
+    //     try {
+    //         // Xóa cart items trước
+    //         $this->clearCart($cartId);
             
-            // Xóa cart
-            $sql = "DELETE FROM {$this->table} WHERE cart_id = :cart_id";
-            $this->db->query($sql);
-            $this->db->bind(':cart_id', $cartId);
+    //         // Xóa cart
+    //         $sql = "DELETE FROM {$this->table} WHERE cart_id = :cart_id";
+    //         $this->db->query($sql);
+    //         $this->db->bind(':cart_id', $cartId);
             
-            return $this->db->execute();
-        } catch (Exception $e) {
-            error_log("Error deleting cart: " . $e->getMessage());
-            return false;
-        }
-    }
+    //         return $this->db->execute();
+    //     } catch (Exception $e) {
+    //         error_log("Error deleting cart: " . $e->getMessage());
+    //         return false;
+    //     }
+    // }
 }
 ?>
