@@ -143,6 +143,9 @@ class AdminRouter {
                             case 'updatePayment':
                                 $this->method = 'updatePayment';
                                 break;
+                            case 'updateStatus':
+                                $this->method = 'updateStatus';
+                                break;
                             case 'updateOrder':
                                 $this->method = 'updateOrder';
                                 break;
@@ -166,13 +169,27 @@ class AdminRouter {
                     
                 case 'customers':
                     $this->controller = 'CustomersController';
-                    $this->method = 'index';
-                    unset($url[0]);
-                    break;
-                    
-                case 'add-customer':
-                    $this->controller = 'CustomersController';
-                    $this->method = 'showAddForm';
+                    // Check for action parameter
+                    if (isset($_GET['action'])) {
+                        switch ($_GET['action']) {
+                            case 'edit':
+                                $this->method = 'showEditForm';
+                                break;
+                            case 'update':
+                                $this->method = 'update';
+                                break;
+                            case 'delete':
+                                $this->method = 'delete';
+                                break;
+                            case 'toggle':
+                                $this->method = 'toggle';
+                                break;
+                            default:
+                                $this->method = 'index';
+                        }
+                    } else {
+                        $this->method = 'index';
+                    }
                     unset($url[0]);
                     break;
                     

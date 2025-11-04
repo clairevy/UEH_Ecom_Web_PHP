@@ -1,7 +1,7 @@
 <?php
 /**
- * Add Product View - Pure MVC View
- * Nhận data từ Controller, không có hardcode
+ * Add/Edit Product View - Pure MVC View
+ * Tái sử dụng form cho cả Create và Update (DRY Principle)
  * 
  * Biến được truyền từ Controller:
  * - $categories: Danh sách categories từ database
@@ -10,11 +10,22 @@
  * - $title: Tiêu đề trang
  * - $pageTitle: Tiêu đề cho header
  * - $breadcrumb: Breadcrumb text
+ * - $isEdit: true nếu đang edit, false/null nếu đang tạo mới
+ * - $product: Dữ liệu sản phẩm (chỉ có khi edit)
  */
 
-// Lấy old input nếu có lỗi validation
+// Kiểm tra edit mode
+$isEdit = isset($isEdit) && $isEdit === true;
+$product = $product ?? null;
+
+// Lấy old input nếu có lỗi validation, hoặc dùng data từ product
 $oldInput = $_SESSION['old_input'] ?? [];
 unset($_SESSION['old_input']);
+
+// Xác định action URL
+$formAction = $isEdit 
+    ? "index.php?url=products&action=update&id={$product->product_id}"
+    : "index.php?url=products&action=create";
 ?>
 
 <!DOCTYPE html>
@@ -22,10 +33,13 @@ unset($_SESSION['old_input']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($title ?? 'Thêm Sản Phẩm') ?> - KICKS Admin</title>
+    <title><?= htmlspecialchars($title ?? 'Thêm Sản Phẩm') ?> - Trang Sức Admin</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="app/views/admin/assets/css/variables.css">
@@ -61,13 +75,19 @@ unset($_SESSION['old_input']);
                 <?php endif; ?>
 
                 <!-- Product Form -->
-                <form id="addProductForm" method="POST" action="index.php?url=products&action=create" enctype="multipart/form-data">
+                <form id="addProductForm" method="POST" action="<?= $formAction ?>" enctype="multipart/form-data">
+                    <?php if ($isEdit): ?>
+                        <input type="hidden" name="product_id" value="<?= $product->product_id ?>">
+                    <?php endif; ?>
+                    
                     <div class="row">
                         <!-- Product Form Fields -->
-                        <div class="col-lg-8 mb-4">
+                        <div class="col-lg-8 col-md-12 mb-4 order-2 order-lg-1">
                             <div class="card">
                                 <div class="card-body">
-                                    <h5 class="card-title mb-4">Thông Tin Sản Phẩm</h5>
+                                    <h5 class="card-title mb-4">
+                                        <?= $isEdit ? 'Chỉnh Sửa' : 'Thêm Mới' ?> Thông Tin Sản Phẩm
+                                    </h5>
 
                                     <!-- Product Name -->
                                     <div class="form-group mb-3">
@@ -77,7 +97,7 @@ unset($_SESSION['old_input']);
                                                id="name" 
                                                name="name" 
                                                placeholder="Nhập tên sản phẩm" 
-                                               value="<?= htmlspecialchars($oldInput['name'] ?? '') ?>"
+                                               value="<?= htmlspecialchars($oldInput['name'] ?? $product->name ?? '') ?>"
                                                required>
                                     </div>
 
@@ -88,18 +108,24 @@ unset($_SESSION['old_input']);
                                                   id="description" 
                                                   name="description" 
                                                   rows="4" 
-                                                  placeholder="Nhập mô tả sản phẩm"><?= htmlspecialchars($oldInput['description'] ?? '') ?></textarea>
+                                                  placeholder="Nhập mô tả sản phẩm"><?= htmlspecialchars($oldInput['description'] ?? $product->description ?? '') ?></textarea>
                                     </div>
 
                                     <div class="row">
                                         <!-- Category -->
-                                        <div class="col-md-6">
+                                        <div class="col-md-6 col-12 mb-3 mb-md-0">
                                             <div class="form-group mb-3">
-                                                <label for="category_ids" class="form-label">Danh Mục <span class="text-danger">*</span></label>
-                                                <select class="form-control" id="category_ids" name="category_ids[]" multiple size="5">
+                                                <label for="category_id" class="form-label">Danh Mục <span class="text-danger">*</span></label>
+                                                <select class="form-control" id="category_id" name="category_id" required>
+                                                    <option value="">-- Chọn danh mục --</option>
                                                     <?php if (!empty($categories)): ?>
+                                                        <?php 
+                                                        $selectedCategoryId = $oldInput['category_id'] ?? 
+                                                            ($product->category_ids[0] ?? null);
+                                                        ?>
                                                         <?php foreach ($categories as $category): ?>
-                                                            <option value="<?= $category->category_id ?>">
+                                                            <option value="<?= $category->category_id ?>"
+                                                                <?= $selectedCategoryId == $category->category_id ? 'selected' : '' ?>>
                                                                 <?= htmlspecialchars($category->name) ?>
                                                             </option>
                                                         <?php endforeach; ?>
@@ -107,20 +133,23 @@ unset($_SESSION['old_input']);
                                                         <option value="">Chưa có danh mục nào</option>
                                                     <?php endif; ?>
                                                 </select>
-                                                <small class="text-muted">Giữ Ctrl (hoặc Cmd) để chọn nhiều danh mục</small>
                                             </div>
                                         </div>
 
                                         <!-- Collection -->
-                                        <div class="col-md-6">
+                                        <div class="col-md-6 col-12">
                                             <div class="form-group mb-3">
                                                 <label for="collection_id" class="form-label">Bộ Sưu Tập</label>
                                                 <select class="form-control" id="collection_id" name="collection_id">
                                                     <option value="">-- Chọn bộ sưu tập --</option>
                                                     <?php if (!empty($collections)): ?>
+                                                        <?php 
+                                                        $selectedCollectionId = $oldInput['collection_id'] ?? 
+                                                            ($product->collection_id ?? null);
+                                                        ?>
                                                         <?php foreach ($collections as $collection): ?>
                                                             <option value="<?= $collection->collection_id ?>"
-                                                                <?= (isset($oldInput['collection_id']) && $oldInput['collection_id'] == $collection->collection_id) ? 'selected' : '' ?>>
+                                                                <?= $selectedCollectionId == $collection->collection_id ? 'selected' : '' ?>>
                                                                 <?= htmlspecialchars($collection->collection_name) ?>
                                                             </option>
                                                         <?php endforeach; ?>
@@ -136,10 +165,11 @@ unset($_SESSION['old_input']);
                                         <select class="form-control" id="material" name="material">
                                             <?php 
                                             $materialOptions = is_array($materials) ? $materials : ['gold', 'silver', 'diamond', 'pearl'];
+                                            $selectedMaterial = $oldInput['material'] ?? ($product->material ?? 'gold');
                                             foreach ($materialOptions as $material): 
                                             ?>
                                                 <option value="<?= htmlspecialchars($material) ?>"
-                                                    <?= (isset($oldInput['material']) && $oldInput['material'] == $material) ? 'selected' : '' ?>>
+                                                    <?= $selectedMaterial == $material ? 'selected' : '' ?>>
                                                     <?= htmlspecialchars(ucfirst($material)) ?>
                                                 </option>
                                             <?php endforeach; ?>
@@ -153,83 +183,145 @@ unset($_SESSION['old_input']);
                                         </div>
                                         <div class="card-body">
                                             <div id="variantsContainer">
-                                                <!-- Default variant -->
-                                                <div class="variant-item border rounded p-3 mb-3" data-index="0">
-                                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                                        <h6 class="mb-0">Biến thể #1</h6>
-                                                        <button type="button" class="btn btn-sm btn-outline-danger remove-variant" onclick="removeVariant(0)" style="display: none;">
-                                                            <i class="fas fa-times"></i>
-                                                        </button>
+                                                <?php if ($isEdit && !empty($product->variants)): ?>
+                                                    <?php foreach ($product->variants as $index => $variant): ?>
+                                                        <div class="variant-item border rounded p-3 mb-3" data-index="<?= $index ?>">
+                                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                <h6 class="mb-0">Biến thể #<?= $index + 1 ?></h6>
+                                                                <button type="button" class="btn btn-sm btn-outline-danger remove-variant" onclick="removeVariant(<?= $index ?>)">
+                                                                    <i class="fas fa-times"></i>
+                                                                </button>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-3">
+                                                                    <div class="form-group mb-3">
+                                                                        <label class="form-label">Size <span class="text-danger">*</span></label>
+                                                                        <select class="form-control variant-size" name="variants[<?= $index ?>][size]" required>
+                                                                            <option value="">Chọn size</option>
+                                                                            <?php foreach (['XS', 'S', 'M', 'L', 'XL', 'XXL', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45'] as $size): ?>
+                                                                                <option value="<?= $size ?>" <?= ($variant->size == $size) ? 'selected' : '' ?>><?= $size ?></option>
+                                                                            <?php endforeach; ?>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="form-group mb-3">
+                                                                        <label class="form-label">Màu sắc <span class="text-danger">*</span></label>
+                                                                        <select class="form-control variant-color" name="variants[<?= $index ?>][color]" required>
+                                                                            <option value="">Chọn màu</option>
+                                                                            <?php foreach (['Đỏ', 'Xanh', 'Vàng', 'Đen', 'Trắng', 'Hồng', 'Tím', 'Cam', 'Xám', 'Nâu'] as $color): ?>
+                                                                                <option value="<?= $color ?>" <?= ($variant->color == $color) ? 'selected' : '' ?>><?= $color ?></option>
+                                                                            <?php endforeach; ?>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="form-group mb-3">
+                                                                        <label class="form-label">Giá <span class="text-danger">*</span></label>
+                                                                        <input type="number" 
+                                                                               class="form-control variant-price" 
+                                                                               name="variants[<?= $index ?>][price]" 
+                                                                               placeholder="0" 
+                                                                               min="0" 
+                                                                               step="1000"
+                                                                               value="<?= htmlspecialchars($variant->price ?? '') ?>"
+                                                                               required>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="form-group mb-3">
+                                                                        <label class="form-label">Số lượng <span class="text-danger">*</span></label>
+                                                                        <input type="number" 
+                                                                               class="form-control variant-stock" 
+                                                                               name="variants[<?= $index ?>][stock]" 
+                                                                               placeholder="0" 
+                                                                               min="0"
+                                                                               value="<?= htmlspecialchars($variant->stock ?? '') ?>"
+                                                                               required>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                <?php else: ?>
+                                                    <!-- Default variant for new product -->
+                                                    <div class="variant-item border rounded p-3 mb-3" data-index="0">
+                                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                                            <h6 class="mb-0">Biến thể #1</h6>
+                                                            <button type="button" class="btn btn-sm btn-outline-danger remove-variant" onclick="removeVariant(0)" style="display: none;">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <div class="form-group mb-3">
+                                                                    <label class="form-label">Size <span class="text-danger">*</span></label>
+                                                                    <select class="form-control variant-size" name="variants[0][size]" required>
+                                                                        <option value="">Chọn size</option>
+                                                                        <option value="XS">XS</option>
+                                                                        <option value="S">S</option>
+                                                                        <option value="M">M</option>
+                                                                        <option value="L">L</option>
+                                                                        <option value="XL">XL</option>
+                                                                        <option value="XXL">XXL</option>
+                                                                        <option value="35">35</option>
+                                                                        <option value="36">36</option>
+                                                                        <option value="37">37</option>
+                                                                        <option value="38">38</option>
+                                                                        <option value="39">39</option>
+                                                                        <option value="40">40</option>
+                                                                        <option value="41">41</option>
+                                                                        <option value="42">42</option>
+                                                                        <option value="43">43</option>
+                                                                        <option value="44">44</option>
+                                                                        <option value="45">45</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <div class="form-group mb-3">
+                                                                    <label class="form-label">Màu sắc <span class="text-danger">*</span></label>
+                                                                    <select class="form-control variant-color" name="variants[0][color]" required>
+                                                                        <option value="">Chọn màu</option>
+                                                                        <option value="Đỏ">Đỏ</option>
+                                                                        <option value="Xanh">Xanh</option>
+                                                                        <option value="Vàng">Vàng</option>
+                                                                        <option value="Đen">Đen</option>
+                                                                        <option value="Trắng">Trắng</option>
+                                                                        <option value="Hồng">Hồng</option>
+                                                                        <option value="Tím">Tím</option>
+                                                                        <option value="Cam">Cam</option>
+                                                                        <option value="Xám">Xám</option>
+                                                                        <option value="Nâu">Nâu</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <div class="form-group mb-3">
+                                                                    <label class="form-label">Giá <span class="text-danger">*</span></label>
+                                                                    <input type="number" 
+                                                                           class="form-control variant-price" 
+                                                                           name="variants[0][price]" 
+                                                                           placeholder="0" 
+                                                                           min="0" 
+                                                                           step="1000"
+                                                                           required>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <div class="form-group mb-3">
+                                                                    <label class="form-label">Số lượng <span class="text-danger">*</span></label>
+                                                                    <input type="number" 
+                                                                           class="form-control variant-stock" 
+                                                                           name="variants[0][stock]" 
+                                                                           placeholder="0" 
+                                                                           min="0"
+                                                                           required>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div class="row">
-                                                        <div class="col-md-3">
-                                                            <div class="form-group mb-3">
-                                                                <label class="form-label">Size <span class="text-danger">*</span></label>
-                                                                <select class="form-control variant-size" name="variants[0][size]" required>
-                                                                    <option value="">Chọn size</option>
-                                                                    <option value="XS">XS</option>
-                                                                    <option value="S">S</option>
-                                                                    <option value="M">M</option>
-                                                                    <option value="L">L</option>
-                                                                    <option value="XL">XL</option>
-                                                                    <option value="XXL">XXL</option>
-                                                                    <option value="35">35</option>
-                                                                    <option value="36">36</option>
-                                                                    <option value="37">37</option>
-                                                                    <option value="38">38</option>
-                                                                    <option value="39">39</option>
-                                                                    <option value="40">40</option>
-                                                                    <option value="41">41</option>
-                                                                    <option value="42">42</option>
-                                                                    <option value="43">43</option>
-                                                                    <option value="44">44</option>
-                                                                    <option value="45">45</option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-3">
-                                                            <div class="form-group mb-3">
-                                                                <label class="form-label">Màu sắc <span class="text-danger">*</span></label>
-                                                                <select class="form-control variant-color" name="variants[0][color]" required>
-                                                                    <option value="">Chọn màu</option>
-                                                                    <option value="Đỏ">Đỏ</option>
-                                                                    <option value="Xanh">Xanh</option>
-                                                                    <option value="Vàng">Vàng</option>
-                                                                    <option value="Đen">Đen</option>
-                                                                    <option value="Trắng">Trắng</option>
-                                                                    <option value="Hồng">Hồng</option>
-                                                                    <option value="Tím">Tím</option>
-                                                                    <option value="Cam">Cam</option>
-                                                                    <option value="Xám">Xám</option>
-                                                                    <option value="Nâu">Nâu</option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-3">
-                                                            <div class="form-group mb-3">
-                                                                <label class="form-label">Giá <span class="text-danger">*</span></label>
-                                                                <input type="number" 
-                                                                       class="form-control variant-price" 
-                                                                       name="variants[0][price]" 
-                                                                       placeholder="0" 
-                                                                       min="0" 
-                                                                       step="1000"
-                                                                       required>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-3">
-                                                            <div class="form-group mb-3">
-                                                                <label class="form-label">Số lượng <span class="text-danger">*</span></label>
-                                                                <input type="number" 
-                                                                       class="form-control variant-stock" 
-                                                                       name="variants[0][stock]" 
-                                                                       placeholder="0" 
-                                                                       min="0"
-                                                                       required>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                <?php endif; ?>
                                             </div>
                                             
                                             <button type="button" class="btn btn-outline-primary btn-sm" onclick="addVariant()">
@@ -248,7 +340,7 @@ unset($_SESSION['old_input']);
                                                        id="sku" 
                                                        name="sku" 
                                                        placeholder="VD: PROD-001" 
-                                                       value="<?= htmlspecialchars($oldInput['sku'] ?? '') ?>"
+                                                       value="<?= htmlspecialchars($oldInput['sku'] ?? $product->sku ?? '') ?>"
                                                        required>
                                             </div>
                                         </div>
@@ -262,7 +354,7 @@ unset($_SESSION['old_input']);
                                                        placeholder="0" 
                                                        min="0" 
                                                        step="1000"
-                                                       value="<?= htmlspecialchars($oldInput['base_price'] ?? '') ?>"
+                                                       value="<?= htmlspecialchars($oldInput['base_price'] ?? $product->base_price ?? '') ?>"
                                                        required>
                                             </div>
                                         </div>
@@ -272,24 +364,34 @@ unset($_SESSION['old_input']);
 
                                     <!-- Is Active -->
                                     <div class="form-check mb-3">
+                                        <?php
+                                        $isActiveChecked = false;
+                                        if (isset($oldInput['is_active'])) {
+                                            $isActiveChecked = $oldInput['is_active'];
+                                        } elseif ($isEdit && isset($product->is_active)) {
+                                            $isActiveChecked = $product->is_active;
+                                        } else {
+                                            $isActiveChecked = true; // Default checked for new product
+                                        }
+                                        ?>
                                         <input class="form-check-input" 
                                                type="checkbox" 
                                                id="is_active" 
                                                name="is_active" 
                                                value="1"
-                                               <?= (isset($oldInput['is_active']) && $oldInput['is_active']) || !isset($oldInput['is_active']) ? 'checked' : '' ?>>
+                                               <?= $isActiveChecked ? 'checked' : '' ?>>
                                         <label class="form-check-label" for="is_active">
                                             Kích hoạt sản phẩm (Hiển thị trên website)
                                         </label>
                                     </div>
 
                                     <!-- Action Buttons -->
-                                    <div class="d-flex gap-2 mt-4">
-                                        <button type="submit" class="btn btn-primary-custom btn-custom px-4">
+                                    <div class="d-flex flex-column flex-sm-row gap-2 mt-4">
+                                        <button type="submit" class="btn btn-primary-custom btn-custom px-4 w-100 w-sm-auto">
                                             <img src="https://cdn-icons-png.flaticon.com/512/5610/5610944.png" alt="Save" width="16" height="16" class="me-1">
-                                            LƯU SẢN PHẨM
+                                            <?= $isEdit ? 'CẬP NHẬT' : 'LƯU SẢN PHẨM' ?>
                                         </button>
-                                        <button type="button" class="btn btn-outline-secondary btn-custom px-4" onclick="window.location.href='index.php?url=products'">
+                                        <button type="button" class="btn btn-outline-secondary btn-custom px-4 w-100 w-sm-auto" onclick="window.location.href='index.php?url=products'">
                                             <img src="https://cdn-icons-png.flaticon.com/512/189/189665.png" alt="Cancel" width="16" height="16" class="me-1">
                                             HỦY BỎ
                                         </button>
@@ -299,7 +401,7 @@ unset($_SESSION['old_input']);
                         </div>
 
                         <!-- Product Gallery -->
-                        <div class="col-lg-4 mb-4">
+                        <div class="col-lg-4 col-md-12 mb-4 order-1 order-lg-2">
                             <div class="card">
                                 <div class="card-body">
                                     <h5 class="card-title mb-3">Hình Ảnh Sản Phẩm</h5>
@@ -325,9 +427,36 @@ unset($_SESSION['old_input']);
                                                onchange="handleFileSelect(this)">
                                     </div>
 
+                                    <!-- Existing Images (Edit Mode) -->
+                                    <?php if ($isEdit && !empty($product->images)): ?>
+                                        <div class="existing-images mb-3">
+                                            <h6 class="fw-bold mb-3">Ảnh Hiện Có</h6>
+                                            <div class="row" id="existingImageList">
+                                                <?php foreach ($product->images as $image): ?>
+                                                    <div class="col-6 mb-2" data-image-id="<?= $image->image_id ?>">
+                                                        <div class="position-relative">
+                                                            <img src="/Ecom_website/<?= htmlspecialchars($image->file_path) ?>" 
+                                                                 class="img-thumbnail" 
+                                                                 alt="Product Image"
+                                                                 style="width: 100%; height: 120px; object-fit: cover;">
+                                                            <?php if ($image->is_primary): ?>
+                                                                <span class="badge bg-primary position-absolute top-0 start-0 m-1">Ảnh chính</span>
+                                                            <?php endif; ?>
+                                                            <button type="button" 
+                                                                    class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1" 
+                                                                    onclick="removeExistingImage(<?= $image->image_id ?>, <?= $product->product_id ?>)">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
+
                                     <!-- Preview Images Container -->
                                     <div id="imagePreviewContainer" class="uploaded-images" style="display: none;">
-                                        <h6 class="fw-bold mb-3">Ảnh Đã Chọn</h6>
+                                        <h6 class="fw-bold mb-3">Ảnh Mới Đã Chọn</h6>
                                         <div id="imageList"></div>
                                     </div>
 
@@ -370,7 +499,7 @@ unset($_SESSION['old_input']);
         
         window.pageConfig = {
             sidebar: {
-                brandName: 'KICKS',
+                brandName: 'Trang Sức',
                 activePage: 'products',
                 links: {
                     dashboard: 'index.php?url=dashboard',
@@ -397,7 +526,42 @@ unset($_SESSION['old_input']);
     <!-- Main JS -->
     <script src="app/views/admin/assets/js/main.js"></script>
     <script>
-        let variantIndex = 1;
+        // Initialize variant index based on existing variants
+        <?php if ($isEdit && !empty($product->variants)): ?>
+            let variantIndex = <?= count($product->variants) ?>;
+        <?php else: ?>
+            let variantIndex = 1;
+        <?php endif; ?>
+
+        // Remove existing image from database
+        function removeExistingImage(imageId, productId) {
+            if (!confirm('Bạn có chắc chắn muốn xóa ảnh này không?')) {
+                return;
+            }
+
+            fetch(`index.php?url=products&action=deleteImage&image_id=${imageId}&product_id=${productId}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove image from DOM
+                    document.querySelector(`[data-image-id="${imageId}"]`).remove();
+                    
+                    // Check if no images left
+                    const existingImages = document.querySelectorAll('#existingImageList > div');
+                    if (existingImages.length === 0) {
+                        document.querySelector('.existing-images').remove();
+                    }
+                } else {
+                    alert('Lỗi: ' + (data.message || 'Không thể xóa ảnh'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi xóa ảnh');
+            });
+        }
 
         // Add new variant
         function addVariant() {
@@ -414,7 +578,7 @@ unset($_SESSION['old_input']);
                     </button>
                 </div>
                 <div class="row">
-                    <div class="col-md-3">
+                    <div class="col-md-3 col-sm-6 col-12 mb-3 mb-md-0">
                         <div class="form-group mb-3">
                             <label class="form-label">Size <span class="text-danger">*</span></label>
                             <select class="form-control variant-size" name="variants[${variantIndex}][size]" required>
@@ -439,7 +603,7 @@ unset($_SESSION['old_input']);
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 col-sm-6 col-12 mb-3 mb-md-0">
                         <div class="form-group mb-3">
                             <label class="form-label">Màu sắc <span class="text-danger">*</span></label>
                             <select class="form-control variant-color" name="variants[${variantIndex}][color]" required>
@@ -457,7 +621,7 @@ unset($_SESSION['old_input']);
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 col-sm-6 col-12 mb-3 mb-md-0">
                         <div class="form-group mb-3">
                             <label class="form-label">Giá <span class="text-danger">*</span></label>
                             <input type="number" 
@@ -469,7 +633,7 @@ unset($_SESSION['old_input']);
                                    required>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 col-sm-6 col-12">
                         <div class="form-group mb-3">
                             <label class="form-label">Số lượng <span class="text-danger">*</span></label>
                             <input type="number" 

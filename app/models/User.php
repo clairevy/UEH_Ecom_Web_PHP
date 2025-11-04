@@ -437,4 +437,26 @@ class User extends BaseModel {
         $this->db->bind(':id', $id);
         return $this->db->execute();
     }
+
+    /**
+     * Xóa người dùng
+     */
+    public function delete($id) {
+        $sql = "DELETE FROM {$this->table} WHERE user_id = :id";
+        $this->db->query($sql);
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
+
+    /**
+     * Toggle trạng thái active của người dùng
+     */
+    public function toggleActive($id) {
+        $sql = "UPDATE {$this->table} 
+                SET is_active = IF(is_active = 1, 0, 1) 
+                WHERE user_id = :id";
+        $this->db->query($sql);
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
 }

@@ -245,6 +245,20 @@ class Collection extends BaseModel {
     }
 
     /**
+     * Lấy collection theo ID kèm ảnh cover
+     */
+    public function getById($id) {
+        $collection = $this->findById($id);
+        if ($collection) {
+            // Lấy ảnh cover
+            $coverImage = $this->getCollectionCoverImage($id);
+            $collection->image_path = $coverImage ? $coverImage->file_path : null;
+            $collection->cover_image = $coverImage;
+        }
+        return $collection;
+    }
+
+    /**
      * Tạo bộ sưu tập mới
      */
     public function create($data) {
@@ -287,5 +301,103 @@ class Collection extends BaseModel {
         $this->db->query($sql);
         $this->db->bind(':id', $id);
         return $this->db->execute();
+    }
+
+    /**
+     * Thêm cover image cho collection vào bảng images + image_usages
+     */
+    public function addCollectionCover($collectionId, $imagePath) {
+        try {
+            // 1. Thêm vào bảng images
+            $fileName = basename($imagePath);
+            $fileType = pathinfo($imagePath, PATHINFO_EXTENSION);
+            
+            $sql = "INSERT INTO images (file_name, file_path, file_type, alt_text, created_at) 
+                    VALUES (:file_name, :file_path, :file_type, :alt_text, NOW())";
+            $this->db->query($sql);
+            $this->db->bind(':file_name', $fileName);
+            $this->db->bind(':file_path', $imagePath);
+            $this->db->bind(':file_type', $fileType);
+            $this->db->bind(':alt_text', 'Collection cover image');
+            
+            if (!$this->db->execute()) {
+                return false;
+            }
+            
+            $imageId = $this->db->lastInsertId();
+            
+            // 2. Xóa ảnh cũ nếu có (set is_primary = 0)
+            $sql = "UPDATE image_usages SET is_primary = 0 
+                    WHERE ref_type = 'collection' AND ref_id = :ref_id";
+            $this->db->query($sql);
+            $this->db->bind(':ref_id', $collectionId);
+            $this->db->execute();
+            
+            // 3. Thêm vào bảng image_usages
+            $sql = "INSERT INTO image_usages (image_id, ref_type, ref_id, is_primary, created_at) 
+                    VALUES (:image_id, 'collection', :ref_id, 1, NOW())";
+            $this->db->query($sql);
+            $this->db->bind(':image_id', $imageId);
+            $this->db->bind(':ref_id', $collectionId);
+            
+            return $this->db->execute();
+            
+        } catch (Exception $e) {
+            error_log("Error adding collection cover: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Lấy ảnh cover của collection
+     */
+    public function getCollectionCoverImage($collectionId) {
+        $sql = "SELECT i.* FROM images i
+                INNER JOIN image_usages iu ON i.image_id = iu.image_id
+                WHERE iu.ref_type = 'collection' 
+                AND iu.ref_id = :ref_id 
+                AND iu.is_primary = 1
+                LIMIT 1";
+        $this->db->query($sql);
+        $this->db->bind(':ref_id', $collectionId);
+        return $this->db->single();
+    }
+
+    /**
+     * Xóa ảnh cover của collection
+     */
+    public function deleteCollectionCoverImage($collectionId) {
+        try {
+            // 1. Lấy thông tin ảnh hiện tại
+            $image = $this->getCollectionCoverImage($collectionId);
+            
+            if (!$image) {
+                return true; // Không có ảnh để xóa
+            }
+            
+            // 2. Xóa file vật lý
+            if (file_exists($image->file_path)) {
+                unlink($image->file_path);
+            }
+            
+            // 3. Xóa khỏi image_usages
+            $sql = "DELETE FROM image_usages 
+                    WHERE ref_type = 'collection' AND ref_id = :ref_id AND image_id = :image_id";
+            $this->db->query($sql);
+            $this->db->bind(':ref_id', $collectionId);
+            $this->db->bind(':image_id', $image->image_id);
+            $this->db->execute();
+            
+            // 4. Xóa khỏi images
+            $sql = "DELETE FROM images WHERE image_id = :image_id";
+            $this->db->query($sql);
+            $this->db->bind(':image_id', $image->image_id);
+            
+            return $this->db->execute();
+            
+        } catch (Exception $e) {
+            error_log("Error deleting collection cover: " . $e->getMessage());
+            return false;
+        }
     }
 }

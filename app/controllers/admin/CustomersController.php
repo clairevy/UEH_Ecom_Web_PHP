@@ -11,24 +11,6 @@ class CustomersController extends BaseController {
     }
 
     /**
-     * Show add customer form
-     */
-    public function showAddForm() {
-        try {
-            $data = [
-                'title' => 'Thêm Khách Hàng',
-                'pageTitle' => 'Thêm Khách Hàng',
-                'breadcrumb' => 'Home > Customers > Add New'
-            ];
-
-            // Render add-customer view inside admin layout
-            $this->renderAdminPage('admin/pages/add-customer', $data);
-        } catch (Exception $e) {
-            $this->view('admin/error', ['message' => 'Không thể hiển thị form thêm khách hàng: ' . $e->getMessage()]);
-        }
-    }
-
-    /**
      * Hiển thị danh sách khách hàng
      */
     public function index() {
@@ -70,71 +52,137 @@ class CustomersController extends BaseController {
     /**
      * Tạo khách hàng mới
      */
-    public function create() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            try {
-                $data = [
-                    'name' => trim($_POST['name']),
-                    'email' => trim($_POST['email']),
-                    'phone' => trim($_POST['phone'] ?? ''),
-                    'password' => trim($_POST['password']),
-                    'confirm_password' => trim($_POST['confirm_password']),
-                    'role_id' => 1 // Customer role
-                ];
-
-                $result = $this->userModel->signup($data);
-                
-                if ($result['success']) {
-                    $_SESSION['success'] = 'Tạo khách hàng thành công!';
-                } else {
-                    $_SESSION['error'] = $result['message'] ?? 'Có lỗi xảy ra khi tạo khách hàng!';
-                }
-            } catch (Exception $e) {
-                $_SESSION['error'] = 'Lỗi: ' . $e->getMessage();
+    /**
+     * Hiển thị form chỉnh sửa khách hàng
+     * TÁI SỬ DỤNG add-customer.php (DRY Principle)
+     */
+    public function showEditForm() {
+        try {
+            $customerId = $_GET['id'] ?? null;
+            
+            if (!$customerId) {
+                throw new Exception('Không tìm thấy ID khách hàng');
             }
-        }
 
-        // Redirect back to add-customer page (keep controller responsible for navigation)
-        // Use BASE_URL so path is consistent with app configuration
-        if (!headers_sent()) {
-            header('Location: ' . BASE_URL . '/admin/index.php?url=add-customer');
+            $customer = $this->userModel->findById($customerId);
+            
+            if (!$customer) {
+                throw new Exception('Khách hàng không tồn tại');
+            }
+
+            // Lấy địa chỉ mặc định (nếu có) - street, ward, province, postal_code
+            $defaultAddress = $this->userModel->getDefaultAddress($customerId);
+            if ($defaultAddress) {
+                // Mapping fields từ database
+                $customer->address_street = $defaultAddress->street ?? '';
+                $customer->province = $defaultAddress->province ?? '';
+                $customer->ward = $defaultAddress->ward ?? '';
+                $customer->postal_code = $defaultAddress->postal_code ?? '';
+                $customer->full_name = $defaultAddress->full_name ?? $customer->name;
+                $customer->address_phone = $defaultAddress->phone ?? $customer->phone;
+            } else {
+                // Nếu không có địa chỉ, khởi tạo empty
+                $customer->address_street = '';
+                $customer->province = '';
+                $customer->ward = '';
+                $customer->postal_code = '';
+            }
+            
+            $data = [
+                'title' => 'Chỉnh Sửa Khách Hàng',
+                'customer' => $customer,
+                'pageTitle' => 'Chỉnh Sửa Khách Hàng',
+                'breadcrumb' => 'Home > Khách Hàng > Chỉnh Sửa',
+                'isEdit' => true  // Flag để view biết đây là edit mode
+            ];
+
+            // TÁI SỬ DỤNG add-customer.php
+            $this->renderAdminPage('admin/pages/add-customer', $data);
+
+        } catch (Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+            header('Location: ' . BASE_URL . '/admin/index.php?url=customers');
             exit;
-        } else {
-            // Fallback: render index if headers already sent
-            $this->index();
         }
     }
 
     /**
      * Cập nhật khách hàng
      */
-    public function update($id) {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            try {
-                $data = [
-                    'name' => trim($_POST['name']),
-                    'phone' => trim($_POST['phone'] ?? '')
+    public function update() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $_SESSION['error'] = 'Invalid request method!';
+            header('Location: ' . BASE_URL . '/admin/index.php?url=customers');
+            exit;
+        }
+
+        try {
+            $customerId = $_GET['id'] ?? null;
+            
+            if (!$customerId) {
+                throw new Exception('Không tìm thấy ID khách hàng');
+            }
+
+            // Cập nhật thông tin user
+            $userData = [
+                'name' => trim($_POST['name']),
+                'phone' => trim($_POST['phone'] ?? ''),
+                'is_active' => isset($_POST['is_active']) ? 1 : 0
+            ];
+
+            // Cập nhật password nếu có
+            if (!empty($_POST['password'])) {
+                $userData['password_hash'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
+            }
+
+            // Cập nhật role_id nếu có
+            if (!empty($_POST['role_id'])) {
+                $userData['role_id'] = intval($_POST['role_id']);
+            }
+
+            $userUpdated = $this->userModel->updateProfile($customerId, $userData);
+
+            // Cập nhật địa chỉ (nếu có)
+            if (!empty($_POST['address_street']) || !empty($_POST['province']) || !empty($_POST['ward'])) {
+                $addressData = [
+                    'full_name' => trim($_POST['name']),
+                    'phone' => trim($_POST['phone'] ?? ''),
+                    'street' => trim($_POST['address_street'] ?? ''),
+                    'ward' => trim($_POST['ward'] ?? ''),
+                    'province' => trim($_POST['province'] ?? ''),
+                    'country' => trim($_POST['country'] ?? 'Việt Nam'),
+                    'postal_code' => trim($_POST['postal_code'] ?? ''),
+                    'is_default' => 1
                 ];
 
-                if ($this->userModel->updateProfile($id, $data)) {
-                    $_SESSION['success'] = 'Cập nhật khách hàng thành công!';
-                } else {
-                    $_SESSION['error'] = 'Có lỗi xảy ra khi cập nhật khách hàng!';
-                }
-            } catch (Exception $e) {
-                $_SESSION['error'] = 'Lỗi: ' . $e->getMessage();
+                $this->userModel->saveUserAddress($customerId, $addressData);
             }
+
+            if ($userUpdated) {
+                $_SESSION['success'] = 'Cập nhật khách hàng thành công!';
+            } else {
+                $_SESSION['error'] = 'Có lỗi xảy ra khi cập nhật khách hàng!';
+            }
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Lỗi: ' . $e->getMessage();
         }
         
-        $this->index();
+        header('Location: ' . BASE_URL . '/admin/index.php?url=customers');
+        exit;
     }
 
     /**
      * Xóa khách hàng
      */
-    public function delete($id) {
+    public function delete() {
         try {
-            if ($this->userModel->delete($id)) {
+            $customerId = $_GET['id'] ?? null;
+            
+            if (!$customerId) {
+                throw new Exception('Không tìm thấy ID khách hàng');
+            }
+
+            if ($this->userModel->delete($customerId)) {
                 $_SESSION['success'] = 'Xóa khách hàng thành công!';
             } else {
                 $_SESSION['error'] = 'Có lỗi xảy ra khi xóa khách hàng!';
@@ -143,15 +191,22 @@ class CustomersController extends BaseController {
             $_SESSION['error'] = 'Lỗi: ' . $e->getMessage();
         }
         
-        $this->index();
+        header('Location: ' . BASE_URL . '/admin/index.php?url=customers');
+        exit;
     }
 
     /**
      * Toggle trạng thái active của khách hàng
      */
-    public function toggle($id) {
+    public function toggle() {
         try {
-            if ($this->userModel->toggleActive($id)) {
+            $customerId = $_GET['id'] ?? null;
+            
+            if (!$customerId) {
+                throw new Exception('Không tìm thấy ID khách hàng');
+            }
+            
+            if ($this->userModel->toggleActive($customerId)) {
                 $_SESSION['success'] = 'Cập nhật trạng thái khách hàng thành công!';
             } else {
                 $_SESSION['error'] = 'Có lỗi xảy ra khi cập nhật trạng thái!';
@@ -160,7 +215,8 @@ class CustomersController extends BaseController {
             $_SESSION['error'] = 'Lỗi: ' . $e->getMessage();
         }
         
-        $this->index();
+        header('Location: ' . BASE_URL . '/admin/index.php?url=customers');
+        exit;
     }
 
     /**

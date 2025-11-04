@@ -25,6 +25,13 @@ class CollectionsController extends BaseController {
             // Lấy tất cả collections từ Model
             $collections = $this->collectionModel->getAllWithProductCount(false); // false = show all
             
+            // Thêm ảnh cover cho từng collection
+            foreach ($collections as $collection) {
+                $coverImage = $this->collectionModel->getCollectionCoverImage($collection->collection_id);
+                $collection->image_path = $coverImage ? $coverImage->file_path : null;
+                $collection->cover_image = $coverImage;
+            }
+            
             // Calculate statistics
             $total = count($collections);
             $active = 0;
@@ -147,6 +154,10 @@ class CollectionsController extends BaseController {
     /**
      * Hiển thị form chỉnh sửa bộ sưu tập
      */
+    /**
+     * Hiển thị form chỉnh sửa bộ sưu tập
+     * TÁI SỬ DỤNG add-collection.php (DRY Principle)
+     */
     public function showEditForm() {
         try {
             $collectionId = $_GET['id'] ?? null;
@@ -165,10 +176,12 @@ class CollectionsController extends BaseController {
                 'title' => 'Chỉnh Sửa Bộ Sưu Tập',
                 'collection' => $collection,
                 'pageTitle' => 'Chỉnh Sửa Bộ Sưu Tập',
-                'breadcrumb' => 'Home > Bộ Sưu Tập > Chỉnh Sửa'
+                'breadcrumb' => 'Home > Bộ Sưu Tập > Chỉnh Sửa',
+                'isEdit' => true  // Flag để view biết đây là edit mode
             ];
 
-            $this->renderAdminPage('admin/pages/edit-collection', $data);
+            // TÁI SỬ DỤNG add-collection.php
+            $this->renderAdminPage('admin/pages/add-collection', $data);
 
         } catch (Exception $e) {
             $_SESSION['error'] = $e->getMessage();
@@ -211,6 +224,25 @@ class CollectionsController extends BaseController {
             ];
 
             if ($this->collectionModel->update($collectionId, $data)) {
+                
+                // Xử lý upload ảnh mới (nếu có)
+                $keepExistingImage = isset($_POST['keep_existing_image']) && $_POST['keep_existing_image'] == '1';
+                $hasNewImage = !empty($_FILES['cover_image']['name']);
+                
+                if ($hasNewImage) {
+                    // Upload ảnh mới - sẽ ghi đè lên ảnh cũ
+                    $uploadResult = $this->handleCoverImageUpload($collectionId, $_FILES['cover_image']);
+                    
+                    if (!$uploadResult['success']) {
+                        $_SESSION['error'] = 'Cập nhật thành công nhưng có lỗi khi upload ảnh: ' . implode(', ', $uploadResult['errors']);
+                        $this->redirect('index.php?url=collections');
+                        return;
+                    }
+                } elseif (!$keepExistingImage) {
+                    // Người dùng đã xóa ảnh cũ và không upload ảnh mới
+                    // (trường hợp này đã được xử lý bởi deleteImage() AJAX)
+                }
+                
                 $_SESSION['success'] = 'Cập nhật bộ sưu tập thành công!';
             } else {
                 $_SESSION['error'] = 'Có lỗi xảy ra khi cập nhật bộ sưu tập!';
@@ -280,6 +312,35 @@ class CollectionsController extends BaseController {
         }
         
         $this->redirect('index.php?url=collections');
+    }
+
+    /**
+     * Xóa ảnh của collection (AJAX)
+     */
+    public function deleteImage() {
+        header('Content-Type: application/json');
+        
+        try {
+            $collectionId = $_POST['collection_id'] ?? null;
+            
+            if (!$collectionId) {
+                echo json_encode(['success' => false, 'message' => 'Không tìm thấy ID bộ sưu tập']);
+                exit;
+            }
+
+            // Xóa ảnh từ bảng images và image_usages
+            $result = $this->collectionModel->deleteCollectionCoverImage($collectionId);
+
+            if ($result) {
+                echo json_encode(['success' => true, 'message' => 'Xóa ảnh thành công']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Có lỗi khi xóa ảnh']);
+            }
+
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Lỗi: ' . $e->getMessage()]);
+        }
+        exit;
     }
 
     // =================== PRIVATE HELPER METHODS (OOP Best Practice) ===================

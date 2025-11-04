@@ -152,3 +152,130 @@ Stack trace:
 #2 C:\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
 #3 {main}
 --------------------------------------------------------------------------------
+[2025-11-04 08:21:57] Exception: Call to undefined method Category::getAllWithProductCount() in D:\app\xampp\htdocs\Ecom_website\app\services\CategoryService.php on line 64
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\CategoriesController.php(28): CategoryService->getAllCategoriesWithStats()
+#1 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(241): CategoriesController->index()
+#2 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#3 {main}
+--------------------------------------------------------------------------------
+[2025-11-04 08:22:08] Exception: Call to undefined method Review::getAllWithDetails() in D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\ReviewsController.php on line 20
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(241): ReviewsController->index()
+#1 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#2 {main}
+--------------------------------------------------------------------------------
+[2025-11-04 08:22:37] Exception: Call to undefined method Category::getAllWithProductCount() in D:\app\xampp\htdocs\Ecom_website\app\services\CategoryService.php on line 64
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\CategoriesController.php(28): CategoryService->getAllCategoriesWithStats()
+#1 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(241): CategoriesController->index()
+#2 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#3 {main}
+--------------------------------------------------------------------------------
+[2025-11-04 08:22:40] Exception: Call to undefined method Category::getAllWithProductCount() in D:\app\xampp\htdocs\Ecom_website\app\services\CategoryService.php on line 64
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\CategoriesController.php(28): CategoryService->getAllCategoriesWithStats()
+#1 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(241): CategoriesController->index()
+#2 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#3 {main}
+--------------------------------------------------------------------------------
+[2025-11-04 08:22:47] Exception: Call to undefined method Category::getAllWithProductCount() in D:\app\xampp\htdocs\Ecom_website\app\services\CategoryService.php on line 64
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\CategoriesController.php(28): CategoryService->getAllCategoriesWithStats()
+#1 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(241): CategoriesController->index()
+#2 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#3 {main}
+--------------------------------------------------------------------------------
+[2025-11-04 08:22:54] Exception: Call to undefined method Category::getAllWithProductCount() in D:\app\xampp\htdocs\Ecom_website\app\services\CategoryService.php on line 64
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\CategoriesController.php(28): CategoryService->getAllCategoriesWithStats()
+#1 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(241): CategoriesController->index()
+#2 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#3 {main}
+--------------------------------------------------------------------------------
+[2025-11-04 08:23:12] Exception: Call to undefined method Review::getAllWithDetails() in D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\ReviewsController.php on line 20
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(241): ReviewsController->index()
+#1 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#2 {main}
+--------------------------------------------------------------------------------
+[2025-11-04 08:27:01] Exception: Call to undefined method Review::getAllWithDetails() in D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\ReviewsController.php on line 20
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(241): ReviewsController->index()
+#1 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#2 {main}
+--------------------------------------------------------------------------------
+[2025-11-04 08:27:15] Exception: Call to undefined method Category::getAllWithProductCount() in D:\app\xampp\htdocs\Ecom_website\app\services\CategoryService.php on line 64
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\CategoriesController.php(28): CategoryService->getAllCategoriesWithStats()
+#1 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(241): CategoriesController->index()
+#2 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#3 {main}
+--------------------------------------------------------------------------------
+[2025-11-04 08:27:18] Exception: Call to undefined method Category::getAllWithProductCount() in D:\app\xampp\htdocs\Ecom_website\app\services\CategoryService.php on line 64
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\CategoriesController.php(28): CategoryService->getAllCategoriesWithStats()
+#1 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(241): CategoriesController->index()
+#2 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#3 {main}
+--------------------------------------------------------------------------------
+[2025-11-04 08:27:23] Exception: Call to undefined method Category::getAllWithProductCount() in D:\app\xampp\htdocs\Ecom_website\app\services\CategoryService.php on line 64
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\CategoriesController.php(28): CategoryService->getAllCategoriesWithStats()
+#1 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(241): CategoriesController->index()
+#2 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#3 {main}
+--------------------------------------------------------------------------------
+[2025-11-04 08:27:28] Exception: Call to undefined method Category::getAllWithProductCount() in D:\app\xampp\htdocs\Ecom_website\app\services\CategoryService.php on line 64
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\CategoriesController.php(28): CategoryService->getAllCategoriesWithStats()
+#1 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(241): CategoriesController->index()
+#2 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#3 {main}
+--------------------------------------------------------------------------------
+[2025-11-04 08:27:32] Exception: Call to undefined method Review::getAllWithDetails() in D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\ReviewsController.php on line 20
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(241): ReviewsController->index()
+#1 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#2 {main}
+--------------------------------------------------------------------------------
+[2025-11-04 08:27:43] Exception: Call to undefined method Category::getAllWithProductCount() in D:\app\xampp\htdocs\Ecom_website\app\services\CategoryService.php on line 64
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\CategoriesController.php(28): CategoryService->getAllCategoriesWithStats()
+#1 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(241): CategoriesController->index()
+#2 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#3 {main}
+--------------------------------------------------------------------------------
+[2025-11-04 08:28:08] Exception: Call to undefined method Review::getAllWithDetails() in D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\ReviewsController.php on line 20
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(241): ReviewsController->index()
+#1 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#2 {main}
+--------------------------------------------------------------------------------
+[2025-11-04 08:39:27] Exception: Call to undefined method Category::getAllWithProductCount() in D:\app\xampp\htdocs\Ecom_website\app\services\CategoryService.php on line 64
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\CategoriesController.php(28): CategoryService->getAllCategoriesWithStats()
+#1 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(241): CategoriesController->index()
+#2 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#3 {main}
+--------------------------------------------------------------------------------
+[2025-11-04 14:55:21] Exception: Call to undefined method User::delete() in D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\CustomersController.php on line 192
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(241): CustomersController->delete('1')
+#1 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#2 {main}
+--------------------------------------------------------------------------------
+[2025-11-04 14:55:33] Exception: Call to undefined method User::delete() in D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\CustomersController.php on line 192
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(241): CustomersController->delete('3')
+#1 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#2 {main}
+--------------------------------------------------------------------------------
+[2025-11-04 16:24:19] Error: Undefined array key "confirm_password" in D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\CustomersController.php on line 81
+--------------------------------------------------------------------------------
+[2025-11-04 16:24:19] Exception: Call to undefined method User::signup() in D:\app\xampp\htdocs\Ecom_website\app\controllers\admin\CustomersController.php on line 85
+Stack trace:
+#0 D:\app\xampp\htdocs\Ecom_website\configs\admin_router.php(264): CustomersController->create()
+#1 D:\app\xampp\htdocs\Ecom_website\admin\index.php(43): AdminRouter->__construct()
+#2 {main}
+--------------------------------------------------------------------------------

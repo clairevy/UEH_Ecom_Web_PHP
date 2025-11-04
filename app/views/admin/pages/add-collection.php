@@ -1,17 +1,29 @@
 <?php
 /**
- * Add Collection View - Pure MVC View
- * Nhận data từ Controller, không có hardcode
+ * Add/Edit Collection View - Pure MVC View
+ * Tái sử dụng form cho cả Create và Update (DRY Principle)
  * 
  * Biến được truyền từ Controller:
  * - $title: Tiêu đề trang
  * - $pageTitle: Tiêu đề cho header
  * - $breadcrumb: Breadcrumb text
  * - $oldInput: Dữ liệu cũ nếu có lỗi validation
+ * - $isEdit: true nếu đang edit, false/null nếu đang tạo mới
+ * - $collection: Dữ liệu collection (chỉ có khi edit)
  */
 
+// Kiểm tra edit mode
+$isEdit = isset($isEdit) && $isEdit === true;
+$collection = $collection ?? null;
+
 // Lấy old input nếu có lỗi validation
-$oldInput = $oldInput ?? [];
+$oldInput = $_SESSION['old_input'] ?? [];
+unset($_SESSION['old_input']);
+
+// Xác định action URL
+$formAction = $isEdit 
+    ? "index.php?url=collections&action=update&id={$collection->collection_id}"
+    : "index.php?url=collections&action=create";
 ?>
 
 <!DOCTYPE html>
@@ -19,10 +31,13 @@ $oldInput = $oldInput ?? [];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($title ?? 'Thêm Bộ Sưu Tập') ?> - KICKS Admin</title>
+    <title><?= htmlspecialchars($title ?? 'Thêm Bộ Sưu Tập') ?> - Trang Sức Admin</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="app/views/admin/assets/css/variables.css">
@@ -59,14 +74,20 @@ $oldInput = $oldInput ?? [];
                 <?php endif; ?>
 
                 <!-- Collection Form -->
-                <form id="addCollectionForm" method="POST" action="index.php?url=collections&action=create" enctype="multipart/form-data">
+                <form id="addCollectionForm" method="POST" action="<?= $formAction ?>" enctype="multipart/form-data">
+                    <?php if ($isEdit): ?>
+                        <input type="hidden" name="collection_id" value="<?= $collection->collection_id ?>">
+                    <?php endif; ?>
+                    
                     <div class="row">
                         <!-- Left Column - Form Fields -->
                         <div class="col-lg-8 mb-4">
                             <!-- Basic Information -->
                             <div class="card mb-4">
                                 <div class="card-body">
-                                    <h5 class="card-title mb-4">Thông Tin Cơ Bản</h5>
+                                    <h5 class="card-title mb-4">
+                                        <?= $isEdit ? 'Chỉnh Sửa' : 'Thêm Mới' ?> Thông Tin Cơ Bản
+                                    </h5>
                                     
                                     <!-- Collection Name -->
                                     <div class="form-group mb-3">
@@ -76,7 +97,7 @@ $oldInput = $oldInput ?? [];
                                                id="name" 
                                                name="name" 
                                                placeholder="VD: Summer Collection 2024, Tết Collection..." 
-                                               value="<?= htmlspecialchars($oldInput['name'] ?? '') ?>"
+                                               value="<?= htmlspecialchars($oldInput['name'] ?? $collection->collection_name ?? '') ?>"
                                                required>
                                     </div>
 
@@ -87,7 +108,8 @@ $oldInput = $oldInput ?? [];
                                                class="form-control" 
                                                id="slug" 
                                                name="slug_preview" 
-                                               placeholder="summer-collection-2024" 
+                                               placeholder="summer-collection-2024"
+                                               value="<?= htmlspecialchars($collection->slug ?? '') ?>" 
                                                readonly>
                                         <small class="text-muted">Tự động tạo từ tên bộ sưu tập</small>
                                     </div>
@@ -99,99 +121,34 @@ $oldInput = $oldInput ?? [];
                                                   id="description" 
                                                   name="description" 
                                                   rows="3" 
-                                                  placeholder="Mô tả ngắn về bộ sưu tập..."><?= htmlspecialchars($oldInput['description'] ?? '') ?></textarea>
+                                                  placeholder="Mô tả ngắn về bộ sưu tập..."><?= htmlspecialchars($oldInput['description'] ?? $collection->description ?? '') ?></textarea>
                                     </div>
-
-                                    <!-- Detailed Content -->
-                                    <div class="form-group mb-3">
-                                        <label for="content" class="form-label">Nội Dung Chi Tiết</label>
-                                        <textarea class="form-control" 
-                                                  id="content" 
-                                                  name="content" 
-                                                  rows="5" 
-                                                  placeholder="Nội dung chi tiết về collection, câu chuyện, cảm hứng..."><?= htmlspecialchars($oldInput['content'] ?? '') ?></textarea>
-                                    </div>
+                                   
                                 </div>
                             </div>
 
                             <!-- Collection Settings -->
                             <div class="card">
                                 <div class="card-body">
-                                    <h5 class="card-title mb-4">Cài Đặt Bộ Sưu Tập</h5>
-                                    
-                                    <!-- Type & Status Row -->
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group mb-3">
-                                                <label for="collection_type" class="form-label">Loại Collection</label>
-                                                <select class="form-control" id="collection_type" name="collection_type">
-                                                    <option value="seasonal">Theo Mùa</option>
-                                                    <option value="event">Sự Kiện</option>
-                                                    <option value="trending">Xu Hướng</option>
-                                                    <option value="bestseller">Bán Chạy</option>
-                                                    <option value="new">Mới Ra Mắt</option>
-                                                    <option value="luxury">Cao Cấp</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-6">
-                                            <div class="form-group mb-3">
-                                                <label for="collection_status" class="form-label">Trạng Thái</label>
-                                                <select class="form-control" id="collection_status" name="status">
-                                                    <option value="active">Hoạt động</option>
-                                                    <option value="inactive">Không hoạt động</option>
-                                                    <option value="draft">Nháp</option>
-                                                    <option value="scheduled">Đã lên lịch</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Date Range -->
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group mb-3">
-                                                <label for="start_date" class="form-label">Ngày Bắt Đầu</label>
-                                                <input type="date" 
-                                                       class="form-control" 
-                                                       id="start_date" 
-                                                       name="start_date"
-                                                       value="<?= htmlspecialchars($oldInput['start_date'] ?? '') ?>">
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-6">
-                                            <div class="form-group mb-3">
-                                                <label for="end_date" class="form-label">Ngày Kết Thúc</label>
-                                                <input type="date" 
-                                                       class="form-control" 
-                                                       id="end_date" 
-                                                       name="end_date"
-                                                       value="<?= htmlspecialchars($oldInput['end_date'] ?? '') ?>">
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Tags -->
-                                    <div class="form-group mb-3">
-                                        <label for="tags" class="form-label">Tags</label>
-                                        <input type="text" 
-                                               class="form-control" 
-                                               id="tags" 
-                                               name="tags" 
-                                               placeholder="Nhập tags cách nhau bởi dấu phẩy (VD: summer, wedding, luxury)"
-                                               value="<?= htmlspecialchars($oldInput['tags'] ?? '') ?>">
-                                    </div>
-
+                                   
                                     <!-- Is Active -->
                                     <div class="form-check">
+                                        <?php
+                                        $isActiveChecked = false;
+                                        if (isset($oldInput['is_active'])) {
+                                            $isActiveChecked = $oldInput['is_active'];
+                                        } elseif ($isEdit && isset($collection->is_active)) {
+                                            $isActiveChecked = $collection->is_active;
+                                        } else {
+                                            $isActiveChecked = true; // Default checked for new collection
+                                        }
+                                        ?>
                                         <input class="form-check-input" 
                                                type="checkbox" 
                                                id="is_active" 
                                                name="is_active" 
                                                value="1"
-                                               <?= (isset($oldInput['is_active']) && $oldInput['is_active']) || !isset($oldInput['is_active']) ? 'checked' : '' ?>>
+                                               <?= $isActiveChecked ? 'checked' : '' ?>>
                                         <label class="form-check-label" for="is_active">
                                             Kích hoạt bộ sưu tập (Hiển thị trên website)
                                         </label>
@@ -210,6 +167,28 @@ $oldInput = $oldInput ?? [];
                                         Ảnh Bìa Collection
                                     </h5>
                                     
+                                    <!-- Existing Image (Edit Mode) -->
+                                    <?php if ($isEdit && !empty($collection->image_path)): ?>
+                                        <div class="existing-image mb-3" id="existingImageContainer">
+                                            <h6 class="fw-bold mb-2">Ảnh Hiện Tại</h6>
+                                            <div class="position-relative">
+                                                <img src="/Ecom_website/<?= htmlspecialchars($collection->image_path) ?>" 
+                                                     class="img-thumbnail w-100" 
+                                                     alt="Collection Cover"
+                                                     style="max-height: 200px; object-fit: cover;">
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2" 
+                                                        onclick="removeExistingCollectionImage(<?= $collection->collection_id ?>)">
+                                                    <i class="fas fa-times"></i> Xóa ảnh
+                                                </button>
+                                            </div>
+                                            <input type="hidden" name="keep_existing_image" id="keepExistingImage" value="1">
+                                            <small class="text-muted d-block mt-2">
+                                                💡 Upload ảnh mới để thay thế, hoặc giữ nguyên ảnh hiện tại
+                                            </small>
+                                        </div>
+                                    <?php endif; ?>
+                                    
                                     <div class="border-2 border-dashed rounded-custom p-4 text-center upload-area" 
                                          id="coverUploadBox"
                                          style="border-color: var(--border-color); cursor: pointer; transition: all 0.3s ease;" 
@@ -219,7 +198,7 @@ $oldInput = $oldInput ?? [];
                                          ondrop="handleDrop(event)">
                                         <div id="coverUploadPlaceholder">
                                             <img src="https://cdn-icons-png.flaticon.com/512/1160/1160358.png" alt="Upload" width="48" height="48" class="mb-2 opacity-50">
-                                            <p class="text-muted mb-1">Upload ảnh bìa</p>
+                                            <p class="text-muted mb-1"><?= $isEdit ? 'Upload ảnh mới (tùy chọn)' : 'Upload ảnh bìa' ?></p>
                                             <p class="text-muted small mb-0">JPG, PNG (Max 5MB)</p>
                                             <p class="text-muted small mb-0">Khuyến nghị: 1200x800px</p>
                                         </div>
@@ -265,7 +244,7 @@ $oldInput = $oldInput ?? [];
                                 </button>
                                 <button type="submit" class="btn btn-success-custom btn-custom px-4">
                                     <img src="https://cdn-icons-png.flaticon.com/512/5610/5610944.png" alt="Save" width="16" height="16" class="me-1">
-                                    TẠO BỘ SƯU TẬP
+                                    <?= $isEdit ? 'CẬP NHẬT' : 'TẠO BỘ SƯU TẬP' ?>
                                 </button>
                             </div>
                         </div>
@@ -282,7 +261,7 @@ $oldInput = $oldInput ?? [];
     <script>
         window.pageConfig = {
             sidebar: {
-                brandName: 'KICKS',
+                brandName: 'Trang Sức',
                 activePage: 'collections',
                 links: {
                     dashboard: 'index.php?url=dashboard',
@@ -321,11 +300,44 @@ $oldInput = $oldInput ?? [];
 
         // =================== IMAGE UPLOAD HANDLING ===================
         
+        // Remove existing collection image
+        function removeExistingCollectionImage(collectionId) {
+            if (!confirm('Bạn có chắc chắn muốn xóa ảnh hiện tại không?')) {
+                return;
+            }
+
+            fetch(`index.php?url=collections&action=deleteImage&id=${collectionId}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove image container from DOM
+                    document.getElementById('existingImageContainer').remove();
+                    
+                    // Show success message
+                    alert('Đã xóa ảnh thành công');
+                } else {
+                    alert('Lỗi: ' + (data.message || 'Không thể xóa ảnh'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi xóa ảnh');
+            });
+        }
+        
         function handleCoverImageSelect(input) {
             const file = input.files[0];
             const previewContainer = document.getElementById('coverPreview');
             const placeholder = document.getElementById('coverUploadPlaceholder');
             const previewImg = document.getElementById('coverPreviewImg');
+            
+            // Nếu đang ở edit mode và upload ảnh mới, đánh dấu không giữ ảnh cũ
+            const keepExistingImage = document.getElementById('keepExistingImage');
+            if (keepExistingImage && file) {
+                keepExistingImage.value = '0';
+            }
             
             if (!file) {
                 previewContainer.style.display = 'none';

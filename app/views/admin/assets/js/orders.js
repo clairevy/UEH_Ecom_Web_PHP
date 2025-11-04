@@ -13,7 +13,7 @@ function viewOrderDetails(orderId) {
 }
 
 /**
- * Chỉnh sửa đơn hàng - điều hướng đến trang chi tiết
+ * Chỉnh sửa đơn hàng - điều hướng đến trang chi tiết để chỉnh sửa
  */
 function editOrder(orderId) {
     console.log('editOrder called with orderId:', orderId);
@@ -21,17 +21,90 @@ function editOrder(orderId) {
 }
 
 /**
- * Xóa đơn hàng
+ * Xóa vĩnh viễn đơn hàng (hard delete)
  */
 function deleteOrder(orderId) {
-    if (confirm('Bạn có chắc chắn muốn xóa đơn hàng này? Hành động này không thể hoàn tác!')) {
-        // Tạo form POST để delete
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = 'index.php?url=orders&action=delete&id=' + orderId;
-        document.body.appendChild(form);
-        form.submit();
+    // Tạo modal Bootstrap để xác nhận
+    const modalHtml = `
+        <div class="modal fade" id="deleteOrderModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Xác Nhận Xóa Đơn Hàng</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>⚠️ CẢNH BÁO:</strong> Bạn đang thực hiện xóa VĨNH VIỄN đơn hàng!</p>
+                        <p>Đơn hàng #${orderId} và tất cả dữ liệu liên quan sẽ bị xóa hoàn toàn khỏi hệ thống.</p>
+                        <p class="text-danger">Hành động này KHÔNG THỂ hoàn tác!</p>
+                        
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="checkbox" id="confirmDeleteCheckbox">
+                            <label class="form-check-label" for="confirmDeleteCheckbox">
+                                Tôi hiểu và chấp nhận xóa vĩnh viễn đơn hàng này
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled onclick="confirmDeleteOrder(${orderId})">
+                            Xóa Vĩnh Viễn
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Xóa modal cũ nếu có
+    const oldModal = document.getElementById('deleteOrderModal');
+    if (oldModal) {
+        oldModal.remove();
     }
+    
+    // Thêm modal mới
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Enable/disable button dựa trên checkbox
+    const checkbox = document.getElementById('confirmDeleteCheckbox');
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    checkbox.addEventListener('change', function() {
+        confirmBtn.disabled = !this.checked;
+    });
+    
+    // Hiển thị modal
+    const modal = new bootstrap.Modal(document.getElementById('deleteOrderModal'));
+    modal.show();
+}
+
+/**
+ * Confirm xóa đơn hàng sau khi check checkbox
+ */
+function confirmDeleteOrder(orderId) {
+    const form = document.createElement('form');
+    form.method = 'GET';
+    form.action = 'index.php';
+    
+    const urlInput = document.createElement('input');
+    urlInput.type = 'hidden';
+    urlInput.name = 'url';
+    urlInput.value = 'orders';
+    
+    const actionInput = document.createElement('input');
+    actionInput.type = 'hidden';
+    actionInput.name = 'action';
+    actionInput.value = 'hardDelete';
+    
+    const idInput = document.createElement('input');
+    idInput.type = 'hidden';
+    idInput.name = 'id';
+    idInput.value = orderId;
+    
+    form.appendChild(urlInput);
+    form.appendChild(actionInput);
+    form.appendChild(idInput);
+    document.body.appendChild(form);
+    form.submit();
 }
 
 // =================== STATUS UPDATE FUNCTIONS ===================

@@ -22,8 +22,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="../assets/css/variables.css">
-    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="app/views/admin/assets/css/variables.css">
+    <link rel="stylesheet" href="app/views/admin/assets/css/main.css">
 </head>
 <body>
     <div class="admin-wrapper">
@@ -106,32 +106,25 @@
 
                 <!-- Collections Management Table -->
                 <div class="table-card">
-                    <div class="table-header">
-                        <h5 class="table-title">Quản Lý Bộ Sưu Tập</h5>
-                        <div class="d-flex gap-2">
+                    <div class="table-header flex-column flex-md-row align-items-start align-items-md-center">
+                        
+                        <div class="d-flex flex-wrap gap-2 w-100 w-md-auto">
                             <!-- Search -->
-                            <div class="position-relative">
-                                <input type="text" class="form-control form-control-sm" placeholder="Tìm kiếm bộ sưu tập..." style="width: 200px; padding-left: 35px;" id="collectionSearch">
+                            <div class="position-relative flex-grow-1" style="max-width: 100%; min-width: 150px;">
+                                <input type="text" class="form-control form-control-sm" placeholder="Tìm kiếm..." style="padding-left: 35px;" id="collectionSearch">
                                 <img src="https://cdn-icons-png.flaticon.com/512/751/751463.png" alt="Search" width="16" height="16" class="position-absolute" style="left: 10px; top: 50%; transform: translateY(-50%);">
                             </div>
                             
                             <!-- Add Collection -->
-                            <button class="btn btn-success-custom btn-sm" onclick="window.location.href='index.php?url=add-collection'">
-                                <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Add" width="16" height="16" class="me-1">
-                                <span class="d-none d-md-inline">Thêm Bộ Sưu Tập</span>
-                                <span class="d-md-none">Thêm</span>
+                            <button class="btn btn-success-custom btn-sm flex-shrink-0" onclick="window.location.href='index.php?url=add-collection'">
+                                <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Add" width="16" height="16" class="me-1 d-none d-sm-inline">
+                                <span class="d-none d-sm-inline">Thêm BST</span>
+                                <span class="d-sm-none">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Add" width="16" height="16">
+                                </span>
                             </button>
                             
-                            <!-- More Actions -->
-                            <div class="dropdown">
-                                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown">
-                                    <img src="https://cdn-icons-png.flaticon.com/512/2311/2311524.png" alt="More" width="16" height="16">
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#">Xuất Excel</a></li>
-                                    <li><a class="dropdown-item" href="#">Nhập dữ liệu</a></li>
-                                </ul>
-                            </div>
+                            
                         </div>
                     </div>
                     
@@ -139,78 +132,69 @@
                         <table class="table" id="collectionsTable">
                             <thead>
                                 <tr>
-                                    <th>
-                                        <input type="checkbox" class="form-check-input" id="selectAll">
-                                    </th>
-                                    <th>ID</th>
-                                    <th>Tên Bộ Sưu Tập</th>
-                                    <th>Slug</th>
-                                    <th>Mô Tả</th>
-                                    <th>Số Sản Phẩm</th>
-                                    <th>Trạng Thái</th>
-                                    <th>Ngày Tạo</th>
-                                    <th>Thao Tác</th>
+                                    <th class="d-none d-md-table-cell text-nowrap">ID</th>
+                                    <th class="text-nowrap">Tên BST</th>
+                                    <th class="d-none d-xl-table-cell text-nowrap">Slug</th>
+                                    <th class="d-none d-lg-table-cell text-nowrap">Mô Tả</th>
+                                    <th class="d-none d-md-table-cell text-nowrap">Sản Phẩm</th>
+                                    <th class="d-none d-sm-table-cell text-nowrap">Trạng Thái</th>
+                                    <th class="d-none d-lg-table-cell text-nowrap">Ngày Tạo</th>
+                                    <th class="text-nowrap">Thao Tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (!empty($collections)): ?>
                                     <?php foreach ($collections as $collection): ?>
                                         <tr>
-                                            <td><input type="checkbox" class="form-check-input row-checkbox"></td>
-                                            <td class="fw-bold">#<?= $collection->collection_id ?></td>
+                                            <td class="fw-bold d-none d-md-table-cell">#<?= $collection->collection_id ?></td>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <img src="https://cdn-icons-png.flaticon.com/512/3208/3208676.png" alt="Collection" width="32" height="32" class="me-2">
-                                                    <div>
-                                                        <div class="fw-bold"><?= htmlspecialchars($collection->collection_name) ?></div>
-                                                        <div class="small text-muted"><?= htmlspecialchars($collection->slug) ?></div>
+                                                  
+                                                    <div class="min-w-0">
+                                                        <div class="fw-bold text-truncate"><?= htmlspecialchars($collection->collection_name) ?></div>
+                                                        <div class="small text-muted d-none d-sm-block text-truncate"><?= htmlspecialchars($collection->slug) ?></div>
+                                                        <!-- Mobile info -->
+                                                        <div class="d-sm-none small mt-1">
+                                                            <?php if ($collection->is_active): ?>
+                                                                <span class="badge badge-delivered badge-custom">Hoạt động</span>
+                                                            <?php else: ?>
+                                                                <span class="badge badge-canceled badge-custom">Không hoạt động</span>
+                                                            <?php endif; ?>
+                                                            <span class="text-muted ms-2"><?= $collection->product_count ?? 0 ?> SP</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td><code><?= htmlspecialchars($collection->slug) ?></code></td>
-                                            <td><?= htmlspecialchars($collection->description ?? 'Không có mô tả') ?></td>
-                                            <td>
+                                            <td class="d-none d-xl-table-cell"><code class="small"><?= htmlspecialchars($collection->slug) ?></code></td>
+                                            <td class="d-none d-lg-table-cell">
+                                                <span class="d-inline-block text-truncate" style="max-width: 200px;"><?= htmlspecialchars($collection->description ?? 'Không có mô tả') ?></span>
+                                            </td>
+                                            <td class="d-none d-md-table-cell">
                                                 <div class="text-center">
                                                     <span class="fw-bold text-primary"><?= $collection->product_count ?? 0 ?></span>
-                                                    <div class="small text-muted">sản phẩm</div>
+                                                    <div class="small text-muted d-none d-lg-block">sản phẩm</div>
                                                 </div>
                                             </td>
-                                            <td>
+                                            <td class="d-none d-sm-table-cell">
                                                 <?php if ($collection->is_active): ?>
                                                     <span class="badge badge-delivered badge-custom">Hoạt động</span>
                                                 <?php else: ?>
                                                     <span class="badge badge-canceled badge-custom">Không hoạt động</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td><?= date('d/m/Y', strtotime($collection->created_at)) ?></td>
+                                            <td class="d-none d-lg-table-cell">
+                                                <div class="text-nowrap small"><?= date('d/m/Y', strtotime($collection->created_at)) ?></div>
+                                            </td>
                                             <td>
-                                                <div class="dropdown">
-                                                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
-                                                        <img src="https://cdn-icons-png.flaticon.com/512/2311/2311524.png" alt="Actions" width="16" height="16">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <button type="button" class="btn btn-outline-success btn-sm p-1" 
+                                                            onclick="editCollection(<?= $collection->collection_id ?>)" title="Chỉnh sửa">
+                                                        <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Edit" width="14" height="14">
                                                     </button>
-                                                    <ul class="dropdown-menu">
-                                                        <li><a class="dropdown-item" href="#" onclick="viewCollection(<?= $collection->collection_id ?>)">
-                                                            <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" alt="View" width="16" height="16" class="me-2">
-                                                            Xem chi tiết
-                                                        </a></li>
-                                                        <li><a class="dropdown-item" href="#" onclick="editCollection(<?= $collection->collection_id ?>)">
-                                                            <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Edit" width="16" height="16" class="me-2">
-                                                            Chỉnh sửa
-                                                        </a></li>
-                                                        <li><a class="dropdown-item" href="#" onclick="viewProducts(<?= $collection->collection_id ?>)">
-                                                            <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="Products" width="16" height="16" class="me-2">
-                                                            Xem sản phẩm
-                                                        </a></li>
-                                                        <li><hr class="dropdown-divider"></li>
-                                                        <li><a class="dropdown-item text-warning" href="#" onclick="toggleCollection(<?= $collection->collection_id ?>)">
-                                                            <img src="https://cdn-icons-png.flaticon.com/512/1828/1828843.png" alt="Toggle" width="16" height="16" class="me-2">
-                                                            <?= $collection->is_active ? 'Vô hiệu hóa' : 'Kích hoạt' ?>
-                                                        </a></li>
-                                                        <li><a class="dropdown-item text-danger" href="#" onclick="deleteCollection(<?= $collection->collection_id ?>)">
-                                                            <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png" alt="Delete" width="16" height="16" class="me-2">
-                                                            Xóa
-                                                        </a></li>
-                                                    </ul>
+                                                    <button type="button" class="btn btn-outline-danger btn-sm p-1" 
+                                                            onclick="deleteCollection(<?= $collection->collection_id ?>)" title="Xóa">
+                                                        <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png" alt="Delete" width="14" height="14">
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -235,13 +219,13 @@
     </div>
 
     <!-- Component Manager -->
-    <script src="../components/component-manager.js"></script>
+    <script src="app/views/admin/components/component-manager.js"></script>
     
     <!-- Page Configuration -->
     <script>
         window.pageConfig = {
             sidebar: {
-                brandName: 'JEWELLERY',
+                brandName: 'Trang Sức',
                 activePage: 'collections',
                 links: {
                     dashboard: '/admin/index.php?url=dashboard',
@@ -258,12 +242,13 @@
     </script>
     
     <!-- Collections Page Script -->
-    <script src="../assets/js/collections.js"></script>
+    <script src="app/views/admin/assets/js/collections.js"></script>
     
     <!-- Collection Management Functions -->
     <script>
         function viewCollection(collectionId) {
-            window.location.href = 'index.php?url=collection-details&id=' + collectionId;
+            // Không còn dùng collection-details, chuyển sang edit
+            window.location.href = 'index.php?url=edit-collection&id=' + collectionId;
         }
         
         function editCollection(collectionId) {
@@ -285,13 +270,84 @@
         }
         
         function deleteCollection(collectionId) {
-            if (confirm('Bạn có chắc chắn muốn xóa bộ sưu tập này? Hành động này không thể hoàn tác!')) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = 'index.php?url=collections&action=delete&id=' + collectionId;
-                document.body.appendChild(form);
-                form.submit();
+            // Tạo modal Bootstrap để xác nhận
+            const modalHtml = `
+                <div class="modal fade" id="deleteCollectionModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Xác Nhận Xóa Bộ Sưu Tập</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p><strong>⚠️ CẢNH BÁO:</strong> Bạn đang thực hiện xóa VĨNH VIỄN bộ sưu tập!</p>
+                                <p>Bộ sưu tập #${collectionId} và tất cả dữ liệu liên quan sẽ bị xóa hoàn toàn khỏi hệ thống.</p>
+                                <p class="text-danger">Hành động này KHÔNG THỂ hoàn tác!</p>
+                                
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input" type="checkbox" id="confirmDeleteCheckbox">
+                                    <label class="form-check-label" for="confirmDeleteCheckbox">
+                                        Tôi hiểu và chấp nhận xóa vĩnh viễn bộ sưu tập này
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled onclick="confirmDeleteCollection(${collectionId})">
+                                    Xóa Vĩnh Viễn
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Xóa modal cũ nếu có
+            const oldModal = document.getElementById('deleteCollectionModal');
+            if (oldModal) {
+                oldModal.remove();
             }
+            
+            // Thêm modal mới
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Enable/disable button dựa trên checkbox
+            const checkbox = document.getElementById('confirmDeleteCheckbox');
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            checkbox.addEventListener('change', function() {
+                confirmBtn.disabled = !this.checked;
+            });
+            
+            // Hiển thị modal
+            const modal = new bootstrap.Modal(document.getElementById('deleteCollectionModal'));
+            modal.show();
+        }
+        
+        function confirmDeleteCollection(collectionId) {
+            const form = document.createElement('form');
+            form.method = 'GET';
+            form.action = 'index.php';
+            
+            const urlInput = document.createElement('input');
+            urlInput.type = 'hidden';
+            urlInput.name = 'url';
+            urlInput.value = 'collections';
+            
+            const actionInput = document.createElement('input');
+            actionInput.type = 'hidden';
+            actionInput.name = 'action';
+            actionInput.value = 'delete';
+            
+            const idInput = document.createElement('input');
+            idInput.type = 'hidden';
+            idInput.name = 'id';
+            idInput.value = collectionId;
+            
+            form.appendChild(urlInput);
+            form.appendChild(actionInput);
+            form.appendChild(idInput);
+            document.body.appendChild(form);
+            form.submit();
         }
 
         // Search functionality

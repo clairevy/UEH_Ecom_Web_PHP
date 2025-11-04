@@ -1,6 +1,6 @@
 <?php
 /**
- * Dashboard Content View - Pure MVC View
+ * Dashboard View - Pure MVC View
  * Tuân thủ nguyên tắc MVC/OOP
  */
 
@@ -10,6 +10,32 @@
 // $bestSellers - sản phẩm bán chạy từ database
 ?>
 
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Trang Sức Admin</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="app/views/admin/assets/css/variables.css">
+    <link rel="stylesheet" href="app/views/admin/assets/css/main.css">
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar Component Container -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header Component Container -->
+            <div id="header-container"></div>
+
+            <!-- Content -->
+            <main class="content">
 <!-- Date Range -->
 <div class="mb-4">
     <div class="d-flex justify-content-between align-items-center">
@@ -67,50 +93,59 @@
 
 <div class="row">
     <!-- Sales Graph -->
-    <div class="col-lg-8 mb-4">
+    <div class="col-lg-8 col-md-12 mb-4 order-2 order-lg-1">
         <div class="table-card">
-            <div class="table-header">
-                <h5 class="table-title">Biểu Đồ Doanh Thu</h5>
-                <div class="btn-group" role="group">
+            <div class="table-header flex-column flex-sm-row align-items-start align-items-sm-center">
+                <h5 class="table-title mb-2 mb-sm-0">Biểu Đồ Doanh Thu</h5>
+                <div class="btn-group btn-group-sm" role="group">
                     <input type="radio" class="btn-check" name="period" id="weekly">
-                    <label class="btn btn-outline-secondary btn-sm" for="weekly">WEEKLY</label>
+                    <label class="btn btn-outline-secondary btn-sm" for="weekly">
+                        <span class="d-none d-sm-inline">WEEKLY</span>
+                        <span class="d-sm-none">W</span>
+                    </label>
                     
                     <input type="radio" class="btn-check" name="period" id="monthly" checked>
-                    <label class="btn btn-outline-secondary btn-sm" for="monthly">MONTHLY</label>
+                    <label class="btn btn-outline-secondary btn-sm" for="monthly">
+                        <span class="d-none d-sm-inline">MONTHLY</span>
+                        <span class="d-sm-none">M</span>
+                    </label>
                     
                     <input type="radio" class="btn-check" name="period" id="yearly">
-                    <label class="btn btn-outline-secondary btn-sm" for="yearly">YEARLY</label>
+                    <label class="btn btn-outline-secondary btn-sm" for="yearly">
+                        <span class="d-none d-sm-inline">YEARLY</span>
+                        <span class="d-sm-none">Y</span>
+                    </label>
                 </div>
             </div>
-            <div class="p-4">
+            <div class="p-2 p-sm-4">
                 <!-- Placeholder for chart -->
-                <div class="text-center py-5" style="height: 300px; border: 2px dashed #e9ecef; border-radius: var(--border-radius);">
+                <div class="text-center py-3 py-sm-5" style="height: 250px; min-height: 200px; border: 2px dashed #e9ecef; border-radius: var(--border-radius);">
                     <img src="https://cdn-icons-png.flaticon.com/512/2920/2920277.png" alt="Chart" width="48" height="48" class="mb-3 opacity-50">
-                    <p class="text-muted">Chart will be rendered here with Chart.js</p>
+                    <p class="text-muted small">Chart will be rendered here with Chart.js</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Best Sellers -->
-    <div class="col-lg-4 mb-4">
+    <div class="col-lg-4 col-md-12 mb-4 order-1 order-lg-2">
         <div class="table-card">
             <div class="table-header">
                 <h5 class="table-title">Sản Phẩm Bán Chạy</h5>
                 <button class="btn btn-link btn-sm">BÁO CÁO</button>
             </div>
-            <div class="p-3">
+            <div class="p-2 p-sm-3">
                 <?php if (!empty($bestSellers)): ?>
                     <?php foreach ($bestSellers as $index => $product): ?>
-                        <div class="d-flex align-items-center mb-3 pb-3 <?= $index < count($bestSellers) - 1 ? 'border-bottom border-custom' : '' ?>">
-                            <img src="<?= !empty($product->primary_image) ? $product->primary_image : 'https://images.unsplash.com/photo-1708221382764-299d9e3ad257?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' ?>" alt="Product" class="product-img me-3">
-                            <div class="flex-grow-1">
-                                <div class="fw-bold"><?= htmlspecialchars($product->name) ?></div>
-                                <div class="text-muted-custom small">$<?= number_format($product->base_price, 2) ?></div>
+                        <div class="d-flex align-items-center mb-2 mb-sm-3 pb-2 pb-sm-3 <?= $index < count($bestSellers) - 1 ? 'border-bottom border-custom' : '' ?>">
+                            <img src="<?= !empty($product->primary_image) ? $product->primary_image : 'https://images.unsplash.com/photo-1708221382764-299d9e3ad257?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' ?>" alt="Product" class="product-img me-2 me-sm-3 flex-shrink-0" style="width: 40px; height: 40px; object-fit: cover;">
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="fw-bold text-truncate small"><?= htmlspecialchars($product->name) ?></div>
+                                <div class="text-muted-custom small d-none d-sm-block">$<?= number_format($product->base_price, 2) ?></div>
                             </div>
-                            <div class="text-end">
-                                <div class="fw-bold">$<?= number_format($product->base_price, 2) ?></div>
-                                <div class="text-muted-custom small"><?= $product->total_sold ?? 0 ?> Sales</div>
+                            <div class="text-end flex-shrink-0 ms-2">
+                                <div class="fw-bold small">$<?= number_format($product->base_price, 2) ?></div>
+                                <div class="text-muted-custom" style="font-size: 0.75rem;"><?= $product->total_sold ?? 0 ?> Sales</div>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -145,7 +180,7 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>
+                    <th class="d-none d-lg-table-cell">
                         <input type="checkbox" class="form-check-input">
                     </th>
                     <th>Mã Đơn Hàng</th>
@@ -227,3 +262,42 @@
         </table>
     </div>
 </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Component Manager -->
+    <script src="app/views/admin/components/component-manager.js"></script>
+    
+    <!-- Page Configuration -->
+    <script>
+        window.pageConfig = {
+            sidebar: {
+                brandName: 'Trang Sức',
+                activePage: 'dashboard',
+                links: {
+                    dashboard: 'index.php?url=dashboard',
+                    products: 'index.php?url=products',
+                    categories: 'index.php?url=categories',
+                    collections: 'index.php?url=collections',
+                    orders: 'index.php?url=orders',
+                    customers: 'index.php?url=customers',
+                    reviews: 'index.php?url=reviews'
+                },
+                categories: [],
+                categoriesTitle: 'DANH MỤC'
+            },
+            header: {
+                title: 'Dashboard',
+                breadcrumb: 'Home > Dashboard'
+            }
+        };
+    </script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Main JS -->
+    <script src="app/views/admin/assets/js/main.js"></script>
+</body>
+</html>

@@ -122,6 +122,30 @@ class Order extends BaseModel {
         return $this->db->execute();
     }
 
+    /**
+     * Update payment status
+     */
+    public function updatePaymentStatus($orderId, $status) {
+        $this->db->query("UPDATE " . $this->table . " 
+                         SET payment_status = :status, updated_at = NOW() 
+                         WHERE order_id = :order_id");
+        $this->db->bind(':status', $status);
+        $this->db->bind(':order_id', $orderId);
+        return $this->db->execute();
+    }
+
+    /**
+     * Update order status
+     */
+    public function updateStatus($orderId, $status) {
+        $this->db->query("UPDATE " . $this->table . " 
+                         SET order_status = :status, updated_at = NOW() 
+                         WHERE order_id = :order_id");
+        $this->db->bind(':status', $status);
+        $this->db->bind(':order_id', $orderId);
+        return $this->db->execute();
+    }
+
     public function countOrders() {
         $this->db->query("SELECT COUNT(*) as total FROM " . $this->table);
         $result = $this->db->single();
@@ -136,7 +160,11 @@ class Order extends BaseModel {
     }
 
     public function getAllOrders(){
-        $this->db->query("SELECT o.*, u.name as user_name FROM " . $this->table . " o 
+        $this->db->query("SELECT o.*, 
+                         u.name as user_name,
+                         COALESCE(o.full_name, u.name) as customer_name,
+                         COALESCE(o.email, u.email) as customer_email
+                         FROM " . $this->table . " o 
                          LEFT JOIN users u ON o.user_id = u.user_id 
                          ORDER BY o.created_at DESC");
         return $this->db->resultSet();

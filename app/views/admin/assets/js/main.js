@@ -1,4 +1,4 @@
-// Main JavaScript file for KICKS Admin Dashboard
+// Main JavaScript file for Trang Sức Admin Dashboard
 // This file contains basic functionality for the admin interface
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function toggleSidebar() {
         sidebar.classList.toggle('show');
         overlay.classList.toggle('show');
-        document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : '';
+        document.body.classList.toggle('sidebar-open');
     }
     
     // Mobile menu toggle button
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     overlay.addEventListener('click', function() {
         sidebar.classList.remove('show');
         overlay.classList.remove('show');
-        document.body.style.overflow = '';
+        document.body.classList.remove('sidebar-open');
     });
     
     // Close sidebar when clicking outside on mobile
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 !e.target.closest('.mobile-menu-toggle')) {
                 sidebar.classList.remove('show');
                 overlay.classList.remove('show');
-                document.body.style.overflow = '';
+                document.body.classList.remove('sidebar-open');
             }
         }
     });
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.innerWidth > 991) {
             sidebar.classList.remove('show');
             overlay.classList.remove('show');
-            document.body.style.overflow = '';
+            document.body.classList.remove('sidebar-open');
         }
     });
 
@@ -191,5 +191,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.addEventListener('resize', handleResize);
 
-    console.log('KICKS Admin Dashboard initialized successfully!');
+    console.log('Trang Sức Admin Dashboard initialized successfully!');
 });

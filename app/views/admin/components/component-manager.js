@@ -1,5 +1,5 @@
 /**
- * Component Manager for KICKS Admin Dashboard
+ * Component Manager for Trang Sức Admin Dashboard
  * Handles loading and managing reusable components
  */
 

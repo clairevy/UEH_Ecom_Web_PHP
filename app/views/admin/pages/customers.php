@@ -21,9 +21,12 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="../assets/css/variables.css">
-    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="app/views/admin/assets/css/variables.css">
+    <link rel="stylesheet" href="app/views/admin/assets/css/main.css">
 </head>
 <body>
     <div class="admin-wrapper">
@@ -62,7 +65,7 @@
                                     <h3 class="mb-0 text-primary"><?= $stats['total'] ?? 0 ?></h3>
                                 </div>
                                 <h6 class="fw-bold">Tổng Khách Hàng</h6>
-                                <p class="text-muted small mb-0">+12% so với tháng trước</p>
+                                
                             </div>
                         </div>
                     </div>
@@ -90,30 +93,22 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <div class="card text-center h-100">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center justify-content-center mb-2">
-                                    <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="New This Month" width="32" height="32" class="me-2">
-                                    <h3 class="mb-0 text-info"><?= $stats['new_this_month'] ?? 0 ?></h3>
-                                </div>
-                                <h6 class="fw-bold">Mới Tháng Này</h6>
-                                <p class="text-muted small mb-0">+8 so với tuần trước</p>
-                            </div>
-                        </div>
-                    </div>
+                    
                 </div>
 
                 <!-- Customer Management Table -->
                 <div class="table-card">
-                    <div class="table-header">
-                        <h5 class="table-title">Danh Sách Khách Hàng</h5>
-                        <div class="d-flex gap-2">
+                    <div class="table-header flex-column flex-md-row align-items-start align-items-md-center">
+                      
+                        <div class="d-flex flex-wrap gap-2 w-100 w-md-auto">
                             <!-- Filters -->
                             <div class="dropdown">
                                 <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                    <img src="https://cdn-icons-png.flaticon.com/512/3031/3031293.png" alt="Filter" width="16" height="16" class="me-1">
-                                    Lọc
+                                    <img src="https://cdn-icons-png.flaticon.com/512/3031/3031293.png" alt="Filter" width="16" height="16" class="me-1 d-none d-sm-inline">
+                                    <span class="d-none d-sm-inline">Lọc</span>
+                                    <span class="d-sm-none">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/3031/3031293.png" alt="Filter" width="16" height="16">
+                                    </span>
                                 </button>
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" href="#" onclick="filterCustomers('all')">Tất cả</a></li>
@@ -124,28 +119,12 @@
                             </div>
 
                             <!-- Search -->
-                            <div class="position-relative">
-                                <input type="text" class="form-control form-control-sm" placeholder="Tìm kiếm khách hàng..." style="width: 200px; padding-left: 35px;" id="customerSearch">
+                            <div class="position-relative flex-grow-1" style="max-width: 100%; min-width: 150px;">
+                                <input type="text" class="form-control form-control-sm" placeholder="Tìm kiếm..." style="padding-left: 35px;" id="customerSearch">
                                 <img src="https://cdn-icons-png.flaticon.com/512/751/751463.png" alt="Search" width="16" height="16" class="position-absolute" style="left: 10px; top: 50%; transform: translateY(-50%);">
                             </div>
 
-                            <!-- Add Customer -->
-                            <button class="btn btn-success-custom btn-sm" onclick="addNewCustomer()">
-                                <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Add" width="16" height="16" class="me-1">
-                                Thêm Khách Hàng
-                            </button>
-
-                            <!-- More Actions -->
-                            <div class="dropdown">
-                                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown">
-                                    <img src="https://cdn-icons-png.flaticon.com/512/2311/2311524.png" alt="More" width="16" height="16">
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#">Xuất Excel</a></li>
-                                    <li><a class="dropdown-item" href="#">Xuất PDF</a></li>
-                                    <li><a class="dropdown-item" href="#">In danh sách</a></li>
-                                </ul>
-                            </div>
+                            
                         </div>
                     </div>
                     
@@ -153,80 +132,75 @@
                         <table class="table" id="customersTable">
                             <thead>
                                 <tr>
-                                    <th>
-                                        <input type="checkbox" class="form-check-input" id="selectAll">
-                                    </th>
-                                    <th>Khách Hàng</th>
-                                    <th>Email</th>
-                                    <th>Số Điện Thoại</th>
-                                    <th>Vai Trò</th>
-                                    <th>Trạng Thái</th>
-                                    <th>Đơn Hàng</th>
-                                    <th>Ngày Tham Gia</th>
-                                    <th>Thao Tác</th>
+                                    <th class="text-nowrap">Khách Hàng</th>
+                                    <th class="d-none d-md-table-cell text-nowrap">Email</th>
+                                    <th class="d-none d-lg-table-cell text-nowrap">SĐT</th>
+                                    <th class="d-none d-xl-table-cell text-nowrap">Vai Trò</th>
+                                    <th class="d-none d-md-table-cell text-nowrap">Trạng Thái</th>
+                                    <th class="d-none d-lg-table-cell text-nowrap">Đơn Hàng</th>
+                                    <th class="d-none d-xl-table-cell text-nowrap">Ngày TG</th>
+                                    <th class="text-nowrap">Thao Tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (!empty($users)): ?>
                                     <?php foreach ($users as $user): ?>
                                         <tr>
-                                            <td><input type="checkbox" class="form-check-input row-checkbox"></td>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User" width="32" height="32" class="rounded-circle me-2">
-                                                    <div>
-                                                        <div class="fw-bold"><?= htmlspecialchars($user->name ?? 'N/A') ?></div>
-                                                        <div class="small text-muted">ID: #<?= $user->user_id ?></div>
+                                                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User" width="32" height="32" class="rounded-circle me-2 flex-shrink-0">
+                                                    <div class="min-w-0">
+                                                        <div class="fw-bold text-truncate"><?= htmlspecialchars($user->name ?? 'N/A') ?></div>
+                                                        <div class="small text-muted d-none d-sm-block">ID: #<?= $user->user_id ?></div>
+                                                        <!-- Mobile info -->
+                                                        <div class="d-md-none small">
+                                                            <div class="text-muted text-truncate"><?= htmlspecialchars($user->email) ?></div>
+                                                            <?php if ($user->is_active): ?>
+                                                                <span class="badge badge-delivered badge-custom">Hoạt động</span>
+                                                            <?php else: ?>
+                                                                <span class="badge badge-canceled badge-custom">Không hoạt động</span>
+                                                            <?php endif; ?>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td><?= htmlspecialchars($user->email) ?></td>
-                                            <td><?= htmlspecialchars($user->phone ?? 'N/A') ?></td>
-                                            <td>
+                                            <td class="d-none d-md-table-cell">
+                                                <span class="text-truncate d-inline-block" style="max-width: 200px;"><?= htmlspecialchars($user->email) ?></span>
+                                            </td>
+                                            <td class="d-none d-lg-table-cell"><?= htmlspecialchars($user->phone ?? 'N/A') ?></td>
+                                            <td class="d-none d-xl-table-cell">
                                                 <?php if ($user->role_name): ?>
                                                     <span class="badge bg-primary"><?= htmlspecialchars($user->role_name) ?></span>
                                                 <?php else: ?>
                                                     <span class="badge bg-secondary">Customer</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td>
+                                            <td class="d-none d-md-table-cell">
                                                 <?php if ($user->is_active): ?>
                                                     <span class="badge badge-delivered badge-custom">Hoạt động</span>
                                                 <?php else: ?>
                                                     <span class="badge badge-canceled badge-custom">Không hoạt động</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td>
+                                            <td class="d-none d-lg-table-cell">
                                                 <div class="text-center">
                                                     <div class="fw-bold"><?= $user->order_count ?? 0 ?></div>
                                                     <div class="small text-muted">đơn hàng</div>
                                                 </div>
                                             </td>
-                                            <td><?= date('d/m/Y', strtotime($user->created_at)) ?></td>
+                                            <td class="d-none d-xl-table-cell">
+                                                <div class="text-nowrap small"><?= date('d/m/Y', strtotime($user->created_at)) ?></div>
+                                            </td>
                                             <td>
-                                                <div class="dropdown">
-                                                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
-                                                        <img src="https://cdn-icons-png.flaticon.com/512/2311/2311524.png" alt="Actions" width="16" height="16">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <button type="button" class="btn btn-outline-success btn-sm p-1" 
+                                                            onclick="editCustomer(<?= $user->user_id ?>)" title="Chỉnh sửa">
+                                                        <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Edit" width="14" height="14">
                                                     </button>
-                                                    <ul class="dropdown-menu">
-                                                        <li><a class="dropdown-item" href="#" onclick="viewCustomer(<?= $user->user_id ?>)">
-                                                            <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" alt="View" width="16" height="16" class="me-2">
-                                                            Xem chi tiết
-                                                        </a></li>
-                                                        <li><a class="dropdown-item" href="#" onclick="editCustomer(<?= $user->user_id ?>)">
-                                                            <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Edit" width="16" height="16" class="me-2">
-                                                            Chỉnh sửa
-                                                        </a></li>
-                                                        <li><hr class="dropdown-divider"></li>
-                                                        <li><a class="dropdown-item text-warning" href="#" onclick="toggleCustomerStatus(<?= $user->user_id ?>)">
-                                                            <img src="https://cdn-icons-png.flaticon.com/512/1828/1828843.png" alt="Toggle" width="16" height="16" class="me-2">
-                                                            <?= $user->is_active ? 'Vô hiệu hóa' : 'Kích hoạt' ?>
-                                                        </a></li>
-                                                        <li><a class="dropdown-item text-danger" href="#" onclick="deleteCustomer(<?= $user->user_id ?>)">
-                                                            <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png" alt="Delete" width="16" height="16" class="me-2">
-                                                            Xóa
-                                                        </a></li>
-                                                    </ul>
+                                                    <button type="button" class="btn btn-outline-danger btn-sm p-1" 
+                                                            onclick="deleteCustomer(<?= $user->user_id ?>)" title="Xóa">
+                                                        <img src="https://cdn-icons-png.flaticon.com/512/3096/3096673.png" alt="Delete" width="14" height="14">
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -250,8 +224,37 @@
         </div>
     </div>
 
+    <!-- Modal Xác Nhận Xóa -->
+    <div class="modal fade" id="deleteCustomerModal" tabindex="-1" aria-labelledby="deleteCustomerModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteCustomerModalLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Xác Nhận Xóa Khách Hàng
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3"><strong>Cảnh báo:</strong> Hành động này sẽ xóa vĩnh viễn khách hàng và không thể hoàn tác!</p>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="confirmDeleteCustomer">
+                        <label class="form-check-label" for="confirmDeleteCustomer">
+                            Tôi hiểu và muốn xóa khách hàng này
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteCustomerBtn" disabled>
+                        <i class="fas fa-trash me-2"></i>Xóa Khách Hàng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Component Manager -->
-    <script src="../components/component-manager.js"></script>
+    <script src="app/views/admin/components/component-manager.js"></script>
     
     <!-- Page Configuration -->
     <script>
@@ -278,18 +281,13 @@
     </script>
     
     <!-- Customers Page Script -->
-    <script src="../assets/js/customers.js"></script>
+    <script src="app/views/admin/assets/js/customers.js"></script>
     
     <!-- Customer Management Functions -->
     <script>
-        function addNewCustomer() {
-            // Redirect to the Add Customer page (MVC: controller/view handled by admin router)
-            window.location.href = '<?= BASE_URL ?>' + '/admin/index.php?url=add-customer';
-        }
-        
-        //
         function viewCustomer(userId) {
-            window.location.href = '<?= BASE_URL ?>' + '/admin/index.php?url=customers&action=show&id=' + userId;
+            // Không còn dùng customer-details, chuyển sang edit
+            window.location.href = '<?= BASE_URL ?>' + '/admin/index.php?url=customers&action=edit&id=' + userId;
         }
         
         function editCustomer(userId) {
@@ -306,15 +304,36 @@
             }
         }
         
+        let customerIdToDelete = null;
+
         function deleteCustomer(userId) {
-            if (confirm('Bạn có chắc chắn muốn xóa khách hàng này không?')) {
+            customerIdToDelete = userId;
+            const modal = new bootstrap.Modal(document.getElementById('deleteCustomerModal'));
+            modal.show();
+        }
+
+        // Handle checkbox change
+        document.getElementById('confirmDeleteCustomer').addEventListener('change', function() {
+            document.getElementById('confirmDeleteCustomerBtn').disabled = !this.checked;
+        });
+
+        // Handle confirm delete button
+        document.getElementById('confirmDeleteCustomerBtn').addEventListener('click', function() {
+            if (customerIdToDelete) {
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '<?= BASE_URL ?>' + '/admin/index.php?url=customers&action=delete&id=' + userId;
+                form.action = '<?= BASE_URL ?>' + '/admin/index.php?url=customers&action=delete&id=' + customerIdToDelete;
                 document.body.appendChild(form);
                 form.submit();
             }
-        }
+        });
+
+        // Reset modal when closed
+        document.getElementById('deleteCustomerModal').addEventListener('hidden.bs.modal', function() {
+            customerIdToDelete = null;
+            document.getElementById('confirmDeleteCustomer').checked = false;
+            document.getElementById('confirmDeleteCustomerBtn').disabled = true;
+        });
         
         function filterCustomers(filter) {
             // TODO: Implement filtering logic

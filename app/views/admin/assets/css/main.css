@@ -75,10 +75,18 @@ body {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 1049;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .sidebar-overlay.show {
   display: block;
+  opacity: 1;
+}
+
+/* Prevent body scroll when sidebar is open on mobile */
+body.sidebar-open {
+  overflow: hidden;
 }
 
 .content {
@@ -389,6 +397,7 @@ body {
     transition: transform 0.3s ease;
     z-index: 1050;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    width: 250px;
   }
   
   .sidebar.show {
@@ -417,6 +426,16 @@ body {
     width: 100%;
     justify-content: space-between;
   }
+  
+  /* Hide less important columns on tablet */
+  .d-none.d-xl-table-cell {
+    display: none !important;
+  }
+  
+  /* Better spacing for cards */
+  .row.mb-4 > [class*="col-"] {
+    margin-bottom: 1rem;
+  }
 }
 
 @media (max-width: 768px) {
@@ -426,6 +445,15 @@ body {
   
   .header-title {
     font-size: var(--font-size-base);
+  }
+  
+  .header-actions {
+    gap: var(--spacing-sm);
+  }
+  
+  /* Hide breadcrumb on mobile */
+  .header-content small {
+    display: none !important;
   }
   
   .content {
@@ -473,13 +501,68 @@ body {
     flex: 1;
     min-width: auto;
   }
+  
+  /* Table actions responsive */
+  .table .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  /* Hide less important table columns */
+  .d-none.d-lg-table-cell {
+    display: none !important;
+  }
+  
+  /* Table card responsive */
+  .table-card {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .table-header {
+    padding: var(--spacing-sm);
+  }
+  
+  .table-title {
+    font-size: 1rem;
+  }
+  
+  /* Dropdown menu items smaller on mobile */
+  .dropdown-menu {
+    font-size: 0.875rem;
+  }
+  
+  /* User dropdown compact */
+  .user-dropdown .btn {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  /* Form controls full width on mobile */
+  .form-control,
+  .form-select {
+    width: 100%;
+  }
 }
 
 @media (max-width: 576px) {
+  /* Header fully responsive */
+  .header-title {
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+  }
+  
+  .mobile-menu-toggle {
+    padding: 0.25rem;
+  }
+  
   /* Full width mobile buttons */
   .btn-custom {
-    width: 100%;
-    margin-bottom: var(--spacing-xs);
+    font-size: 0.75rem;
+    padding: 0.375rem 0.5rem;
   }
   
   /* Stack table actions */
@@ -488,9 +571,20 @@ body {
     gap: 0.25rem;
   }
   
+  /* Action buttons in table */
+  .table .btn {
+    width: 100%;
+    margin-bottom: 0.25rem;
+  }
+  
+  .table .btn:last-child {
+    margin-bottom: 0;
+  }
+  
   /* Hide non-essential table columns on mobile */
-  .table .d-none-mobile {
-    display: none;
+  .table .d-none-mobile,
+  .d-none.d-md-table-cell {
+    display: none !important;
   }
   
   /* Mobile sidebar brand */
@@ -502,6 +596,90 @@ body {
   .sidebar-nav-link {
     padding: var(--spacing-sm) var(--spacing-md);
     font-size: 0.875rem;
+  }
+  
+  .sidebar-nav-icon {
+    width: 18px;
+    height: 18px;
+  }
+  
+  /* Stats cards */
+  .stats-card {
+    padding: var(--spacing-sm);
+  }
+  
+  .stats-value {
+    font-size: 1.125rem;
+  }
+  
+  .stats-label {
+    font-size: 0.75rem;
+  }
+  
+  /* Table responsive */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .table {
+    font-size: 0.75rem;
+    min-width: 500px;
+  }
+  
+  .table th,
+  .table td {
+    padding: 0.375rem;
+    white-space: nowrap;
+  }
+  
+  /* Form groups */
+  .form-group {
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .form-label {
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .form-control,
+  .form-select {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.5rem;
+  }
+  
+  /* Modal responsive */
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+  
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: var(--spacing-sm);
+  }
+  
+  /* Search and filter inputs */
+  .table-header input[type="text"],
+  .table-header select {
+    font-size: 0.875rem;
+  }
+  
+  /* Badge sizes */
+  .badge {
+    font-size: 0.65rem;
+    padding: 0.25em 0.5em;
+  }
+  
+  /* Dropdown items */
+  .dropdown-menu {
+    min-width: 8rem;
+  }
+  
+  .dropdown-item {
+    font-size: 0.8125rem;
+    padding: 0.375rem 0.75rem;
   }
 }
 

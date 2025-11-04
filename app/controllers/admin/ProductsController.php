@@ -107,6 +107,12 @@ class ProductsController extends BaseController {
         }
 
         try {
+            // DEBUG: Log toàn bộ POST data
+            error_log("=== CREATE PRODUCT - START ===");
+            error_log("Full POST data: " . json_encode($_POST));
+            error_log("category_id: " . (isset($_POST['category_id']) ? $_POST['category_id'] : 'NOT SET'));
+            error_log("category_ids: " . (isset($_POST['category_ids']) ? json_encode($_POST['category_ids']) : 'NOT SET'));
+            
             // Validate input data
             $validationErrors = $this->validateProductData($_POST);
             
@@ -163,8 +169,21 @@ class ProductsController extends BaseController {
             }
 
             // Xử lý categories (many-to-many relationship)
-            if (!empty($_POST['category_ids']) && is_array($_POST['category_ids'])) {
+            // Hỗ trợ cả single select (category_id) và multi-select (category_ids[])
+            error_log("CREATE PRODUCT - Checking category data...");
+            error_log("POST category_id: " . (isset($_POST['category_id']) ? $_POST['category_id'] : 'NOT SET'));
+            error_log("POST category_id empty: " . (empty($_POST['category_id']) ? 'TRUE' : 'FALSE'));
+            
+            if (!empty($_POST['category_id'])) {
+                // Single category from dropdown
+                error_log("Using single category_id: " . $_POST['category_id']);
+                $this->attachCategoriesToProduct($productId, [(int)$_POST['category_id']]);
+            } elseif (!empty($_POST['category_ids']) && is_array($_POST['category_ids'])) {
+                // Multiple categories (legacy support)
+                error_log("Using multiple category_ids: " . json_encode($_POST['category_ids']));
                 $this->attachCategoriesToProduct($productId, $_POST['category_ids']);
+            } else {
+                error_log("WARNING: No category selected or sent in POST data");
             }
 
             $_SESSION['success'] = 'Tạo sản phẩm thành công!';
@@ -222,6 +241,30 @@ class ProductsController extends BaseController {
 
             // Update product trong database
             if ($this->productModel->update($productId, $data)) {
+                // Xử lý variants (XÓA CŨ + THÊM MỚI)
+                if (isset($_POST['variants']) && is_array($_POST['variants'])) {
+                    // Xóa tất cả variants cũ
+                    $db = Database::getInstance();
+                    $db->query("DELETE FROM product_variants WHERE product_id = :product_id");
+                    $db->bind(':product_id', $productId);
+                    $db->execute();
+                    
+                    // Thêm variants mới
+                    foreach ($_POST['variants'] as $variant) {
+                        if (!empty($variant['size']) && !empty($variant['color']) && 
+                            isset($variant['price']) && isset($variant['stock'])) {
+                            $db->query("INSERT INTO product_variants (product_id, size, color, price, stock) 
+                                       VALUES (:product_id, :size, :color, :price, :stock)");
+                            $db->bind(':product_id', $productId);
+                            $db->bind(':size', trim($variant['size']));
+                            $db->bind(':color', trim($variant['color']));
+                            $db->bind(':price', floatval($variant['price']));
+                            $db->bind(':stock', intval($variant['stock']));
+                            $db->execute();
+                        }
+                    }
+                }
+                
                 // Xử lý upload images mới (nếu có)
                 if (isset($_FILES['product_images']) && !empty($_FILES['product_images']['name'][0])) {
                     $uploadResult = $this->handleProductImages($productId, $_FILES['product_images']);
@@ -232,7 +275,12 @@ class ProductsController extends BaseController {
                 }
 
                 // Xử lý categories (nếu có)
-                if (isset($_POST['category_ids']) && is_array($_POST['category_ids'])) {
+                // Hỗ trợ cả single select (category_id) và multi-select (category_ids[])
+                if (!empty($_POST['category_id'])) {
+                    // Single category from dropdown
+                    $this->attachCategoriesToProduct($productId, [(int)$_POST['category_id']]);
+                } elseif (isset($_POST['category_ids']) && is_array($_POST['category_ids'])) {
+                    // Multiple categories (legacy support)
                     $this->attachCategoriesToProduct($productId, $_POST['category_ids']);
                 }
 
@@ -255,6 +303,10 @@ class ProductsController extends BaseController {
      * Hiển thị form chỉnh sửa sản phẩm
      * Sử dụng cùng view với product-details (view/edit mode)
      */
+    /**
+     * Hiển thị form chỉnh sửa sản phẩm
+     * Tái sử dụng add-product.php với data của sản phẩm cần edit
+     */
     public function showEditForm() {
         try {
             $productId = $_GET['id'] ?? null;
@@ -269,10 +321,16 @@ class ProductsController extends BaseController {
                 throw new Exception('Sản phẩm không tồn tại');
             }
 
-            // Load images từ database (ĐÚNG SCHEMA)
+            // Load images và variants từ database
             $product->images = $this->productModel->getProductImages($productId);
             $product->primary_image = $this->productModel->getProductPrimaryImage($productId);
+            $product->variants = $this->productModel->getProductVariants($productId);
+            
+            // Load categories của product này
+            $productCategories = $this->productModel->getProductCategories($productId);
+            $product->category_ids = array_column($productCategories, 'category_id');
 
+            // Load data cho dropdowns
             $categories = $this->categoryModel->getAll();
             $collections = $this->collectionModel->getAll();
             $materials = $this->productModel->getAvailableMaterials();
@@ -285,11 +343,11 @@ class ProductsController extends BaseController {
                 'materials' => $materials,
                 'pageTitle' => 'Chỉnh Sửa Sản Phẩm',
                 'breadcrumb' => 'Home > Sản Phẩm > Chỉnh Sửa',
-                'editMode' => true  // Flag để view biết đây là edit mode
+                'isEdit' => true  // Flag để view biết đây là edit mode
             ];
 
-            // Sử dụng product-details.php (không phải edit-product.php)
-            $this->renderAdminPage('admin/pages/product-details', $data);
+            // TÁI SỬ DỤNG add-product.php - DRY Principle
+            $this->renderAdminPage('admin/pages/add-product', $data);
 
         } catch (Exception $e) {
             $_SESSION['error'] = $e->getMessage();
@@ -345,18 +403,98 @@ class ProductsController extends BaseController {
     /**
      * Xóa sản phẩm (soft delete)
      */
+    /**
+     * Xóa sản phẩm (soft delete - mặc định)
+     */
     public function delete($id) {
         try {
             if ($this->productModel->delete($id)) {
-                $_SESSION['success'] = 'Xóa sản phẩm thành công!';
+                $_SESSION['success'] = 'Đã ẩn sản phẩm thành công!';
             } else {
-                $_SESSION['error'] = 'Có lỗi xảy ra khi xóa sản phẩm!';
+                $_SESSION['error'] = 'Có lỗi xảy ra khi ẩn sản phẩm!';
             }
         } catch (Exception $e) {
             $_SESSION['error'] = 'Lỗi: ' . $e->getMessage();
         }
         
         $this->redirect('index.php?url=products');
+    }
+    
+    /**
+     * Xóa vĩnh viễn sản phẩm (hard delete)
+     */
+    public function hardDelete($id) {
+        try {
+            error_log("Hard deleting product ID: $id");
+            
+            if ($this->productModel->hardDelete($id)) {
+                $_SESSION['success'] = 'Đã xóa vĩnh viễn sản phẩm thành công!';
+                error_log("Product $id hard deleted successfully");
+            } else {
+                $_SESSION['error'] = 'Có lỗi xảy ra khi xóa sản phẩm!';
+                error_log("Failed to hard delete product $id");
+            }
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Lỗi: ' . $e->getMessage();
+            error_log("Hard delete error: " . $e->getMessage());
+        }
+        
+        $this->redirect('index.php?url=products');
+    }
+
+    /**
+     * Xóa ảnh của sản phẩm
+     * Method: POST (AJAX)
+     */
+    public function deleteImage() {
+        header('Content-Type: application/json');
+        
+        try {
+            $imageId = $_GET['image_id'] ?? null;
+            $productId = $_GET['product_id'] ?? null;
+            
+            if (!$imageId || !$productId) {
+                echo json_encode(['success' => false, 'message' => 'Thiếu thông tin ảnh']);
+                return;
+            }
+
+            // Lấy thông tin ảnh từ database
+            $db = Database::getInstance();
+            $db->query("SELECT i.file_path FROM images i 
+                       JOIN image_usages iu ON i.image_id = iu.image_id 
+                       WHERE i.image_id = :image_id AND iu.ref_id = :product_id AND iu.ref_type = 'product'");
+            $db->bind(':image_id', $imageId);
+            $db->bind(':product_id', $productId);
+            $image = $db->single();
+
+            if (!$image) {
+                echo json_encode(['success' => false, 'message' => 'Không tìm thấy ảnh']);
+                return;
+            }
+
+            // Xóa file vật lý
+            $filePath = $_SERVER['DOCUMENT_ROOT'] . '/Ecom_website/' . $image->file_path;
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+
+            // Xóa trong database (image_usages và images)
+            $db->query("DELETE FROM image_usages WHERE image_id = :image_id AND ref_id = :product_id AND ref_type = 'product'");
+            $db->bind(':image_id', $imageId);
+            $db->bind(':product_id', $productId);
+            $db->execute();
+
+            // Xóa trong bảng images nếu không còn usage nào
+            $db->query("DELETE FROM images WHERE image_id = :image_id AND NOT EXISTS (SELECT 1 FROM image_usages WHERE image_id = :image_id)");
+            $db->bind(':image_id', $imageId);
+            $db->execute();
+
+            echo json_encode(['success' => true, 'message' => 'Đã xóa ảnh thành công']);
+            
+        } catch (Exception $e) {
+            error_log('deleteImage Error: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
     }
 
     // =================== PRIVATE HELPER METHODS (OOP Best Practice) ===================
@@ -511,24 +649,42 @@ class ProductsController extends BaseController {
      */
     private function attachCategoriesToProduct($productId, $categoryIds) {
         try {
+            error_log("=== attachCategoriesToProduct CALLED ===");
+            error_log("Product ID: " . $productId);
+            error_log("Category IDs: " . json_encode($categoryIds));
+            
             // Xóa các liên kết cũ
             $sql = "DELETE FROM product_categories WHERE product_id = :product_id";
             $db = Database::getInstance();
             $db->query($sql);
             $db->bind(':product_id', $productId);
-            $db->execute();
+            $deleted = $db->execute();
+            error_log("Deleted old categories, rows affected: " . ($deleted ? 'success' : 'none'));
 
             // Thêm các liên kết mới
+            $insertCount = 0;
             foreach ($categoryIds as $categoryId) {
-                $sql = "INSERT INTO product_categories (product_id, category_id, created_at) 
-                        VALUES (:product_id, :category_id, NOW())";
+                error_log("Inserting product_category - Product: $productId, Category: $categoryId");
+                // Bảng product_categories chỉ có 2 cột: product_id và category_id
+                $sql = "INSERT INTO product_categories (product_id, category_id) 
+                        VALUES (:product_id, :category_id)";
                 $db->query($sql);
                 $db->bind(':product_id', $productId);
                 $db->bind(':category_id', $categoryId);
-                $db->execute();
+                $result = $db->execute();
+                if ($result) {
+                    $insertCount++;
+                    error_log("Successfully inserted category $categoryId");
+                } else {
+                    error_log("Failed to insert category $categoryId");
+                }
             }
+            
+            error_log("Total categories inserted: $insertCount");
+            error_log("=== attachCategoriesToProduct COMPLETED ===");
         } catch (Exception $e) {
-            error_log('Error attaching categories: ' . $e->getMessage());
+            error_log('ERROR in attachCategoriesToProduct: ' . $e->getMessage());
+            error_log('Stack trace: ' . $e->getTraceAsString());
         }
     }
 

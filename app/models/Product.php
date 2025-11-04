@@ -634,13 +634,17 @@ class Product extends BaseModel {
     /**
      * READ - Lấy sản phẩm theo ID với stock từ variants
      */
+    /**
+     * Tìm sản phẩm theo ID
+     * Lấy cả sản phẩm inactive để admin có thể edit
+     */
     public function findById($id) {
         $sql = "SELECT p.*, 
                        COALESCE(SUM(pv.stock), 0) as stock_quantity,
                        COUNT(pv.variant_id) as variant_count
                 FROM {$this->table} p 
                 LEFT JOIN product_variants pv ON p.product_id = pv.product_id
-                WHERE p.product_id = :id AND p.is_active = 1
+                WHERE p.product_id = :id
                 GROUP BY p.product_id";
         $this->db->query($sql);
         $this->db->bind(':id', $id);
@@ -706,13 +710,55 @@ class Product extends BaseModel {
     }
     
     /**
-     * DELETE - Xóa sản phẩm (soft delete)
+     * DELETE - Xóa sản phẩm (soft delete - chỉ ẩn sản phẩm)
      */
     public function delete($id) {
         $sql = "UPDATE {$this->table} SET is_active = 0, updated_at = NOW() WHERE product_id = :id";
         $this->db->query($sql);
         $this->db->bind(':id', $id);
         return $this->db->execute();
+    }
+    
+    /**
+     * Xóa vĩnh viễn sản phẩm (hard delete - xóa hẳn khỏi database)
+     * Cảnh báo: Sẽ xóa tất cả dữ liệu liên quan (variants, images, categories)
+     */
+    public function hardDelete($id) {
+        try {
+            $this->db->beginTransaction();
+            
+            // 1. Xóa product categories
+            $sql = "DELETE FROM product_categories WHERE product_id = :id";
+            $this->db->query($sql);
+            $this->db->bind(':id', $id);
+            $this->db->execute();
+            
+            // 2. Xóa product variants
+            $sql = "DELETE FROM product_variants WHERE product_id = :id";
+            $this->db->query($sql);
+            $this->db->bind(':id', $id);
+            $this->db->execute();
+            
+            // 3. Xóa image usages
+            $sql = "DELETE FROM image_usages WHERE ref_id = :id AND ref_type = 'product'";
+            $this->db->query($sql);
+            $this->db->bind(':id', $id);
+            $this->db->execute();
+            
+            // 4. Xóa product chính
+            $sql = "DELETE FROM {$this->table} WHERE product_id = :id";
+            $this->db->query($sql);
+            $this->db->bind(':id', $id);
+            $result = $this->db->execute();
+            
+            $this->db->commit();
+            return $result;
+            
+        } catch (Exception $e) {
+            $this->db->rollback();
+            error_log("Hard delete product error: " . $e->getMessage());
+            return false;
+        }
     }
     
     // ============= BASIC UTILITY METHODS =============
@@ -938,6 +984,31 @@ class Product extends BaseModel {
      */
     public function getAvailableMaterials() {
         return ['gold', 'silver', 'diamond', 'pearl'];
+    }
+    
+    /**
+     * Lấy tất cả variants của một sản phẩm
+     */
+    public function getProductVariants($productId) {
+        $sql = "SELECT * FROM product_variants 
+                WHERE product_id = :product_id 
+                ORDER BY variant_id ASC";
+        $this->db->query($sql);
+        $this->db->bind(':product_id', $productId);
+        return $this->db->resultSet();
+    }
+    
+    /**
+     * Lấy danh sách categories của một sản phẩm
+     */
+    public function getProductCategories($productId) {
+        $sql = "SELECT pc.*, c.name as category_name 
+                FROM product_categories pc
+                LEFT JOIN categories c ON pc.category_id = c.category_id
+                WHERE pc.product_id = :product_id";
+        $this->db->query($sql);
+        $this->db->bind(':product_id', $productId);
+        return $this->db->resultSet();
     }
     
     /**

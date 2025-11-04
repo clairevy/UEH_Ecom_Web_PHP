@@ -185,12 +185,17 @@ class OrdersController extends BaseController {
     /**
      * Legacy method - giữ lại để tương thích ngược
      */
-    public function updateStatus($id) {
+    public function updateStatus() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
-                $status = $_POST['status'];
+                $orderId = $_GET['id'] ?? null;
+                $status = $_POST['order_status'] ?? null;
                 
-                if ($this->orderModel->updateStatus($id, $status)) {
+                if (!$orderId || !$status) {
+                    throw new Exception('Thiếu thông tin đơn hàng hoặc trạng thái');
+                }
+                
+                if ($this->orderModel->updateStatus($orderId, $status)) {
                     $_SESSION['success'] = 'Cập nhật trạng thái đơn hàng thành công!';
                 } else {
                     $_SESSION['error'] = 'Có lỗi xảy ra khi cập nhật trạng thái!';
@@ -200,7 +205,8 @@ class OrdersController extends BaseController {
             }
         }
         
-        $this->redirect('index.php?url=orders');
+        header('Location: ' . BASE_URL . '/admin/index.php?url=orders');
+        exit;
     }
     
     /**
@@ -221,6 +227,41 @@ class OrdersController extends BaseController {
             }
         } catch (Exception $e) {
             $_SESSION['error'] = 'Lỗi: ' . $e->getMessage();
+        }
+        
+        $this->redirect('index.php?url=orders');
+    }
+
+    /**
+     * Xóa vĩnh viễn đơn hàng (hard delete)
+     */
+    public function hardDelete() {
+        try {
+            $orderId = $_GET['id'] ?? null;
+            
+            if (!$orderId) {
+                throw new Exception('Không tìm thấy ID đơn hàng');
+            }
+
+            error_log("Hard deleting order ID: $orderId");
+            
+            // Xóa order items trước
+            $db = Database::getInstance();
+            $db->query("DELETE FROM order_items WHERE order_id = :order_id");
+            $db->bind(':order_id', $orderId);
+            $db->execute();
+            
+            // Xóa order
+            if ($this->orderModel->deleteById($orderId)) {
+                $_SESSION['success'] = 'Đã xóa vĩnh viễn đơn hàng thành công!';
+                error_log("Order $orderId hard deleted successfully");
+            } else {
+                $_SESSION['error'] = 'Có lỗi xảy ra khi xóa đơn hàng!';
+                error_log("Failed to hard delete order $orderId");
+            }
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Lỗi: ' . $e->getMessage();
+            error_log("Hard delete order error: " . $e->getMessage());
         }
         
         $this->redirect('index.php?url=orders');

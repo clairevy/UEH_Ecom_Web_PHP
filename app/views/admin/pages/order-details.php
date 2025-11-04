@@ -26,7 +26,7 @@ if (!$order) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($title ?? 'Chi Tiết Đơn Hàng') ?> - KICKS Admin</title>
+    <title><?= htmlspecialchars($title ?? 'Chi Tiết Đơn Hàng') ?> - Trang Sức Admin</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -56,15 +56,15 @@ if (!$order) {
                 </div>
 
                 <!-- Order Header -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h3 class="mb-1">Đơn Hàng: <span class="badge bg-primary px-3 py-2">#<?= $order->order_id ?></span></h3>
-                        <div class="d-flex align-items-center text-muted">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+                    <div class="w-100 w-md-auto">
+                        <h3 class="mb-2 fs-4 fs-md-3">Đơn Hàng: <span class="badge bg-primary px-2 px-md-3 py-2">#<?= $order->order_id ?></span></h3>
+                        <div class="d-flex align-items-center text-muted small">
                             <img src="https://cdn-icons-png.flaticon.com/512/2693/2693507.png" alt="Calendar" width="16" height="16" class="me-2">
                             <span><?= date('d/m/Y H:i', strtotime($order->created_at)) ?></span>
                         </div>
                     </div>
-                    <div>
+                    <div class="w-100 w-md-auto">
                         <?php
                         $statusConfig = [
                             'pending' => ['class' => 'warning', 'text' => 'Chờ xác nhận'],
@@ -75,7 +75,7 @@ if (!$order) {
                         ];
                         $currentStatus = $statusConfig[$order->order_status ?? 'pending'] ?? $statusConfig['pending'];
                         ?>
-                        <span class="badge bg-<?= $currentStatus['class'] ?> px-3 py-2">
+                        <span class="badge bg-<?= $currentStatus['class'] ?> px-2 px-md-3 py-2 w-100 w-md-auto text-center">
                             <?= $currentStatus['text'] ?>
                         </span>
                     </div>
@@ -101,15 +101,15 @@ if (!$order) {
                 <!-- Order Information Cards -->
                 <div class="row mb-4">
                     <!-- Customer Info -->
-                    <div class="col-md-4 mb-3">
+                    <div class="col-lg-4 col-md-6 col-12 mb-3">
                         <div class="card h-100">
                             <div class="card-body">
                                 <div class="text-center mb-3">
-                                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Customer" width="32" height="32">
+                                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Customer" width="28" height="28">
                                     </div>
                                 </div>
-                                <h6 class="fw-bold text-center mb-3">Thông Tin Khách Hàng</h6>
+                                <h6 class="fw-bold text-center mb-3 small">Thông Tin Khách Hàng</h6>
                                 
                                 <div class="mb-2">
                                     <label class="small text-muted">Họ Tên:</label>
@@ -130,15 +130,15 @@ if (!$order) {
                     </div>
 
                     <!-- Order Status Management (EDIT MODE) -->
-                    <div class="col-md-4 mb-3">
+                    <div class="col-lg-4 col-md-6 col-12 mb-3">
                         <div class="card h-100">
                             <div class="card-body">
                                 <div class="text-center mb-3">
-                                    <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                        <img src="https://cdn-icons-png.flaticon.com/512/3063/3063822.png" alt="Order" width="32" height="32">
+                                    <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/3063/3063822.png" alt="Order" width="28" height="28">
                                     </div>
                                 </div>
-                                <h6 class="fw-bold text-center mb-3">Trạng Thái Đơn Hàng</h6>
+                                <h6 class="fw-bold text-center mb-3 small">Trạng Thái Đơn Hàng</h6>
                                 
                                 <?php if ($editMode): ?>
                                     <!-- Editable: Dropdown -->
@@ -148,10 +148,10 @@ if (!$order) {
                                                 onchange="updatePaymentStatus(<?= $order->order_id ?>, this.value)"
                                                 data-original="<?= $order->payment_status ?? 'unpaid' ?>">
                                             <option value="unpaid" <?= ($order->payment_status ?? 'unpaid') === 'unpaid' ? 'selected' : '' ?>>
-                                                ⚠️ Chưa thanh toán
+                                                 Chưa thanh toán
                                             </option>
                                             <option value="paid" <?= ($order->payment_status ?? 'unpaid') === 'paid' ? 'selected' : '' ?>>
-                                                ✓ Đã thanh toán
+                                                 Đã thanh toán
                                             </option>
                                         </select>
                                     </div>
@@ -161,11 +161,11 @@ if (!$order) {
                                         <select class="form-select form-select-sm" 
                                                 onchange="updateOrderStatus(<?= $order->order_id ?>, this.value)"
                                                 data-original="<?= $order->order_status ?? 'pending' ?>">
-                                            <option value="pending" <?= ($order->order_status ?? 'pending') === 'pending' ? 'selected' : '' ?>>⏳ Chờ xác nhận</option>
-                                            <option value="confirmed" <?= ($order->order_status ?? '') === 'confirmed' ? 'selected' : '' ?>>✓ Đã xác nhận</option>
-                                            <option value="shipping" <?= ($order->order_status ?? '') === 'shipping' ? 'selected' : '' ?>>🚚 Đang giao hàng</option>
-                                            <option value="delivered" <?= ($order->order_status ?? '') === 'delivered' ? 'selected' : '' ?>>✅ Đã giao hàng</option>
-                                            <option value="cancelled" <?= ($order->order_status ?? '') === 'cancelled' ? 'selected' : '' ?>>❌ Đã hủy</option>
+                                            <option value="pending" <?= ($order->order_status ?? 'pending') === 'pending' ? 'selected' : '' ?>>Chờ xác nhận</option>
+                                            <option value="confirmed" <?= ($order->order_status ?? '') === 'confirmed' ? 'selected' : '' ?>>Đã xác nhận</option>
+                                            <option value="shipping" <?= ($order->order_status ?? '') === 'shipping' ? 'selected' : '' ?>>Đang giao hàng</option>
+                                            <option value="delivered" <?= ($order->order_status ?? '') === 'delivered' ? 'selected' : '' ?>>Đã giao hàng</option>
+                                            <option value="cancelled" <?= ($order->order_status ?? '') === 'cancelled' ? 'selected' : '' ?>>Đã hủy</option>
                                         </select>
                                     </div>
                                 <?php else: ?>
@@ -188,15 +188,15 @@ if (!$order) {
                     </div>
 
                     <!-- Shipping Address -->
-                    <div class="col-md-4 mb-3">
+                    <div class="col-lg-4 col-md-12 col-12 mb-3">
                         <div class="card h-100">
                             <div class="card-body">
                                 <div class="text-center mb-3">
-                                    <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                        <img src="https://cdn-icons-png.flaticon.com/512/2072/2072130.png" alt="Delivery" width="32" height="32">
+                                    <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/2072/2072130.png" alt="Delivery" width="28" height="28">
                                     </div>
                                 </div>
-                                <h6 class="fw-bold text-center mb-3">Địa Chỉ Giao Hàng</h6>
+                                <h6 class="fw-bold text-center mb-3 small">Địa Chỉ Giao Hàng</h6>
                                 
                                 <div class="small">
                                     <div class="mb-1"><strong><?= htmlspecialchars($order->street ?? 'N/A') ?></strong></div>
@@ -218,10 +218,10 @@ if (!$order) {
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>Sản Phẩm</th>
-                                    <th class="text-center">Số Lượng</th>
-                                    <th class="text-end">Đơn Giá</th>
-                                    <th class="text-end">Thành Tiền</th>
+                                    <th class="text-nowrap">Sản Phẩm</th>
+                                    <th class="text-center text-nowrap d-none d-sm-table-cell">Số Lượng</th>
+                                    <th class="text-end text-nowrap d-none d-md-table-cell">Đơn Giá</th>
+                                    <th class="text-end text-nowrap">Thành Tiền</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -234,21 +234,26 @@ if (!$order) {
                                                          alt="Product" 
                                                          width="40" 
                                                          height="40" 
-                                                         class="rounded me-3">
-                                                    <div>
-                                                        <div class="fw-bold"><?= htmlspecialchars($item->product_name ?? 'N/A') ?></div>
+                                                         class="rounded me-2 flex-shrink-0">
+                                                    <div class="min-w-0">
+                                                        <div class="fw-bold text-truncate small"><?= htmlspecialchars($item->product_name ?? 'N/A') ?></div>
                                                         <?php if (!empty($item->variant_name)): ?>
-                                                            <div class="small text-muted">Variant: <?= htmlspecialchars($item->variant_name) ?></div>
+                                                            <div class="small text-muted text-truncate">Variant: <?= htmlspecialchars($item->variant_name) ?></div>
                                                         <?php endif; ?>
+                                                        <!-- Mobile: show quantity -->
+                                                        <div class="d-sm-none small mt-1">
+                                                            <span class="badge bg-secondary">SL: <?= $item->quantity ?></span>
+                                                            <span class="d-md-none text-muted ms-2"><?= number_format($item->unit_price_snapshot, 0, ',', '.') ?>đ</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="text-center">
+                                            <td class="text-center d-none d-sm-table-cell">
                                                 <span class="badge bg-secondary"><?= $item->quantity ?></span>
                                             </td>
-                                            <td class="text-end"><?= number_format($item->unit_price_snapshot, 0, ',', '.') ?> VND</td>
-                                            <td class="text-end fw-bold text-primary">
-                                                <?= number_format($item->total_price ?? ($item->quantity * $item->unit_price_snapshot), 0, ',', '.') ?> VND
+                                            <td class="text-end text-nowrap d-none d-md-table-cell small"><?= number_format($item->unit_price_snapshot, 0, ',', '.') ?> VND</td>
+                                            <td class="text-end fw-bold text-primary text-nowrap small">
+                                                <?= number_format($item->total_price ?? ($item->quantity * $item->unit_price_snapshot), 0, ',', '.') ?><span class="d-none d-sm-inline"> VND</span><span class="d-sm-none">đ</span>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -320,7 +325,7 @@ if (!$order) {
     <script>
         window.pageConfig = {
             sidebar: {
-                brandName: 'KICKS',
+                brandName: 'Trang Sức',
                 activePage: 'orders',
                 links: {
                     dashboard: 'index.php?url=dashboard',
