@@ -380,6 +380,31 @@
     
     <!-- Custom JavaScript -->
     <script>
+           // Helper function to convert relative paths to absolute URLs
+        function getAssetUrl(path) {
+                     // base path for this app (e.g. /Ecom_website or '')
+            const base = "<?= getBaseUrl() ?>" || '';
+
+            // No path -> use placeholder via server-side helper (safe)
+            if (!path) return (base ? base : '') + '/public/assets/images/placeholder.svg';
+
+            // Absolute remote URL
+            if (path.startsWith('http')) return path;
+
+            // If path already starts with app base (e.g. "/Ecom_website/...") return as-is
+            if (base && path.startsWith(base)) return path;
+
+            // If path is absolute from root (starting with '/'), prefix base
+            if (path.startsWith('/')) return (base ? base : '') + path;
+
+            // If path points to public folder already
+            if (path.startsWith('public/')) return (base ? base + '/' : '/') + path;
+
+            // Otherwise assume asset under public/assets
+            return (base ? base : '') + '/public/assets/' + path.replace(/^\/+/, '');
+        }
+        const PLACEHOLDER_URL = "<?= asset('images/placeholder.svg') ?>";
+
         document.addEventListener('DOMContentLoaded', function() {
         // Home
         document.querySelectorAll('.nav-link[href="#index"]').forEach(el => {
@@ -422,13 +447,15 @@
         const dots = document.querySelectorAll('.slider-dot');
         let currentSlide = 0;
         
-        dots.forEach((dot, index) => {
-            dot.addEventListener('click', () => {
-                dots[currentSlide].classList.remove('active');
-                currentSlide = index;
-                dots[currentSlide].classList.add('active');
+       if (dots && dots.length > 0) {
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                     if (dots[currentSlide]) dots[currentSlide].classList.remove('active');
+                    currentSlide = index;
+                     if (dots[currentSlide]) dots[currentSlide].classList.add('active');
+                });
             });
-        });
+        }
 
         // Auto slide (optional)
         setInterval(() => {
@@ -480,22 +507,19 @@
                 console.log('New Arrivals API Response:', newArrivalsResult);
                 if (newArrivalsResult.success) {
                     newArrivalsData = newArrivalsResult.data.map(product => {
-                        console.log('Processing product:', product);
-                        console.log('Primary image:', product.primary_image);
                         return {
                             id: product.product_id,
+                            slug: product.slug || product.product_id,
                             name: product.name.toUpperCase(),
                             desc: product.description ? product.description.substring(0, 80) + '...' : 'No description',
                             price: parseFloat(product.base_price),
-                            img: product.primary_image ? product.primary_image.file_path : "/public/assets/images/placeholder.svg",
+                            img: product.primary_image ? getAssetUrl(product.primary_image.file_path) : getAssetUrl("images/placeholder.svg"),
                             createdAt: product.created_at,
                             sold: Math.floor(Math.random() * 50) // Mock sold data
                         };
                     });
-                    console.log('Processed newArrivalsData:', newArrivalsData);
-                    console.log('About to render newArrivals...');
                     renderProducts('newArrivals');
-                    console.log('newArrivals rendered!');
+        
                 }
 
                 // Fetch popular products - Clean URL
@@ -507,10 +531,11 @@
                         console.log('Processing popular product:', product);
                         return {
                             id: product.product_id,
+                            slug: product.slug || product.product_id,
                             name: product.name.toUpperCase(),
                             desc: product.description ? product.description.substring(0, 80) + '...' : 'No description',
                             price: parseFloat(product.base_price),
-                            img: product.primary_image ? product.primary_image.file_path : "/public/assets/images/placeholder.svg",
+                            img: product.primary_image ? getAssetUrl(product.primary_image.file_path) : getAssetUrl("images/placeholder.svg"),
                             createdAt: product.created_at,
                             sold: Math.floor(Math.random() * 50) // Mock sold data
                         };
@@ -541,7 +566,7 @@
                     name: "DIAMOND SOLITAIRE RING",
                     desc: "Crafted in 18K white gold, this solitaire ring features a brilliant-cut diamond...",
                     price: 50,
-                    img: "/public/assets/images/placeholder.svg",
+                    img: PLACEHOLDER_URL,
                     createdAt: "2025-09-18",
                     sold: 10
                 },
@@ -550,7 +575,7 @@
                     name: "GOLDEN EARRINGS",
                     desc: "18K gold earrings with elegant design.",
                     price: 120,
-                    img: "/public/assets/images/placeholder.svg",
+                    img: PLACEHOLDER_URL,
                     createdAt: "2025-09-17",
                     sold: 25
                 },
@@ -613,6 +638,7 @@ function renderProducts(type, direction = null) {
     `);
   }
   const container = document.getElementById(type === 'newArrivals' ? 'newArrivalsContainer' : 'popularContainer');
+ if (container) {
   container.innerHTML = items.join('');
   // Xóa cả hai class trước khi thêm mới
   container.classList.remove('product-carousel-slide-left', 'product-carousel-slide-right');
@@ -622,8 +648,9 @@ function renderProducts(type, direction = null) {
       container.classList.add('product-carousel-slide-left');
     } else if (direction === 'right') {
       container.classList.add('product-carousel-slide-right');
+     }
+        }
     }
-  }
 }
 
 function moveCarousel(type, dir) {

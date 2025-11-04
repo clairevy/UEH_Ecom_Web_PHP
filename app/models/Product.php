@@ -673,5 +673,69 @@ class Product extends BaseModel {
         
         return true;
     }
+/**
+     * CREATE - Tạo product variants
+     */
+    public function createVariants($productId, $variants) {
+        if (empty($variants) || !is_array($variants)) {
+            return false;
+        }
 
+        $sql = "INSERT INTO product_variants (product_id, size, color, price, stock, created_at, updated_at) 
+                VALUES (:product_id, :size, :color, :price, :stock, NOW(), NOW())";
+
+        $success = true;
+        foreach ($variants as $variant) {
+            // Validate variant data
+            if (empty($variant['size']) || empty($variant['color']) || 
+                !isset($variant['price']) || !isset($variant['stock'])) {
+                continue;
+            }
+
+            $this->db->query($sql);
+            $this->db->bind(':product_id', $productId);
+            $this->db->bind(':size', trim($variant['size']));
+            $this->db->bind(':color', trim($variant['color']));
+            $this->db->bind(':price', floatval($variant['price']));
+            $this->db->bind(':stock', intval($variant['stock']));
+            
+            if (!$this->db->execute()) {
+                $success = false;
+            }
+        }
+
+        return $success;
+    }
+
+    /**
+     * CREATE - Tạo sản phẩm với variants
+     */
+    public function createWithVariants($productData, $variants = []) {
+        // Begin transaction
+        $this->db->beginTransaction();
+        
+        try {
+            // Create product first
+            $productId = $this->create($productData);
+            if (!$productId) {
+                throw new Exception('Failed to create product');
+            }
+
+            // Create variants if provided
+            if (!empty($variants)) {
+                if (!$this->createVariants($productId, $variants)) {
+                    throw new Exception('Failed to create product variants');
+                }
+            }
+
+            // Commit transaction
+            $this->db->commit();
+            return $productId;
+            
+        } catch (Exception $e) {
+            // Rollback transaction
+            $this->db->rollback();
+            return false;
+        }
+    }
 }

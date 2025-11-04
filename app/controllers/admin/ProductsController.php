@@ -9,7 +9,7 @@ class ProductsController extends BaseController {
     private $collectionModel;
     
     // Upload configuration
-    private $uploadPath = 'public/uploads/products/';
+    private $uploadPath;
     private $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
     private $maxFileSize = 5242880; // 5MB
 
@@ -18,6 +18,9 @@ class ProductsController extends BaseController {
         $this->productModel = $this->model('Product');
         $this->categoryModel = $this->model('Category');
         $this->collectionModel = $this->model('Collection');
+                
+        // Set absolute upload path
+        $this->uploadPath = $_SERVER['DOCUMENT_ROOT'] . '/Ecom_website/public/uploads/products/';
     }
 
     /**
@@ -126,7 +129,24 @@ class ProductsController extends BaseController {
             ];
 
             // Tạo sản phẩm trong database
-            $productId = $this->productModel->create($data);
+               // Prepare variants data
+            $variants = [];
+            if (isset($_POST['variants']) && is_array($_POST['variants'])) {
+                foreach ($_POST['variants'] as $variant) {
+                    if (!empty($variant['size']) && !empty($variant['color']) && 
+                        isset($variant['price']) && isset($variant['stock'])) {
+                        $variants[] = [
+                            'size' => trim($variant['size']),
+                            'color' => trim($variant['color']),
+                            'price' => floatval($variant['price']),
+                            'stock' => intval($variant['stock'])
+                        ];
+                    }
+                }
+            }
+
+            // Tạo sản phẩm với variants trong database (using transaction)
+            $productId = $this->productModel->createWithVariants($data, $variants);
             
             if (!$productId) {
                 throw new Exception('Không thể tạo sản phẩm trong database');
@@ -367,6 +387,34 @@ class ProductsController extends BaseController {
         if (isset($data['stock']) && (!is_numeric($data['stock']) || $data['stock'] < 0)) {
             $errors[] = 'Số lượng tồn kho phải là số không âm';
         }
+             // Validate variants
+        if (isset($data['variants']) && is_array($data['variants'])) {
+            if (empty($data['variants'])) {
+                $errors[] = 'Phải có ít nhất 1 biến thể sản phẩm';
+            } else {
+                foreach ($data['variants'] as $index => $variant) {
+                    $variantNum = $index + 1;
+                    
+                    if (empty($variant['size'])) {
+                        $errors[] = "Biến thể #{$variantNum}: Size không được để trống";
+                    }
+                    
+                    if (empty($variant['color'])) {
+                        $errors[] = "Biến thể #{$variantNum}: Màu sắc không được để trống";
+                    }
+                    
+                    if (empty($variant['price']) || !is_numeric($variant['price']) || $variant['price'] <= 0) {
+                        $errors[] = "Biến thể #{$variantNum}: Giá phải là số dương";
+                    }
+                    
+                    if (!isset($variant['stock']) || !is_numeric($variant['stock']) || $variant['stock'] < 0) {
+                        $errors[] = "Biến thể #{$variantNum}: Số lượng tồn kho phải là số không âm";
+                    }
+                }
+            }
+        } else {
+            $errors[] = 'Phải có ít nhất 1 biến thể sản phẩm';
+        }
 
         return $errors;
     }
@@ -414,8 +462,9 @@ class ProductsController extends BaseController {
 
                     // Move uploaded file
                     if (move_uploaded_file($fileTmpName, $destination)) {
+                         $relativePath = 'public/uploads/products/' . $productId . '/' . $newFileName;
                         $uploadedFiles[] = [
-                            'path' => $destination,
+                             'path' => $relativePath, // Use relative path for database
                             'is_primary' => ($i === 0) // First image is primary
                         ];
                     } else {
@@ -440,7 +489,7 @@ class ProductsController extends BaseController {
                 }
                 
                 // Update main_image column (backward compatibility)
-                $mainImagePath = $uploadedFiles[0]['path'];
+                $mainImagePath = $uploadedFiles[0]['path']; // Already relative path
                 $this->productModel->update($productId, ['main_image' => $mainImagePath]);
             }
 

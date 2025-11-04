@@ -7195,3 +7195,9 @@ Stack trace:
 --------------------------------------------------------------------------------
 [2025-11-03 10:51:39] Error: Undefined property: stdClass::$product_names in C:\xampp\htdocs\Ecom_website\app\views\admin\pages\dashboard.php on line 181
 --------------------------------------------------------------------------------
+[2025-11-03 22:54:21] Fatal Error: Cannot redeclare getImageUrl() (previously declared in C:\xampp\htdocs\Ecom_website\app\views\admin\pages\products.php:116) in C:\xampp\htdocs\Ecom_website\app\views\admin\pages\products.php on line 116
+--------------------------------------------------------------------------------
+[2025-11-03 22:54:30] Fatal Error: Cannot redeclare getImageUrl() (previously declared in C:\xampp\htdocs\Ecom_website\app\views\admin\pages\products.php:116) in C:\xampp\htdocs\Ecom_website\app\views\admin\pages\products.php on line 116
+--------------------------------------------------------------------------------
+[2025-11-03 22:55:07] Fatal Error: Cannot redeclare getImageUrl() (previously declared in C:\xampp\htdocs\Ecom_website\app\views\admin\pages\products.php:116) in C:\xampp\htdocs\Ecom_website\app\views\admin\pages\products.php on line 116
+--------------------------------------------------------------------------------

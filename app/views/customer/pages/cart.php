@@ -193,7 +193,7 @@
                                 <div class="cart-item" data-cart-key="<?php echo $item['cart_key']; ?>">
                                     <div class="row align-items-center">
                                         <div class="col-md-2">
-                                            <img src="<?php echo $item['product']->primary_image->file_path ?? '/public/assets/images/placeholder.jpg'; ?>" 
+                                            <img src="<?php echo isset($item['product']->primary_image) ? asset($item['product']->primary_image->file_path) : asset('images/placeholder.jpg'); ?>" 
                                                  alt="<?php echo htmlspecialchars($item['product']->name); ?>" 
                                                  class="product-image">
                                         </div>
