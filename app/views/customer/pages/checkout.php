@@ -291,10 +291,39 @@ $userInfo = $data['userInfo'] ?? null;
         }
         
         .invalid-feedback {
-            display: block;
+            display: none;
             color: #dc3545;
             font-size: 0.85rem;
             margin-top: 0.4rem;
+        }
+        
+        .valid-feedback {
+            display: none;
+            color: #198754;
+            font-size: 0.85rem;
+            margin-top: 0.4rem;
+            font-weight: 500;
+        }
+        
+        /* Show appropriate feedback based on validation state */
+        .form-control.is-invalid + .invalid-feedback,
+        .form-select.is-invalid + .invalid-feedback {
+            display: block;
+        }
+        
+        .form-control.is-valid ~ .valid-feedback,
+        .form-select.is-valid ~ .valid-feedback {
+            display: block;
+        }
+        
+        .form-control.is-valid, .form-select.is-valid {
+            border-color: #198754;
+            box-shadow: 0 0 15px rgba(25, 135, 84, 0.15);
+        }
+        
+        .form-control.is-invalid, .form-select.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 15px rgba(220, 53, 69, 0.15);
         }
         
         @media (max-width: 768px) {
@@ -470,6 +499,7 @@ $userInfo = $data['userInfo'] ?? null;
                                            value="<?= $userInfo ? htmlspecialchars($userInfo->name) : '' ?>" 
                                            placeholder="Nhập họ và tên đầy đủ" required>
                                     <div class="invalid-feedback">Vui lòng nhập họ và tên</div>
+                                    <div class="valid-feedback">Tên hợp lệ ✓</div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
@@ -477,6 +507,7 @@ $userInfo = $data['userInfo'] ?? null;
                                            value="<?= $userInfo ? htmlspecialchars($userInfo->email) : '' ?>" 
                                            placeholder="example@email.com" required>
                                     <div class="invalid-feedback">Vui lòng nhập email hợp lệ</div>
+                                    <div class="valid-feedback">Email hợp lệ ✓</div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold">Số điện thoại <span class="text-danger">*</span></label>
@@ -484,6 +515,7 @@ $userInfo = $data['userInfo'] ?? null;
                                            value="<?= $userInfo ? htmlspecialchars($userInfo->phone ?? '') : '' ?>" 
                                            placeholder="0123456789" required>
                                     <div class="invalid-feedback">Vui lòng nhập số điện thoại</div>
+                                    <div class="valid-feedback">Số điện thoại hợp lệ ✓</div>
                                 </div>
                                 <!-- Address Fields - Will be shown/hidden based on delivery method -->
                                 <div id="addressFields">
@@ -493,6 +525,7 @@ $userInfo = $data['userInfo'] ?? null;
                                             <option value="">Chọn tỉnh/thành phố...</option>
                                         </select>
                                         <div class="invalid-feedback">Vui lòng chọn tỉnh/thành phố</div>
+                                        <div class="valid-feedback">Tỉnh/Thành phố đã chọn ✓</div>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label fw-semibold">Phường/Xã <span class="text-danger">*</span></label>
@@ -500,12 +533,14 @@ $userInfo = $data['userInfo'] ?? null;
                                             <option value="">Chọn phường/xã...</option>
                                         </select>
                                         <div class="invalid-feedback">Vui lòng chọn phường/xã</div>
+                                        <div class="valid-feedback">Phường/Xã đã chọn ✓</div>
                                     </div>
                                     <div class="col-12 mb-3">
                                         <label class="form-label fw-semibold">Địa chỉ chi tiết <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" name="address" 
                                                placeholder="Ví dụ: 123 Nguyễn Du" required>
                                         <div class="invalid-feedback">Vui lòng nhập địa chỉ chi tiết</div>
+                                        <div class="valid-feedback">Địa chỉ hợp lệ ✓</div>
                                     </div>
                                 </div>
                                 <div class="col-12 mb-3">
@@ -864,6 +899,73 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error loading wards:', error);
             wardSelect.innerHTML = '<option value="">Lỗi tải dữ liệu</option>';
             showNotification('Không thể tải danh sách phường/xã', 'error');
+        }
+    }
+
+    // Real-time validation
+    if (form) {
+        // Add validation listeners to all form fields
+        const formFields = form.querySelectorAll('input, select, textarea');
+        formFields.forEach(field => {
+            field.addEventListener('blur', function() {
+                validateField(this);
+            });
+            
+            field.addEventListener('input', function() {
+                // Clear validation state on input
+                this.classList.remove('is-valid', 'is-invalid');
+            });
+            
+            // For select fields, validate on change
+            if (field.tagName === 'SELECT') {
+                field.addEventListener('change', function() {
+                    validateField(this);
+                });
+            }
+        });
+        
+        // Validate individual field
+        function validateField(field) {
+            const value = field.value.trim();
+            
+            // Always clear previous validation classes first
+            field.classList.remove('is-valid', 'is-invalid');
+            
+            // Don't validate if field is empty (let them type first)
+            if (!value && field.hasAttribute('required')) {
+                return; // No validation display for empty required fields
+            }
+            
+            // If field has content, validate it
+            if (value) {
+                let isValid = true;
+                
+                // Email validation
+                if (field.type === 'email') {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    isValid = emailRegex.test(value);
+                }
+                // Phone validation
+                else if (field.type === 'tel') {
+                    const phoneRegex = /^[0-9]{10,11}$/;
+                    isValid = phoneRegex.test(value);
+                }
+                // Name validation (at least 2 characters)
+                else if (field.name === 'name') {
+                    isValid = value.length >= 2;
+                }
+                // Address validation (at least 5 characters)
+                else if (field.name === 'address') {
+                    isValid = value.length >= 5;
+                }
+                // Select validation
+                else if (field.tagName === 'SELECT') {
+                    isValid = value !== '';
+                }
+                
+                // Apply validation classes only if field has content
+                field.classList.add(isValid ? 'is-valid' : 'is-invalid');
+            }
         }
     }
 
