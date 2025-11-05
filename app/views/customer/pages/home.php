@@ -490,37 +490,7 @@
         }
 
         // Fallback mock data
-        function getMockProducts() {
-            return [
-                {
-                    id: 1,
-                    name: "DIAMOND SOLITAIRE RING",
-                    desc: "Crafted in 18K white gold, this solitaire ring features a brilliant-cut diamond...",
-                    price: 50,
-                    img: PLACEHOLDER_URL,
-                    createdAt: "2025-09-18",
-                    sold: 10
-                },
-                {
-                    id: 2,
-                    name: "GOLDEN EARRINGS",
-                    desc: "18K gold earrings with elegant design.",
-                    price: 120,
-                    img: PLACEHOLDER_URL,
-                    createdAt: "2025-09-17",
-                    sold: 25
-                },
-                {
-                    id: 3,
-                    name: "SILVER BRACELET",
-                    desc: "Sterling silver bracelet with diamond accents.",
-                    price: 80,
-                    img: PLACEHOLDER_URL,
-                    createdAt: "2025-09-16",
-                    sold: 18
-                }
-            ];
-        }
+       
 
 /* Cấu hình số card hiển thị mỗi lần */
 const CARDS_PER_VIEW = 3;
