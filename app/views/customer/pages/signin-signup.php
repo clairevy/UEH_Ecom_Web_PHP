@@ -475,7 +475,9 @@
             });
         }
     </script>
+    </script>
     <!-- ...existing code... -->
+    <?php include __DIR__ . '/../components/footer.php'; ?>
 <script>
     // ...existing JS code...
 
