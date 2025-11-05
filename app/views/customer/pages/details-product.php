@@ -477,49 +477,7 @@ if (!function_exists('url')) {
 
     </div> <!-- End main-content -->
 
-<!-- Footer -->
-<footer class="bg-dark text-white py-5">
-<div class="container">
-    <div class="row">
-        <div class="col-md-3">
-            <h5>Exclusive</h5>
-            <ul class="list-unstyled">
-                <li><a href="#" class="text-light">Collections</a></li>
-                <li><a href="#" class="text-light">New Arrivals</a></li>
-                <li><a href="#" class="text-light">Best Sellers</a></li>
-            </ul>
-        </div>
-        <div class="col-md-3">
-            <h5>Support</h5>
-            <ul class="list-unstyled">
-                <li><a href="#" class="text-light">Customer Service</a></li>
-                <li><a href="#" class="text-light">Size Guide</a></li>
-                <li><a href="#" class="text-light">Care Instructions</a></li>
-                <li><a href="#" class="text-light">Returns & Exchanges</a></li>
-            </ul>
-        </div>
-        <div class="col-md-3">
-            <h5>Account</h5>
-            <ul class="list-unstyled">
-                <li><a href="#" class="text-light">My Account</a></li>
-                <li><a href="#" class="text-light">Order History</a></li>
-                <li><a href="#" class="text-light">Wishlist</a></li>
-                <li><a href="#" class="text-light">Newsletter</a></li>
-            </ul>
-        </div>
-        <div class="col-md-3">
-            <h5>Contact us</h5>
-            <p class="text-light"></p>
-            <div class="social-icons">
-                <i class="fab fa-facebook me-2"></i>
-                <i class="fab fa-twitter me-2"></i>
-                <i class="fab fa-instagram me-2"></i>
-                <i class="fab fa-linkedin"></i>
-            </div>
-        </div>
-    </div>
-</div>
-</footer>
+<?php include __DIR__ . '/../components/footer.php'; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
 <!-- SweetAlert2 JS -->

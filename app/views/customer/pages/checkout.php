@@ -4,24 +4,24 @@ $cartItems = $data['cartItems'] ?? [];
 $cartSummary = $data['cartSummary'] ?? [];
 $userInfo = $data['userInfo'] ?? null;
 ?>
-
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $title ?> - Jewelry Store</title>
+    </div>
+    </div>
+    </div>
+    </div>
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <html xmlns:th="http://www.thymeleaf.org">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link href="<?= asset('css/css.css?v=' . time()) ?>" rel="stylesheet">
-    <!-- SweetAlert2 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">  
-    
-    
+    <!-- Loading Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content text-center">
+                <div class="modal-body py-4">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mb-0">Đang xử lý đơn hàng...</p>
+                </div>
+            </div>
+        </div>
+    </div>
     <style>
         body {
             background-color: var(--cream);
@@ -982,33 +982,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
 });
-</script>
-    <footer class="bg-dark text-white py-5 mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <h5><i class="fas fa-gem me-2"></i>JEWELRY</h5>
-                    <p class="text-light">Chuyên cung cấp trang sức cao cấp với chất lượng tốt nhất.</p>
-                </div>
-                <div class="col-md-4">
-                    <h5>Liên hệ</h5>
-                    <ul class="list-unstyled text-light">
-                        <li><i class="fas fa-phone me-2"></i>1900 1234</li>
-                        <li><i class="fas fa-envelope me-2"></i>info@jewelry.com</li>
-                        <li><i class="fas fa-map-marker-alt me-2"></i>123 Đường ABC, Quận 1, TP.HCM</li>
-                    </ul>
-                </div>
-                <div class="col-md-4">
-                    <h5>Theo dõi chúng tôi</h5>
-                    <div class="social-icons">
-                        <a href="#" class="text-light me-3"><i class="fab fa-facebook fa-2x"></i></a>
-                        <a href="#" class="text-light me-3"><i class="fab fa-instagram fa-2x"></i></a>
-                        <a href="#" class="text-light"><i class="fab fa-youtube fa-2x"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
+    </script>
+    <?php include __DIR__ . '/../components/footer.php'; ?>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

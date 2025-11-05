@@ -55,12 +55,7 @@
                 <div class="hero-slide">
                     <div class="row h-100 align-items-center">
                         <div class="col-md-6">
-                            <!-- <div class="hero-content">
-                                <h1 class="hero-title">Adorn yourself</h1>
-                                <h2 class="hero-subtitle">IN BRILLIANCE</h2>
-                                <p class="hero-text">Discover our exquisite collection of handcrafted jewelry designed to shine as bright as you do.</p>
-                                <button class="btn btn-gold">DISCOVER MORE</button>
-                            </div> -->
+                          
                         </div>
                         <div class="col-md-6">
                             <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&h=600&fit=crop" alt="Jewelry 1" class="hero-image">
@@ -72,12 +67,7 @@
                 <div class="hero-slide">
                     <div class="row h-100 align-items-center">
                         <div class="col-md-6">
-                            <!-- <div class="hero-content">
-                                <h1 class="hero-title">Elegant</h1>
-                                <h2 class="hero-subtitle">GOLD COLLECTION</h2>
-                                <p class="hero-text">Timeless pieces crafted with precision and passion for the modern woman.</p>
-                                <button class="btn btn-gold">EXPLORE NOW</button>
-                            </div> -->
+                            
                         </div>
                         <div class="col-md-6">
                             <img src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&h=600&fit=crop" alt="Jewelry 2" class="hero-image">
@@ -89,12 +79,7 @@
                 <div class="hero-slide">
                     <div class="row h-100 align-items-center">
                         <div class="col-md-6">
-                            <!-- <div class="hero-content">
-                                <h1 class="hero-title">Luxury</h1>
-                                <h2 class="hero-subtitle">DIAMOND RINGS</h2>
-                                <p class="hero-text">Celebrate life's precious moments with our stunning diamond collection.</p>
-                                <button class="btn btn-gold">SHOP RINGS</button>
-                            </div> -->
+                           
                         </div>
                         <div class="col-md-6">
                             <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&h=600&fit=crop" alt="Jewelry 3" class="hero-image">
@@ -106,12 +91,7 @@
                 <div class="hero-slide">
                     <div class="row h-100 align-items-center">
                         <div class="col-md-6">
-                            <!-- <div class="hero-content">
-                                <h1 class="hero-title">Sophisticated</h1>
-                                <h2 class="hero-subtitle">NECKLACES</h2>
-                                <p class="hero-text">Grace your neckline with our carefully curated necklace collection.</p>
-                                <button class="btn btn-gold">VIEW COLLECTION</button>
-                            </div> -->
+                           
                         </div>
                         <div class="col-md-6">
                             <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&h=600&fit=crop" alt="Jewelry 4" class="hero-image">
@@ -123,12 +103,7 @@
                 <div class="hero-slide">
                     <div class="row h-100 align-items-center">
                         <div class="col-md-6">
-                            <!-- <div class="hero-content">
-                                <h1 class="hero-title">Exquisite</h1>
-                                <h2 class="hero-subtitle">EARRINGS</h2>
-                                <p class="hero-text">Complete your look with our stunning earring designs.</p>
-                                <button class="btn btn-gold">DISCOVER EARRINGS</button>
-                            </div> -->
+                            
                         </div>
                         <div class="col-md-6">
                             <img src="https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=600&h=600&fit=crop" alt="Jewelry 5" class="hero-image">
@@ -152,7 +127,7 @@
 
 <!-- New Arrivals -->
 <section class="container shrink my-4">
-  <h2 class="section-title text-center">NEW ARRIVALS</h2>
+  <h2 class="section-title text-center">SẢN PHẨM MỚI NHẤT</h2>
   <div class="title-underline"></div>
   <div class="row justify-content-center" id="newArrivalsContainer">
     <!-- JS sẽ render sản phẩm ở đây -->
@@ -164,13 +139,13 @@
       <i class="fas fa-chevron-right"></i>
   </button>
   <div class="text-center mt-4">
-    <button class="btn btn-outline-dark" onclick="viewMoreNewArrivals()">View more</button>
+    <button class="btn btn-outline-dark" onclick="viewMoreNewArrivals()">XEM THÊM</button>
   </div>
 </section>
 
 <!-- The Most Popular -->
 <section class="container shrink my-4">
-  <h2 class="section-title text-center">THE MOST POPULAR</h2>
+  <h2 class="section-title text-center">SẢN PHẨM PHỔ BIẾN NHẤT</h2>
   <div class="title-underline"></div>
   <div class="row justify-content-center" id="popularContainer">
     <!-- JS sẽ render sản phẩm ở đây -->
@@ -182,7 +157,7 @@
       <i class="fas fa-chevron-right"></i>
   </button>
   <div class="text-center mt-4">
-    <button class="btn btn-outline-dark" onclick="viewMorePopular()">View more</button>
+    <button class="btn btn-outline-dark" onclick="viewMorePopular()">XEM THÊM</button>
   </div>
 </section>
 
@@ -190,7 +165,7 @@
     <section class="py-5 bg-light">
         <div class="container">
             <div class="text-center mb-5">
-                <h2 class="section-title">CATEGORY</h2>
+                <h2 class="section-title">DANH MỤC</h2>
                 <div class="title-underline"></div>
             </div>
             <div class="position-relative">
@@ -251,14 +226,14 @@
                 <div class="col-md-6 mb-4">
                     <div class="category-card gold-card" onclick="goToProducts('material', 'gold')">
                         <div class="category-overlay">
-                            <h3 class="category-title">GOLD</h3>                            
+                            <h3 class="category-title">VÀNG</h3>                            
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6 mb-4">
                     <div class="category-card silver-card" onclick="goToProducts('material', 'silver')">
                         <div class="category-overlay">
-                            <h3 class="category-title">SILVER</h3>                            
+                            <h3 class="category-title">BẠC</h3>                            
                         </div>
                     </div>
                 </div>
@@ -271,7 +246,7 @@
     <section class="py-5">
         <div class="container">
             <div class="text-center mb-5">
-                <h2 class="section-title">FEEDBACKS</h2>
+                <h2 class="section-title">ĐÁNH GIÁ TỪ KHÁCH HÀNG</h2>
                 <div class="title-underline"></div>
             </div>
             <div class="row">
@@ -282,9 +257,9 @@
                                 <img src="<?= asset('images/placeholder.svg') ?>" alt="Customer" class="feedback-image">
                             </div>
                             <div class="col-8">
-                                <h5>SOPHIA</h5>
-                                <p class="feedback-date">New York City</p>
-                                <p class="feedback-text">"The quality and craftsmanship is absolutely outstanding. I've received so many compliments on my jewelry pieces."</p>
+                                <h5>ANH THƯ</h5>
+                                <p class="feedback-date">TP. Hồ Chí Minh</p>
+                                <p class="feedback-text">"Sản phẩm đẹp, quy trình mua hàng dễ dàng. Shop hỗ trợ khách rất nhiệt tình, sẽ ghé lại lần sau."</p>
                                 <div class="rating">
                                     <i class="fas fa-star"></i>
                                     <i class="fas fa-star"></i>
@@ -303,9 +278,9 @@
                                 <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop" alt="Customer" class="feedback-image">
                             </div>
                             <div class="col-8">
-                                <h5>EMMA T</h5>
-                                <p class="feedback-date">Los Angeles</p>
-                                <p class="feedback-text">"Beautiful jewelry that exceeds expectations. The customer service is exceptional and delivery was fast."</p>
+                                <h5>MINH THƯ</h5>
+                                <p class="feedback-date">TP. Hồ Chí Minh</p>
+                                <p class="feedback-text">"Size nhẫn rất vừa vặn, sản phẩm thật rất giống trong ảnh. Sẽ tiếp tục ủng hộ shop."</p>
                                 <div class="rating">
                                     <i class="fas fa-star"></i>
                                     <i class="fas fa-star"></i>
@@ -319,54 +294,12 @@
                 </div>
             </div>
             <div class="text-center">
-                <button class="btn btn-outline-dark">VIEW MORE</button>
+                <button class="btn btn-outline-dark">XEM THÊM</button>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-white py-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-3">
-                    <h5>Exclusive</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#" class="text-light">Collections</a></li>
-                        <li><a href="#" class="text-light">New Arrivals</a></li>
-                        <li><a href="#" class="text-light">Best Sellers</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3">
-                    <h5>Support</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#" class="text-light">Customer Service</a></li>
-                        <li><a href="#" class="text-light">Size Guide</a></li>
-                        <li><a href="#" class="text-light">Care Instructions</a></li>
-                        <li><a href="#" class="text-light">Returns & Exchanges</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3">
-                    <h5>Account</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#" class="text-light">My Account</a></li>
-                        <li><a href="#" class="text-light">Order History</a></li>
-                        <li><a href="#" class="text-light">Wishlist</a></li>
-                        <li><a href="#" class="text-light">Newsletter</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3">
-                    <h5>Contact us</h5>
-                    <p class="text-light"></p>
-                    <div class="social-icons">
-                        <i class="fab fa-facebook me-2"></i>
-                        <i class="fab fa-twitter me-2"></i>
-                        <i class="fab fa-instagram me-2"></i>
-                        <i class="fab fa-linkedin"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <?php include __DIR__ . '/../components/footer.php'; ?>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     
