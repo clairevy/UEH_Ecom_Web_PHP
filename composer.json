@@ -2,6 +2,7 @@
     "name": "ecom_website/jewelry-store",
     "description": "E-commerce Website for Jewelry Store",
     "type": "project",
+    "license": "proprietary", 
     "require": {
         "php": ">=7.4",
         "phpmailer/phpmailer": "^6.8"
