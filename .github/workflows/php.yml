@@ -1,0 +1,58 @@
+name: PHP Composer & Deploy to DirectAdmin
+
+on:
+  push:
+    branches: [ "main" ]   # Tự động chạy khi push lên nhánh main
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1️⃣ Lấy code từ GitHub
+    - name: 📦 Checkout source code
+      uses: actions/checkout@v4
+
+    # 2️⃣ Kiểm tra composer.json
+    - name: 🧩 Validate composer.json and composer.lock
+      run: composer validate --strict
+
+    # 3️⃣ Cache thư viện Composer để tăng tốc build
+    - name: ⚡ Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+
+    # 4️⃣ Cài đặt dependencies PHP
+    - name: 📥 Install PHP dependencies
+      run: composer install --prefer-dist --no-progress
+
+    # 5️⃣ Deploy qua FTP lên DirectAdmin
+    - name: 🚀 Deploy to DirectAdmin via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        port: ${{ secrets.FTP_PORT }}
+        server-dir: ${{ secrets.FTP_PATH }}
+        local-dir: ./
+        protocol: ftp
+        dangerous-clean-slate: false   # Giữ lại các file cũ, chỉ ghi đè file mới
+
+    # 6️⃣ Ghi log sau khi deploy
+    - name: ✅ Deployment summary
+      run: |
+        echo "🎉 Deploy completed successfully!"
+        echo "🌐 Website: https://${{ secrets.FTP_SERVER }}"
+        echo "📂 Path on server: ${{ secrets.FTP_PATH }}"
+        echo "🕒 Deployment time: $(date)"
