@@ -597,6 +597,6 @@ $products = $data['products'] ?? [];
     </script>
 
     <!-- Include Footer -->
-    <?php include __DIR__ . '/../components/footer.html'; ?>
+    <?php include __DIR__ . '/../components/footer.php'; ?>
 </body>
 </html>

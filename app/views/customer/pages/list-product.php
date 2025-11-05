@@ -25,11 +25,9 @@ if (!function_exists('url')) {
     <?php include __DIR__ . '/../components/header.php'; ?>
 
     <!-- Banner Section -->
-    <section class="banner-section">
-        <div class="banner-content">
-            <!-- <h2>Luxury Jewelry Collection</h2> -->
-            <!-- <p>Discover our exquisite handcrafted pieces</p> -->
-        </div>
+    <section class="banner-section" 
+    style="background: url('https://images.unsplash.com/photo-1625908733471-7878cc0a230d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2080') no-repeat center center; background-size: cover; height: 300px; position: relative;">
+       
     </section>
 
     <!-- Main Content -->
@@ -40,7 +38,7 @@ if (!function_exists('url')) {
                 <!-- Category Filter -->
                 <div class="filter-card">
                     <div class="filter-header">
-                        <i class="fas fa-list me-2"></i>Category
+                        <i class="fas fa-list me-2"></i>Danh mục
                     </div>
                     <div class="filter-body">
                         <?php if (isset($categories) && !empty($categories)): ?>
@@ -112,12 +110,12 @@ if (!function_exists('url')) {
                 <!-- Price Range Filter -->
                 <div class="filter-card">
                     <div class="filter-header">
-                        <i class="fas fa-dollar-sign me-2"></i>Price Range
+                        <i class="fas fa-dollar-sign me-2"></i>Mức giá
                     </div>
                     <div class="filter-body">
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="radio" name="priceRange" value="all" id="all-price" checked>
-                            <label class="form-check-label" for="all-price">All Price</label>
+                            <label class="form-check-label" for="all-price">Tất cả các mức giá</label>
                         </div>
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="radio" name="priceRange" value="0-1000000" id="under-1m">
@@ -171,13 +169,13 @@ if (!function_exists('url')) {
                         </div>
                         <div class="col-md-6">
                             <select class="form-select" id="sortSelect">
-                                <option value="popular">Most Popular</option>
-                                <option value="price_asc">Price: Low to High</option>
-                                <option value="price_desc">Price: High to Low</option>
-                                <option value="newest">Newest</option>
-                                <option value="rating">Best Rating</option>
-                                <option value="name_asc">Name: A-Z</option>
-                                <option value="name_desc">Name: Z-A</option>
+                                <option value="popular">Phổ biến nhất</option>
+                                <option value="price_asc">Giá: từ thấp đến cao</option>
+                                <option value="price_desc">Giá: từ cao đến thấp</option>
+                                <option value="newest">Mới nhất</option>
+                                <option value="rating">Được đánh giá nhiều nhất</option>
+                                <option value="name_asc">Theo tên: từ A-Z</option>
+                                <option value="name_desc">Theo tên: từ Z-A</option>
                             </select>
                         </div>
                     </div>
@@ -268,49 +266,7 @@ if (!function_exists('url')) {
         </div>
     </div>
 
-        <!-- Footer -->
-    <footer class="bg-dark text-white py-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-3">
-                    <h5>Exclusive</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#" class="text-light">Collections</a></li>
-                        <li><a href="#" class="text-light">New Arrivals</a></li>
-                        <li><a href="#" class="text-light">Best Sellers</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3">
-                    <h5>Support</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#" class="text-light">Customer Service</a></li>
-                        <li><a href="#" class="text-light">Size Guide</a></li>
-                        <li><a href="#" class="text-light">Care Instructions</a></li>
-                        <li><a href="#" class="text-light">Returns & Exchanges</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3">
-                    <h5>Account</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#" class="text-light">My Account</a></li>
-                        <li><a href="#" class="text-light">Order History</a></li>
-                        <li><a href="#" class="text-light">Wishlist</a></li>
-                        <li><a href="#" class="text-light">Newsletter</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3">
-                    <h5>Contact us</h5>
-                    <p class="text-light"></p>
-                    <div class="social-icons">
-                        <i class="fab fa-facebook me-2"></i>
-                        <i class="fab fa-twitter me-2"></i>
-                        <i class="fab fa-instagram me-2"></i>
-                        <i class="fab fa-linkedin"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <?php include __DIR__ . '/../components/footer.php'; ?>
 
     <!-- Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
