@@ -129,7 +129,7 @@ class ProductService extends BaseModel {
                 $sql .= " ORDER BY p.name DESC";
                 break;
             case 'rating':
-                $sql .= " ORDER BY p.created_at DESC"; // Placeholder for rating sort
+                $sql .= " ORDER BY average_rating DESC, review_count DESC";
                 break;
             case 'newest':
                 $sql .= " ORDER BY p.created_at DESC";
@@ -160,10 +160,15 @@ class ProductService extends BaseModel {
         
         $products = $this->productModel->db->resultSet();
         
-        // Attach images cho mỗi sản phẩm
+        // Attach images và rating data cho mỗi sản phẩm
         foreach ($products as $product) {
             $product->images = $this->getProductImages($product->product_id);
             $product->primary_image = $this->getProductPrimaryImage($product->product_id);
+            
+            // Attach rating data sử dụng ReviewService
+            $ratingStats = $this->reviewService->getProductReviewStats($product->product_id);
+            $product->average_rating = $ratingStats ? (float)$ratingStats->average_rating : 0;
+            $product->review_count = $ratingStats ? (int)$ratingStats->total_reviews : 0;
         }
         
         // Get total count for pagination
@@ -427,7 +432,7 @@ class ProductService extends BaseModel {
     }
     
     /**
-     * Get popular products (by view count or sales)
+     * Get popular products (by sales count)
      */
     public function getPopularProducts($limit = 8) {
         // Sanitize limit parameter to prevent SQL injection
@@ -438,7 +443,13 @@ class ProductService extends BaseModel {
                 FROM products p 
                 LEFT JOIN collection c ON p.collection_id = c.collection_id 
                 WHERE p.is_active = 1 
-                ORDER BY p.created_at DESC 
+                ORDER BY (
+                    SELECT COALESCE(SUM(oi.quantity), 0) 
+                    FROM order_items oi 
+                    JOIN orders o ON oi.order_id = o.order_id 
+                    WHERE oi.product_id = p.product_id 
+                    AND o.order_status IN ('paid', 'shipped', 'delivered')
+                ) DESC, p.created_at DESC 
                 LIMIT $limit";
         
         $this->db->query($sql);

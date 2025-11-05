@@ -196,28 +196,36 @@ if (!function_exists('url')) {
                                         <div class="position-relative">
                                             <img src="<?= $product->primary_image ? asset($product->primary_image->file_path) : asset('images/placeholder.svg') ?>" 
                                                  class="card-img-top" alt="<?= htmlspecialchars($product->name) ?>">
-                                            <span class="badge bg-danger position-absolute top-0 end-0 m-2">NEW</span>
                                         </div>
                                         <div class="card-body">
                                             <h5 class="card-title mb-2"><?= htmlspecialchars($product->name) ?></h5>
                                             <div class="mb-2">
                                                 <span class="price fw-bold"><?= number_format($product->base_price, 0, ',', '.') ?>₫</span>
                                             </div>
+                                            <?php if (isset($product->average_rating) && $product->average_rating > 0): ?>
                                             <div class="mb-2">
                                                 <span class="rating text-warning">
-                                                    ★★★★★
+                                                    <?php 
+                                                    $rating = round($product->average_rating);
+                                                    for ($i = 1; $i <= 5; $i++) {
+                                                        echo ($i <= $rating) ? '★' : '☆';
+                                                    }
+                                                    ?>
                                                 </span>
-                                                <span class="text-muted ms-1">(<?= rand(10, 200) ?>)</span>
+                                                <span class="text-muted ms-1">
+                                                    (<?= number_format($product->review_count ?? 0) ?>)
+                                                </span>
                                             </div>
+                                            <?php endif; ?>
                                             <div class="product-actions">
                                                 <button class="btn btn-icon btn-sm me-2" title="Yêu thích" 
                                                         onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist(<?= $product->product_id ?>)">
                                                     <i class="fa-regular fa-heart"></i>
                                                 </button>
-                                                <button class="btn btn-icon btn-sm" title="Thêm vào giỏ" 
+                                                <!-- <button class="btn btn-icon btn-sm" title="Thêm vào giỏ" 
                                                         onclick="event.preventDefault(); event.stopPropagation(); addToCartFromList(<?= $product->product_id ?>, '<?= htmlspecialchars($product->name) ?>')">
                                                     <i class="fa-solid fa-cart-plus"></i>
-                                                </button>
+                                                </button> -->
                                             </div>
                                         </div>
                                     </a>
