@@ -1,0 +1,16 @@
+[2025-11-05 12:39:12] Error: include(C:\xampp\htdocs\Ecom_website\app\views\customer\pages/../components/footer.html): Failed to open stream: No such file or directory in C:\xampp\htdocs\Ecom_website\app\views\customer\pages\collection.php on line 546
+--------------------------------------------------------------------------------
+[2025-11-05 12:39:12] Error: include(): Failed opening 'C:\xampp\htdocs\Ecom_website\app\views\customer\pages/../components/footer.html' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\Ecom_website\app\views\customer\pages\collection.php on line 546
+--------------------------------------------------------------------------------
+[2025-11-05 12:39:22] Error: include(C:\xampp\htdocs\Ecom_website\app\views\customer\pages/../components/footer.html): Failed to open stream: No such file or directory in C:\xampp\htdocs\Ecom_website\app\views\customer\pages\collection.php on line 546
+--------------------------------------------------------------------------------
+[2025-11-05 12:39:22] Error: include(): Failed opening 'C:\xampp\htdocs\Ecom_website\app\views\customer\pages/../components/footer.html' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\Ecom_website\app\views\customer\pages\collection.php on line 546
+--------------------------------------------------------------------------------
+[2025-11-05 12:39:39] Error: include(C:\xampp\htdocs\Ecom_website\app\views\customer\pages/../components/footer.html): Failed to open stream: No such file or directory in C:\xampp\htdocs\Ecom_website\app\views\customer\pages\collection.php on line 546
+--------------------------------------------------------------------------------
+[2025-11-05 12:39:39] Error: include(): Failed opening 'C:\xampp\htdocs\Ecom_website\app\views\customer\pages/../components/footer.html' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\Ecom_website\app\views\customer\pages\collection.php on line 546
+--------------------------------------------------------------------------------
+[2025-11-05 12:41:17] Error: include(C:\xampp\htdocs\Ecom_website\app\views\customer\pages/../components/footer.html): Failed to open stream: No such file or directory in C:\xampp\htdocs\Ecom_website\app\views\customer\pages\collection.php on line 600
+--------------------------------------------------------------------------------
+[2025-11-05 12:41:17] Error: include(): Failed opening 'C:\xampp\htdocs\Ecom_website\app\views\customer\pages/../components/footer.html' for inclusion (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\Ecom_website\app\views\customer\pages\collection.php on line 600
+--------------------------------------------------------------------------------

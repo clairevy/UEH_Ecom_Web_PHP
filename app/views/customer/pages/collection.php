@@ -170,6 +170,13 @@ $products = $data['products'] ?? [];
         .carousel-nav:disabled {
             opacity: 0.3;
             cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .carousel-nav.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
         }
 
         #collectionTitle {
@@ -188,25 +195,28 @@ $products = $data['products'] ?? [];
 
         .product-card {
             background: white;
-            border-radius: 10px;
+            border-radius: 15px;
             box-shadow: 0 8px 24px rgba(212, 175, 55, 0.15);
-            width: 280px;
+            width: 320px;
             flex-shrink: 0;
             transition: all 0.3s ease;
-            border: 1px solid rgba(212, 175, 55, 0.1);
+            border: 2px solid rgba(212, 175, 55, 0.1);
             position: relative;
             z-index: 1;
+            cursor: pointer;
+            overflow: hidden;
         }
 
         .product-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 12px 32px rgba(212, 175, 55, 0.25);
+            box-shadow: 0 15px 35px rgba(212, 175, 55, 0.3);
+            border-color: rgba(212, 175, 55, 0.3);
             z-index: 2;
         }
 
         .product-image {
             width: 100%;
-            height: 250px;
+            height: 200px;
             background: linear-gradient(135deg, #f5f3ed 0%, #f8f6f0 100%);
             display: flex;
             align-items: center;
@@ -228,65 +238,33 @@ $products = $data['products'] ?? [];
 
         .product-info {
             padding: 1.5rem;
+            text-align: center;
+            width: 100%;
         }
 
         .product-title {
-            font-size: 1.1rem;
+            font-size: 1.4rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
             color: #3e2723;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             font-family: 'Playfair Display', serif;
+            text-transform: uppercase;
         }
 
         .product-description {
-            font-size: 0.85rem;
+            font-size: 1rem;
             color: #666;
-            line-height: 1.5;
-            margin-bottom: 1rem;
+            line-height: 1.6;
+            margin-bottom: 0;
             display: -webkit-box;
-            -webkit-line-clamp: 3;
+            -webkit-line-clamp: 4;
+            line-clamp: 4;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
-        .product-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
 
-        .product-price {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #d4af37;
-        }
-
-        .product-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .icon-btn {
-            width: 35px;
-            height: 35px;
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            color: #d4af37;
-        }
-
-        .icon-btn:hover {
-            background: #d4af37;
-            color: white;
-            border-color: #d4af37;
-            transform: translateY(-2px);
-        }
 
         @media (max-width: 1200px) {
             .hero-title {
@@ -342,7 +320,7 @@ $products = $data['products'] ?? [];
             }
 
             .product-card {
-                width: 240px;
+                width: 300px;
             }
 
             .carousel-nav {
@@ -368,7 +346,23 @@ $products = $data['products'] ?? [];
             }
 
             .product-card {
-                width: 220px;
+                width: 280px;
+            }
+
+            .product-image {
+                height: 180px;
+            }
+
+            .product-info {
+                padding: 1rem;
+            }
+
+            .product-title {
+                font-size: 1.2rem;
+            }
+
+            .product-description {
+                font-size: 0.9rem;
             }
             
             .product-carousel {
@@ -421,53 +415,67 @@ $products = $data['products'] ?? [];
         let productsShown = false;
         const productsPerPage = 3;
 
-        function formatPrice(price, salePrice = null) {
-            if (salePrice && parseFloat(salePrice) < parseFloat(price)) {
-                return `<span class="text-decoration-line-through text-muted">$${parseFloat(price).toFixed(1)}</span> <span class="text-danger">$${parseFloat(salePrice).toFixed(1)}</span>`;
-            }
-            return `$${parseFloat(price).toFixed(1)}`;
-        }
-
         function renderProducts() {
-            if (!productsData || productsData.length === 0) {
-                return;
-            }
-
             const container = document.getElementById('cardsContainer');
             container.innerHTML = '';
+
+            if (!productsData || productsData.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted">Không có sản phẩm nào trong bộ sưu tập này.</div>';
+                return;
+            }
 
             const visibleProducts = productsData.slice(currentIndex, currentIndex + productsPerPage);
 
             visibleProducts.forEach(product => {
                 const card = document.createElement('div');
                 card.className = 'product-card';
+                card.style.cursor = 'pointer';
+                
+                // Add click event to go to product detail
+                card.addEventListener('click', () => {
+                    window.location.href = '<?= BASE_URL ?>/product/' + (product.slug || product.product_id);
+                });
+                
+                // Debug product data
+                console.log('Product data:', product);
+                console.log('Product main_image:', product.main_image);
+                console.log('Product images:', product.images);
                 
                 // Get main image with base URL
-                const baseUrl = '<?= getBaseUrl() ?>';
-                const mainImage = product.main_image || 'assets/images/placeholder.svg';
-                const imageUrl = mainImage.startsWith('/') 
-                    ? baseUrl + mainImage 
-                    : baseUrl + `/public/uploads/products/${product.product_id}/${mainImage}`;
+                const baseUrl = '<?= BASE_URL ?>';
+                let imageUrl = baseUrl + '/public/assets/images/placeholder.svg'; // Default
+                
+                // Try different image sources
+                if (product.main_image && product.main_image !== 'assets/images/placeholder.svg') {
+                    // If main_image is already set by controller
+                    if (product.main_image.startsWith('http') || product.main_image.startsWith('/')) {
+                        imageUrl = product.main_image;
+                    } else {
+                        imageUrl = baseUrl + '/' + product.main_image;
+                    }
+                } else if (product.images && product.images.trim() !== '') {
+                    // If images string exists, use first image
+                    const imageArray = product.images.split(',');
+                    const firstImage = imageArray[0].trim();
+                    if (firstImage) {
+                        if (firstImage.startsWith('http') || firstImage.startsWith('/')) {
+                            imageUrl = firstImage;
+                        } else {
+                            imageUrl = baseUrl + '/' + firstImage;
+                        }
+                    }
+                }
+                
+                console.log('Final imageUrl:', imageUrl);
                 
                 card.innerHTML = `
                     <div class="product-image">
-                        <img src="${imageUrl}" alt="${product.name}" 
-                             onerror="this.src='${baseUrl}/public/assets/images/placeholder.svg'">`
+                        <img src="${imageUrl}" alt="${product.name || 'Sản phẩm'}" 
+                             onerror="this.src='${baseUrl}/public/assets/images/placeholder.svg'">
                     </div>
                     <div class="product-info">
-                        <h3 class="product-title">${product.name}</h3>
+                        <h3 class="product-title">${product.name || 'Sản phẩm'}</h3>
                         <p class="product-description">${product.description || 'Sản phẩm chất lượng cao với thiết kế tinh tế và sang trọng.'}</p>
-                        <div class="product-footer">
-                            <div class="product-price">${formatPrice(product.price, product.sale_price)}</div>
-                            <div class="product-actions">
-                                <button class="icon-btn" onclick="addToWishlist(${product.product_id})" title="Thêm vào yêu thích">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                                <button class="icon-btn" onclick="addToCart(${product.product_id})" title="Thêm vào giỏ hàng">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </button>
-                            </div>
-                        </div>
                     </div>
                 `;
                 container.appendChild(card);
@@ -480,56 +488,102 @@ $products = $data['products'] ?? [];
             const prevBtn = document.getElementById('prevBtn');
             const nextBtn = document.getElementById('nextBtn');
 
-            prevBtn.disabled = currentIndex === 0;
-            nextBtn.disabled = currentIndex + productsPerPage >= productsData.length;
-        }
+            console.log('Updating navigation buttons');
+            console.log('currentIndex:', currentIndex);
+            console.log('productsPerPage:', productsPerPage);
+            console.log('total products:', productsData ? productsData.length : 0);
+            console.log('Can go prev:', currentIndex > 0);
+            console.log('Can go next:', currentIndex + productsPerPage < (productsData ? productsData.length : 0));
 
-        function showProducts() {
-            if (!productsShown && productsData && productsData.length > 0) {
-                const description = document.getElementById('collectionDescription');
-                const button = document.querySelector('.btn-view-details');
-                const productsSection = document.getElementById('productsSection');
-                
-                // Fade out description and button
-                description.classList.add('fade-out');
-                if (button) {
-                    button.style.opacity = '0';
-                    button.style.pointerEvents = 'none';
-                }
-                
-                setTimeout(() => {
-                    productsSection.classList.add('show');
-                }, 500);
-                
-                productsShown = true;
+            // Remove all disabled states first
+            prevBtn.classList.remove('disabled');
+            nextBtn.classList.remove('disabled');
+            prevBtn.disabled = false;
+            nextBtn.disabled = false;
+
+            // Add disabled state if needed
+            if (currentIndex === 0) {
+                prevBtn.classList.add('disabled');
+            }
+            
+            if (!productsData || currentIndex + productsPerPage >= productsData.length) {
+                nextBtn.classList.add('disabled');
             }
         }
 
+        function showProducts() {
+            console.log('showProducts called');
+            console.log('productsShown:', productsShown);
+            console.log('productsData:', productsData);
+            console.log('productsData length:', productsData ? productsData.length : 'No data');
+            
+            // Always show the products section regardless of data
+            const description = document.getElementById('collectionDescription');
+            const button = document.querySelector('.btn-view-details');
+            const productsSection = document.getElementById('productsSection');
+            
+            // Fade out description and button
+            if (description) {
+                description.classList.add('fade-out');
+            }
+            if (button) {
+                button.style.opacity = '0';
+                button.style.pointerEvents = 'none';
+            }
+            
+            setTimeout(() => {
+                if (productsSection) {
+                    productsSection.classList.add('show');
+                }
+                renderProducts(); // Render products
+            }, 500);
+            
+            productsShown = true;
+        }
+
         function nextSlide() {
+            console.log('nextSlide called');
+            console.log('currentIndex:', currentIndex);
+            console.log('productsPerPage:', productsPerPage);
+            console.log('productsData.length:', productsData ? productsData.length : 'No data');
+            
+            // Check if button is disabled
+            const nextBtn = document.getElementById('nextBtn');
+            if (nextBtn.classList.contains('disabled')) {
+                console.log('Next button is disabled');
+                return;
+            }
+            
             if (productsData && currentIndex + productsPerPage < productsData.length) {
                 currentIndex++;
+                console.log('Moving to next slide, new currentIndex:', currentIndex);
                 renderProducts();
+            } else {
+                console.log('Cannot go to next slide - reached end');
             }
         }
 
         function previousSlide() {
+            console.log('previousSlide called');
+            console.log('currentIndex:', currentIndex);
+            
+            // Check if button is disabled
+            const prevBtn = document.getElementById('prevBtn');
+            if (prevBtn.classList.contains('disabled')) {
+                console.log('Previous button is disabled');
+                return;
+            }
+            
             if (currentIndex > 0) {
                 currentIndex--;
+                console.log('Moving to previous slide, new currentIndex:', currentIndex);
                 renderProducts();
+            } else {
+                console.log('Cannot go to previous slide - already at start');
             }
         }
 
-        function addToCart(productId) {
-            // Implement add to cart functionality
-            console.log('Add to cart:', productId);
-            // You can add AJAX call to add product to cart
-        }
 
-        function addToWishlist(productId) {
-            // Implement add to wishlist functionality
-            console.log('Add to wishlist:', productId);
-            // You can add AJAX call to add product to wishlist
-        }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -543,6 +597,6 @@ $products = $data['products'] ?? [];
     </script>
 
     <!-- Include Footer -->
-    <?php include __DIR__ . '/../components/footer.html'; ?>
+    <?php include __DIR__ . '/../components/footer.php'; ?>
 </body>
 </html>
