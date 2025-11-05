@@ -20,21 +20,21 @@ $user = SessionHelper::getUser();
             <ul class="navbar-nav mx-auto">
                 <!-- Home -->
                 <li class="nav-item">
-                    <a class="nav-link" href="<?= url('/') ?>">Home</a>
+                    <a class="nav-link" href="<?= url('/') ?>">Trang chủ</a>
                 </li>
                 
                 <!-- About Us -->
                 <li class="nav-item">
-                    <a class="nav-link" href="<?= url('/about') ?>">About us</a>
+                    <a class="nav-link" href="<?= url('/about') ?>">Thông tin</a>
                 </li>
                 
                 <!-- Category Dropdown -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="categoryDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Category
+                        Danh mục sản phẩm
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="categoryDropdown">
-                        <li><a class="dropdown-item" href="<?= url('/products') ?>">All Products</a></li>
+                        <li><a class="dropdown-item" href="<?= url('/products') ?>">Tất cả sản phẩm</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <!-- Categories sẽ được load bằng JavaScript -->
                         <div id="categoriesDropdown">
@@ -46,7 +46,7 @@ $user = SessionHelper::getUser();
                 <!-- Collection Dropdown -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="collectionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Collection
+                        Bộ sưu tập
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="collectionDropdown">
                         <!-- Collections sẽ được load bằng JavaScript -->
@@ -202,15 +202,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success && data.data) {
                 const collectionsDiv = document.getElementById('collectionsDropdown');
                 collectionsDiv.innerHTML = '';
-                
-                // Add "All Collections" link
-                const allLi = document.createElement('li');
-                allLi.innerHTML = `<a class="dropdown-item" href="<?= url('/collections') ?>">All Collections</a>`;
-                collectionsDiv.appendChild(allLi);
-                
-                const dividerLi = document.createElement('li');
-                dividerLi.innerHTML = '<hr class="dropdown-divider">';
-                collectionsDiv.appendChild(dividerLi);
                 
                 data.data.forEach(collection => {
                     const li = document.createElement('li');
